@@ -21,7 +21,11 @@ import {
   TrendingUp,
   Eye,
   Copy,
-  Star
+  Star,
+  Sparkles,
+  Activity,
+  CheckCircle,
+  ArrowRight
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import Navigation from "@/components/Navigation";
@@ -44,6 +48,7 @@ const Profile = () => {
   const [transactions, setTransactions] = useState<any[]>([]);
   const [cards, setCards] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [animateCards, setAnimateCards] = useState(false);
 
   // Fetch user data from Xano
   useEffect(() => {
@@ -68,6 +73,8 @@ const Profile = () => {
         });
       } finally {
         setLoading(false);
+        // Trigger animations after data loads
+        setTimeout(() => setAnimateCards(true), 100);
       }
     };
 
@@ -181,17 +188,22 @@ const Profile = () => {
   };
 
   const ProfileContent = () => (
-    <>
-      {/* Header */}
-      <div className="flex items-center justify-between mb-6 lg:mb-8">
+    <div className="space-y-8">
+      {/* Header with Animation */}
+      <div className={`flex items-center justify-between mb-8 transition-all duration-1000 ${animateCards ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
         <div className="flex items-center">
-          <BackButton to="/dashboard" className="mr-3 rounded-full w-10 h-10 p-0 lg:hidden" />
-          <h1 className="text-2xl lg:text-3xl font-bold text-gray-900">Profile</h1>
+          <BackButton to="/dashboard" className="mr-4 rounded-full w-10 h-10 p-0 lg:hidden" />
+          <div className="flex items-center gap-3">
+            <h1 className="text-3xl font-bold text-gray-900 bg-gradient-to-r from-gray-900 via-blue-900 to-gray-900 bg-clip-text text-transparent">
+              Profile
+            </h1>
+            <Sparkles className="h-6 w-6 text-blue-500 animate-pulse" />
+          </div>
         </div>
         <Button 
           onClick={() => setActiveModal("personal")}
           size="sm" 
-          className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 rounded-full shadow-lg"
+          className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
         >
           <Edit className="h-4 w-4 mr-2" />
           Edit
@@ -200,36 +212,40 @@ const Profile = () => {
 
       <div className="lg:grid lg:grid-cols-3 lg:gap-8">
         {/* Main Content */}
-        <div className="lg:col-span-2">
-          {/* Profile Header Card */}
-          <Card className="mb-6 lg:mb-8 border-0 shadow-lg bg-gradient-to-br from-blue-900 via-blue-800 to-blue-900 text-white overflow-hidden relative">
-            <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full -translate-y-16 translate-x-16"></div>
-            <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/5 rounded-full translate-y-12 -translate-x-12"></div>
-            <div className="absolute top-1/2 left-1/2 w-48 h-48 bg-gradient-to-r from-blue-500/20 to-blue-600/20 rounded-full -translate-x-1/2 -translate-y-1/2 blur-3xl"></div>
-            <CardContent className="p-6 lg:p-8 relative z-10">
-              <div className="flex items-start gap-4 lg:gap-6">
+        <div className="lg:col-span-2 space-y-8">
+          {/* Profile Header Card with Premium Design */}
+          <div className={`transition-all duration-1000 delay-200 ${animateCards ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
+            <Card className="mb-8 border-0 shadow-2xl bg-gradient-to-br from-blue-900 via-blue-800 to-blue-900 text-white overflow-hidden relative group">
+              {/* Animated Background Elements */}
+              <div className="absolute inset-0 bg-gradient-to-r from-blue-900/50 via-blue-800/50 to-blue-900/50"></div>
+              <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full -translate-y-16 translate-x-16 group-hover:scale-150 transition-transform duration-700"></div>
+              <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/5 rounded-full translate-y-12 -translate-x-12 group-hover:scale-150 transition-transform duration-700 delay-300"></div>
+              <div className="absolute top-1/2 left-1/2 w-64 h-64 bg-gradient-to-r from-white/5 to-white/10 rounded-full -translate-x-1/2 -translate-y-1/2 blur-3xl group-hover:blur-2xl transition-all duration-1000"></div>
+              
+              <CardContent className="p-8 relative z-10">
+                <div className="flex items-start gap-6">
                 <div className="relative">
-                  <Avatar className="w-16 h-16 lg:w-20 lg:h-20 border-3 border-white/20 shadow-xl">
+                    <Avatar className="w-20 h-20 lg:w-24 lg:h-24 border-4 border-white/20 shadow-2xl">
                     <AvatarImage src="/placeholder-avatar.jpg" alt={`${firstName} ${lastName}`} />
-                    <AvatarFallback className="bg-gradient-to-br from-blue-500 to-blue-600 text-white text-xl lg:text-2xl font-bold">
+                      <AvatarFallback className="bg-gradient-to-br from-blue-500 to-blue-600 text-white text-2xl lg:text-3xl font-bold">
                       {getInitials(firstName, lastName)}
                     </AvatarFallback>
                   </Avatar>
-                  <div className="absolute -top-1 -right-1 w-5 h-5 bg-green-500 rounded-full border-2 border-white"></div>
-                </div>
-                <div className="flex-1">
-                  <h2 className="text-xl lg:text-2xl font-bold mb-1">{firstName} {lastName}</h2>
-                  <div className="flex items-center gap-2 text-white/80 mb-2 lg:mb-3">
-                    <Mail className="h-3 w-3 lg:h-4 lg:w-4" />
-                    <span className="text-sm lg:text-base">{profileData.email}</span>
+                    <div className="absolute -top-2 -right-2 w-6 h-6 bg-green-500 rounded-full border-3 border-white shadow-lg"></div>
                   </div>
-                  <div className="flex items-center gap-3 lg:gap-4">
+                  <div className="flex-1">
+                    <h2 className="text-2xl lg:text-3xl font-bold mb-2">{firstName} {lastName}</h2>
+                    <div className="flex items-center gap-3 text-white/80 mb-3">
+                      <Mail className="h-4 w-4 lg:h-5 lg:w-5" />
+                      <span className="text-base lg:text-lg">{profileData.email}</span>
+                    </div>
+                    <div className="flex items-center gap-4">
                     <Badge className="bg-white/20 text-white border-white/30 hover:bg-white/30">
-                      <Star className="h-3 w-3 lg:h-4 lg:w-4 mr-1" />
+                        <Star className="h-4 w-4 lg:h-5 lg:w-5 mr-2" />
                       {profileData.tier} Verified
                     </Badge>
-                    <div className="flex items-center gap-1 text-xs lg:text-sm text-white/70">
-                      <Calendar className="h-3 w-3 lg:h-4 lg:w-4" />
+                      <div className="flex items-center gap-2 text-sm lg:text-base text-white/70">
+                        <Calendar className="h-4 w-4 lg:h-5 lg:w-5" />
                       <span>Since {profileData.dateJoined}</span>
                     </div>
                   </div>
@@ -237,26 +253,27 @@ const Profile = () => {
               </div>
             </CardContent>
           </Card>
+          </div>
 
-          {/* Account Stats */}
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4 mb-6 lg:mb-8">
+          {/* Account Stats with Enhanced Design */}
+          <div className={`grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8 transition-all duration-1000 delay-400 ${animateCards ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
             {accountStats.map((stat, index) => (
-              <Card key={index} className="border-0 shadow-sm hover:shadow-md transition-all duration-200 hover:-translate-y-1">
-                <CardContent className="p-4 lg:p-6">
-                  <div className="flex items-center gap-3 lg:gap-4">
-                    <div className={`w-10 h-10 lg:w-12 lg:h-12 ${stat.bg} rounded-xl flex items-center justify-center`}>
-                      <stat.icon className={`h-5 w-5 lg:h-6 lg:w-6 ${stat.color}`} />
+              <Card key={index} className="border-0 shadow-lg hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 bg-gradient-to-br from-white to-gray-50">
+                <CardContent className="p-6">
+                  <div className="flex items-center gap-4">
+                    <div className={`w-12 h-12 lg:w-14 lg:h-14 ${stat.bg} rounded-xl flex items-center justify-center shadow-lg`}>
+                      <stat.icon className={`h-6 w-6 lg:h-7 lg:w-7 ${stat.color}`} />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-xs lg:text-sm text-gray-500 mb-1">{stat.label}</p>
+                      <p className="text-sm lg:text-base text-gray-500 mb-1">{stat.label}</p>
                       <div className="flex items-center gap-2">
-                        <p className="font-semibold text-gray-900 truncate text-sm lg:text-base">{stat.value}</p>
+                        <p className="font-bold text-gray-900 truncate text-base lg:text-lg">{stat.value}</p>
                         {stat.label === "Wallet Balance" && (
                           <Button
                             variant="ghost"
                             size="sm"
                             onClick={() => setShowBalance(!showBalance)}
-                            className="p-1 h-6 w-6"
+                            className="p-1 h-6 w-6 hover:bg-gray-100 rounded-full"
                           >
                             <Eye className="h-3 w-3" />
                           </Button>
@@ -269,84 +286,97 @@ const Profile = () => {
             ))}
           </div>
 
-          {/* Account Information */}
-          <Card className="mb-6 lg:mb-8 border-0 shadow-sm">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-lg lg:text-xl flex items-center gap-2">
-                <CreditCard className="h-5 w-5 lg:h-6 lg:w-6 text-blue-600" />
+          {/* Account Information with Enhanced Design */}
+          <div className={`transition-all duration-1000 delay-600 ${animateCards ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
+            <Card className="mb-8 border-0 shadow-2xl bg-gradient-to-br from-white to-gray-50">
+              <CardHeader className="pb-6">
+                <CardTitle className="text-xl lg:text-2xl flex items-center gap-3">
+                  <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center shadow-lg">
+                    <CreditCard className="h-6 w-6 text-white" />
+                  </div>
                 Account Details
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-3 lg:space-y-4">
-              <div className="flex justify-between items-center p-3 lg:p-4 bg-gray-50 rounded-xl">
+              <CardContent className="space-y-4">
+                <div className="flex justify-between items-center p-4 lg:p-6 bg-gradient-to-r from-gray-50 to-gray-100 rounded-2xl border border-gray-200">
                 <div>
-                  <p className="text-sm lg:text-base text-gray-600">Account Number</p>
-                  <p className="font-semibold text-sm lg:text-base">{profileData.accountNumber}</p>
+                    <p className="text-base lg:text-lg text-gray-600 mb-1">Account Number</p>
+                    <p className="font-bold text-base lg:text-lg">{profileData.accountNumber}</p>
                 </div>
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={copyAccountNumber}
-                  className="rounded-full w-8 h-8 lg:w-10 lg:h-10 p-0"
+                    className="rounded-full w-10 h-10 lg:w-12 lg:h-12 p-0 hover:bg-gray-200 transition-all duration-300 hover:scale-110"
                 >
-                  <Copy className="h-4 w-4 lg:h-5 lg:w-5" />
+                    <Copy className="h-5 w-5 lg:h-6 lg:w-6" />
                 </Button>
-              </div>
-              <div className="grid grid-cols-2 gap-3 lg:gap-4">
-                <div className="p-3 lg:p-4 bg-gray-50 rounded-xl">
-                  <p className="text-sm lg:text-base text-gray-600">Platform</p>
-                  <p className="font-semibold text-sm lg:text-base">{profileData.bank}</p>
                 </div>
-                <div className="p-3 lg:p-4 bg-gray-50 rounded-xl">
-                  <p className="text-sm lg:text-base text-gray-600">Account Type</p>
-                  <p className="font-semibold text-sm lg:text-base">{profileData.accountType}</p>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="p-4 lg:p-6 bg-gradient-to-r from-gray-50 to-gray-100 rounded-2xl border border-gray-200">
+                    <p className="text-base lg:text-lg text-gray-600 mb-1">Platform</p>
+                    <p className="font-bold text-base lg:text-lg">{profileData.bank}</p>
+                  </div>
+                  <div className="p-4 lg:p-6 bg-gradient-to-r from-gray-50 to-gray-100 rounded-2xl border border-gray-200">
+                    <p className="text-base lg:text-lg text-gray-600 mb-1">Account Type</p>
+                    <p className="font-bold text-base lg:text-lg">{profileData.accountType}</p>
                 </div>
               </div>
             </CardContent>
           </Card>
+          </div>
         </div>
 
-        {/* Sidebar */}
-        <div className="lg:col-span-1">
-          {/* Quick Actions */}
-          <Card className="mb-6 lg:mb-8 border-0 shadow-sm lg:sticky lg:top-8">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-lg lg:text-xl">Quick Actions</CardTitle>
+        {/* Sidebar with Enhanced Design */}
+        <div className="lg:col-span-1 space-y-6">
+          {/* Quick Actions with Premium Design */}
+          <div className={`transition-all duration-1000 delay-800 ${animateCards ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
+            <Card className="mb-8 border-0 shadow-2xl bg-gradient-to-br from-white to-gray-50 lg:sticky lg:top-8">
+              <CardHeader className="pb-6">
+                <CardTitle className="text-xl lg:text-2xl flex items-center gap-3">
+                  <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center shadow-lg">
+                    <Activity className="h-5 w-5 text-white" />
+                  </div>
+                  Quick Actions
+                </CardTitle>
             </CardHeader>
             <CardContent className="p-0">
               {quickActions.map((item, index) => (
                 <div
                   key={index}
                   onClick={item.action}
-                  className="flex items-center justify-between p-4 lg:p-6 hover:bg-gray-50 cursor-pointer border-b border-gray-100 last:border-b-0 transition-colors active:bg-gray-100"
+                    className="flex items-center justify-between p-6 hover:bg-gray-50 cursor-pointer border-b border-gray-100 last:border-b-0 transition-all duration-300 active:bg-gray-100 group"
                 >
                   <div className="flex items-center gap-4">
-                    <div className={`w-12 h-12 lg:w-14 lg:h-14 bg-gradient-to-br ${item.gradient} rounded-xl flex items-center justify-center shadow-lg`}>
-                      <item.icon className="h-6 w-6 lg:h-7 lg:w-7 text-white" />
+                      <div className={`w-14 h-14 lg:w-16 lg:h-16 bg-gradient-to-br ${item.gradient} rounded-2xl flex items-center justify-center shadow-lg group-hover:shadow-xl transition-all duration-300 group-hover:scale-110`}>
+                        <item.icon className="h-7 w-7 lg:h-8 lg:w-8 text-white" />
                     </div>
                     <div>
-                      <span className="font-semibold text-gray-900 block text-sm lg:text-base">{item.label}</span>
-                      <span className="text-sm lg:text-base text-gray-500">{item.subtitle}</span>
+                        <span className="font-bold text-gray-900 block text-base lg:text-lg">{item.label}</span>
+                        <span className="text-base lg:text-lg text-gray-500">{item.subtitle}</span>
+                      </div>
                     </div>
-                  </div>
-                  <ChevronRight className="h-5 w-5 lg:h-6 lg:w-6 text-gray-400" />
+                    <ChevronRight className="h-6 w-6 lg:h-7 lg:w-7 text-gray-400 group-hover:text-blue-600 transition-colors duration-300" />
                 </div>
               ))}
             </CardContent>
           </Card>
+          </div>
 
-          {/* Logout Button */}
+          {/* Logout Button with Enhanced Design */}
+          <div className={`transition-all duration-1000 delay-1000 ${animateCards ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
           <Button
             onClick={handleLogout}
             variant="outline"
-            className="w-full h-12 lg:h-14 text-red-600 border-red-200 hover:bg-red-50 border-2 rounded-xl text-base lg:text-lg font-medium"
+              className="w-full h-14 text-red-600 border-red-200 hover:bg-red-50 border-2 rounded-2xl text-lg lg:text-xl font-semibold shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
           >
-            <LogOut className="h-4 w-4 lg:h-5 lg:w-5 mr-2" />
+              <LogOut className="h-5 w-5 lg:h-6 lg:w-6 mr-3" />
             Logout
           </Button>
+          </div>
         </div>
       </div>
-    </>
+    </div>
   );
 
   return (

@@ -17,6 +17,10 @@ import Bills from "./pages/Bills";
 import Cards from "./pages/Cards";
 import Profile from "./pages/Profile";
 import Transfer from "./pages/Transfer";
+import AirtimeSwap from "./pages/AirtimeSwap";
+import FlightBooking from "./pages/FlightBooking";
+import BitcoinTrading from "./pages/BitcoinTrading";
+import VirtualCard from "./pages/VirtualCard";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -42,6 +46,10 @@ const App = () => {
             <Route path="/cards" element={<Cards />} />
             <Route path="/profile" element={<Profile />} />
             <Route path="/transfer" element={<Transfer />} />
+            <Route path="/airtime-swap" element={<AirtimeSwap />} />
+            <Route path="/flight-booking" element={<FlightBooking />} />
+            <Route path="/bitcoin-trading" element={<BitcoinTrading />} />
+            <Route path="/virtual-card" element={<VirtualCard />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>

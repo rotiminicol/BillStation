@@ -430,29 +430,29 @@ const Onboarding = () => {
         {/* Right Side - Form */}
         <div className="w-1/2 bg-white overflow-y-auto">
           <div className="w-full max-w-2xl mx-auto p-12">
-            {/* Header */}
-            <div className="flex items-center justify-center mb-8">
-              <img 
-                src="/logo.png" 
-                alt="Bill Station Logo" 
-                className="w-8 h-8 object-contain"
-              />
-              <span className="ml-2 font-semibold text-gray-900">Bill Station</span>
-            </div>
+        {/* Header */}
+        <div className="flex items-center justify-center mb-8">
+          <img 
+            src="/logo.png" 
+            alt="Bill Station Logo" 
+            className="w-8 h-8 object-contain"
+          />
+          <span className="ml-2 font-semibold text-gray-900">Bill Station</span>
+        </div>
 
-            {/* Progress Bar */}
-            <div className="mb-8">
-              <div className="flex justify-between items-center mb-2">
-                <span className="text-sm text-gray-600">Step {currentStep + 1} of {steps.length}</span>
+        {/* Progress Bar */}
+        <div className="mb-8">
+          <div className="flex justify-between items-center mb-2">
+            <span className="text-sm text-gray-600">Step {currentStep + 1} of {steps.length}</span>
                 <span className="text-sm font-medium text-blue-600">{Math.round(((currentStep + 1) / steps.length) * 100)}%</span>
-              </div>
-              <div className="w-full bg-gray-200 rounded-full h-2">
-                <div 
+          </div>
+          <div className="w-full bg-gray-200 rounded-full h-2">
+            <div 
                   className="bg-blue-600 h-2 rounded-full transition-all duration-300"
-                  style={{ width: `${((currentStep + 1) / steps.length) * 100}%` }}
-                ></div>
-              </div>
-            </div>
+              style={{ width: `${((currentStep + 1) / steps.length) * 100}%` }}
+            ></div>
+          </div>
+        </div>
 
             <Card className="border-0 shadow-none bg-white/95 backdrop-blur-sm">
               <CardHeader className="text-center pb-4">
@@ -461,34 +461,34 @@ const Onboarding = () => {
                     {currentStepData.icon}
                   </div>
                 </div>
-                <CardTitle className="text-xl">{currentStepData.title}</CardTitle>
-                <CardDescription>{currentStepData.description}</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                {currentStepData.content}
-                
+            <CardTitle className="text-xl">{currentStepData.title}</CardTitle>
+            <CardDescription>{currentStepData.description}</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            {currentStepData.content}
+            
                 <div className="flex gap-3 pt-4">
-                  {currentStep > 0 && (
-                    <Button
-                      variant="outline"
-                      onClick={handleBack}
-                      className="flex-1"
-                    >
+              {currentStep > 0 && (
+                <Button
+                  variant="outline"
+                  onClick={handleBack}
+                  className="flex-1"
+                >
                       <ArrowLeft className="h-4 w-4 mr-2" />
-                      Back
-                    </Button>
-                  )}
-                  <Button
-                    onClick={handleNext}
-                    className="flex-1"
-                    disabled={loading}
-                  >
-                    {loading ? "Setting up..." : currentStep === steps.length - 1 ? "Get Started" : "Continue"}
+                  Back
+                </Button>
+              )}
+              <Button
+                onClick={handleNext}
+                className="flex-1"
+                disabled={loading}
+              >
+                {loading ? "Setting up..." : currentStep === steps.length - 1 ? "Get Started" : "Continue"}
                     {!loading && currentStep < steps.length - 1 && <ArrowRight className="h-4 w-4 ml-2" />}
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
           </div>
         </div>
       </div>
