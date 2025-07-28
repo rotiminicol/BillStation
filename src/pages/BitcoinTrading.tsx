@@ -10,6 +10,7 @@ import Navigation from "@/components/Navigation";
 import DesktopLayout from "@/components/DesktopLayout";
 import BackButton from "@/components/ui/back-button";
 import { useToast } from "@/hooks/use-toast";
+import { getBankLogo } from "@/lib/bankLogos";
 
 const BitcoinTrading = () => {
   const [activeTab, setActiveTab] = useState<'buy' | 'sell'>('buy');
@@ -378,7 +379,6 @@ const BitcoinTrading = () => {
   return (
     <DesktopLayout>
       <BitcoinTradingContent />
-      <Navigation />
     </DesktopLayout>
   );
 };

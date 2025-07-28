@@ -27,29 +27,45 @@ const Navigation = () => {
 
   return (
     <>
-      <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 px-4 py-2 z-[9999] shadow-lg">
-        <div className="flex justify-around">
-          {navItems.map((item) => {
-            const isActive = location.pathname === item.href;
+      {/* Modern Floating Bottom Navigation Bar */}
+      <nav className="lg:hidden fixed bottom-4 left-1/2 -translate-x-1/2 z-[9999] w-[95vw] max-w-md rounded-2xl bg-white/90 shadow-2xl border border-gray-200 px-4 py-2 flex items-center justify-around backdrop-blur-md transition-all duration-300">
+        {navItems.map((item) => {
+          const isActive = location.pathname === item.href;
+          if (item.action) {
             return (
               <button
                 key={item.href}
-                onClick={item.action || (() => {})}
+                onClick={item.action}
                 className={cn(
-                  "flex flex-col items-center py-2 px-3 rounded-lg transition-all duration-300",
+                  "flex flex-col items-center justify-center py-2 px-4 rounded-xl transition-all duration-300",
                   isActive
-                    ? "text-blue-600 bg-blue-50 shadow-md"
-                    : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
+                    ? "text-blue-600 bg-blue-100 shadow-md"
+                    : "text-gray-500 hover:text-blue-600 hover:bg-blue-50"
                 )}
               >
-                <item.icon className="h-5 w-5 mb-1" />
-                <span className="text-xs font-medium">{item.label}</span>
+                <item.icon className="h-7 w-7 mb-1" />
+                <span className="text-xs font-semibold tracking-wide">{item.label}</span>
               </button>
             );
-          })}
-        </div>
+          } else {
+            return (
+              <Link
+                key={item.href}
+                to={item.href}
+                className={cn(
+                  "flex flex-col items-center justify-center py-2 px-4 rounded-xl transition-all duration-300",
+                  isActive
+                    ? "text-blue-600 bg-blue-100 shadow-md"
+                    : "text-gray-500 hover:text-blue-600 hover:bg-blue-50"
+                )}
+              >
+                <item.icon className="h-7 w-7 mb-1" />
+                <span className="text-xs font-semibold tracking-wide">{item.label}</span>
+              </Link>
+            );
+          }
+        })}
       </nav>
-
       {/* Mobile Menu Overlay */}
       {showMenu && (
         <div className="lg:hidden fixed inset-0 bg-black/50 z-[10000] flex items-end">
@@ -66,7 +82,6 @@ const Navigation = () => {
                   <X className="h-5 w-5" />
                 </Button>
               </div>
-              
               <div className="grid grid-cols-2 gap-4">
                 {menuItems.map((item, index) => (
                   <Link

@@ -38,15 +38,16 @@ import AccountSettingsModal from "@/components/profile/AccountSettingsModal";
 import NotificationsModal from "@/components/profile/NotificationsModal";
 import HelpSupportModal from "@/components/profile/HelpSupportModal";
 import { authAPI, transactionAPI, cardAPI } from "@/services/api";
+import { User as UserType, Transaction, Card as CardType } from "@/types";
 
 const Profile = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
   const [activeModal, setActiveModal] = useState<string | null>(null);
   const [showBalance, setShowBalance] = useState(false);
-  const [userData, setUserData] = useState<any>(null);
-  const [transactions, setTransactions] = useState<any[]>([]);
-  const [cards, setCards] = useState<any[]>([]);
+  const [userData, setUserData] = useState<UserType | null>(null);
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [cards, setCards] = useState<CardType[]>([]);
   const [loading, setLoading] = useState(true);
   const [animateCards, setAnimateCards] = useState(false);
 
@@ -82,7 +83,7 @@ const Profile = () => {
   }, [toast]);
 
   // Extract name parts from the user data
-  const getNameParts = (userData: any) => {
+  const getNameParts = (userData: UserType | null) => {
     if (!userData) return { firstName: "User", lastName: "" };
     
     const fullName = userData.name || userData.firstName || "";
@@ -382,8 +383,6 @@ const Profile = () => {
   return (
     <DesktopLayout>
       <ProfileContent />
-      <Navigation />
-
       {/* Modals */}
       <PersonalInfoModal 
         isOpen={activeModal === "personal"} 

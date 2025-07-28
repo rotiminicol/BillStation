@@ -10,6 +10,7 @@ import Navigation from "@/components/Navigation";
 import DesktopLayout from "@/components/DesktopLayout";
 import BackButton from "@/components/ui/back-button";
 import { useToast } from "@/hooks/use-toast";
+import { getBankLogo } from "@/lib/bankLogos";
 
 const AirtimeSwap = () => {
   const [selectedNetwork, setSelectedNetwork] = useState("");
@@ -290,7 +291,6 @@ const AirtimeSwap = () => {
   return (
     <DesktopLayout>
       <AirtimeSwapContent />
-      <Navigation />
     </DesktopLayout>
   );
 };

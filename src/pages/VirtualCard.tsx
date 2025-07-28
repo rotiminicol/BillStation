@@ -10,6 +10,7 @@ import Navigation from "@/components/Navigation";
 import DesktopLayout from "@/components/DesktopLayout";
 import BackButton from "@/components/ui/back-button";
 import { useToast } from "@/hooks/use-toast";
+import { getBankLogo } from "@/lib/bankLogos";
 
 const VirtualCard = () => {
   const [activeTab, setActiveTab] = useState<'create' | 'manage'>('create');
@@ -391,7 +392,6 @@ const VirtualCard = () => {
   return (
     <DesktopLayout>
       <VirtualCardContent />
-      <Navigation />
     </DesktopLayout>
   );
 };

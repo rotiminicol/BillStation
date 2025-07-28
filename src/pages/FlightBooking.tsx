@@ -10,6 +10,7 @@ import Navigation from "@/components/Navigation";
 import DesktopLayout from "@/components/DesktopLayout";
 import BackButton from "@/components/ui/back-button";
 import { useToast } from "@/hooks/use-toast";
+import { getBankLogo } from "@/lib/bankLogos";
 
 const FlightBooking = () => {
   const [activeTab, setActiveTab] = useState<'flights' | 'hotels' | 'transport'>('flights');
@@ -354,7 +355,6 @@ const FlightBooking = () => {
   return (
     <DesktopLayout>
       <FlightBookingContent />
-      <Navigation />
     </DesktopLayout>
   );
 };

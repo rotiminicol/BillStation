@@ -13,6 +13,8 @@ import BackButton from "@/components/ui/back-button";
 import { useToast } from "@/hooks/use-toast";
 import { paystackService, Bank } from "@/services/paystack";
 import { transactionAPI, authAPI } from "@/services/api";
+import { getBankLogo } from "@/lib/bankLogos";
+import { User, Transaction } from "@/types";
 
 const Transfer = () => {
   const [transferType, setTransferType] = useState("billstation");
@@ -24,8 +26,8 @@ const Transfer = () => {
   const [selectedBank, setSelectedBank] = useState("");
   const [accountName, setAccountName] = useState("");
   const [verifyingAccount, setVerifyingAccount] = useState(false);
-  const [transactions, setTransactions] = useState<any[]>([]);
-  const [userData, setUserData] = useState<any>(null);
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [userData, setUserData] = useState<User | null>(null);
   const [animateCards, setAnimateCards] = useState(false);
   const { toast } = useToast();
 
@@ -385,14 +387,13 @@ const Transfer = () => {
                         className={`flex items-center justify-between p-6 hover:bg-gray-50 transition-all duration-300 hover:shadow-sm ${index === transactions.length - 1 ? 'rounded-b-lg' : 'border-b border-gray-100'}`}
                       >
                         <div className="flex items-center gap-4">
-                          <div className={`w-12 h-12 rounded-full flex items-center justify-center shadow-lg ${
-                            transaction.type === "credit" ? 'bg-gradient-to-br from-green-500 to-green-600' : 'bg-gradient-to-br from-red-500 to-red-600'
-                          }`}>
-                            <span className={`text-white font-bold text-lg ${
-                              transaction.type === "credit" ? 'text-green-100' : 'text-red-100'
-                            }`}>
-                              {transaction.type === "credit" ? "+" : "-"}
-                            </span>
+                          <div className="w-12 h-12 rounded-full bg-white flex items-center justify-center shadow-lg overflow-hidden">
+                            <img
+                              src={getBankLogo({ code: transaction.bankCode, name: transaction.bankName || transaction.description })}
+                              alt={transaction.bankName || transaction.description || 'Bank'}
+                              className="w-10 h-10 object-contain"
+                              onError={e => { e.currentTarget.src = '/placeholder.svg'; }}
+                            />
                           </div>
                           <div>
                             <p className="font-semibold text-gray-900 text-base">{transaction.description}</p>
@@ -401,9 +402,7 @@ const Transfer = () => {
                             </p>
                           </div>
                         </div>
-                        <p className={`font-bold text-base ${
-                          transaction.type === "credit" ? "text-green-600" : "text-red-600"
-                        }`}>
+                        <p className={`font-bold text-base ${transaction.type === "credit" ? "text-green-600" : "text-red-600"}`}>
                           {transaction.type === "credit" ? "+" : "-"}₦{(transaction.amount || 0).toLocaleString()}
                         </p>
                       </div>
@@ -421,7 +420,6 @@ const Transfer = () => {
   return (
     <DesktopLayout>
       <TransferContent />
-      <Navigation />
     </DesktopLayout>
   );
 };
