@@ -49,15 +49,16 @@ const Dashboard = () => {
     fetchDashboardData();
   }, [toast]);
 
+  // Updated easy actions with real project pages - limited to 8 items
   const easyActions = [
-    { icon: Phone, label: "Airtime", href: "/airtime" },
-    { icon: ArrowUpDown, label: "Airtime Swap", href: "/airtime-swap" },
-    { icon: Globe, label: "Data", href: "/data" },
-    { icon: TrendingUp, label: "Betting", href: "/betting" },
-    { icon: Tv, label: "Cable TV", href: "/cable-tv" },
-    { icon: GiftCard, label: "Sell Giftcard", href: "/sell-giftcard" },
-    { icon: Electricity, label: "Electricity", href: "/electricity" },
-    { icon: MoreHorizontal, label: "More", href: "/more" },
+    { icon: Send, label: "Transfer", href: "/transfer" },
+    { icon: Smartphone, label: "Bills", href: "/bills" },
+    { icon: CreditCard, label: "Cards", href: "/cards" },
+    { icon: RefreshCw, label: "Airtime Swap", href: "/airtime-swap" },
+    { icon: Plane, label: "Flight Booking", href: "/flight-booking" },
+    { icon: Bitcoin, label: "Bitcoin Trading", href: "/bitcoin-trading" },
+    { icon: GiftCard, label: "Gift Cards", href: "/gift-card" },
+    { icon: Building2, label: "Hotel Booking", href: "/hotel-booking" },
   ];
 
   if (loading) {
@@ -111,7 +112,14 @@ const Dashboard = () => {
               <Button variant="secondary" size="sm" className="bg-white/20 text-white hover:bg-white/30 border-0">
                 Primary Wallet
               </Button>
-              <div className="w-6 h-6 bg-white/20 rounded-full"></div>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowBalance(!showBalance)}
+                className="text-white hover:bg-white/20 rounded-full p-2"
+              >
+                {showBalance ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
+              </Button>
             </div>
             
             <div className="text-center mb-6">
@@ -127,14 +135,35 @@ const Dashboard = () => {
             </div>
 
             <div className="flex items-center justify-center gap-8">
-              <Button variant="ghost" size="sm" className="text-white hover:bg-white/20 rounded-full p-3">
-                <Plus className="h-6 w-6" />
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="text-white hover:bg-white/20 rounded-full p-3"
+                asChild
+              >
+                <Link to="/transfer">
+                  <Plus className="h-6 w-6" />
+                </Link>
               </Button>
-              <Button variant="ghost" size="sm" className="text-white hover:bg-white/20 rounded-full p-3">
-                <Send className="h-6 w-6" />
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="text-white hover:bg-white/20 rounded-full p-3"
+                asChild
+              >
+                <Link to="/transfer">
+                  <Send className="h-6 w-6" />
+                </Link>
               </Button>
-              <Button variant="ghost" size="sm" className="text-white hover:bg-white/20 rounded-full p-3">
-                <CreditCard className="h-6 w-6" />
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="text-white hover:bg-white/20 rounded-full p-3"
+                asChild
+              >
+                <Link to="/cards">
+                  <CreditCard className="h-6 w-6" />
+                </Link>
               </Button>
             </div>
           </div>

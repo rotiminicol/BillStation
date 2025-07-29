@@ -17,8 +17,7 @@ const Signup = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [formData, setFormData] = useState({
-    firstName: '',
-    lastName: '',
+    fullName: '',
     email: '',
     phone: '',
     company: '',
@@ -57,8 +56,7 @@ const Signup = () => {
 
     try {
       const signupData = {
-        firstName: formData.firstName,
-        lastName: formData.lastName,
+        fullName: formData.fullName,
         email: formData.email,
         phone: formData.phone,
         password: formData.password,
@@ -78,14 +76,14 @@ const Signup = () => {
   };
 
   return (
-    <div className="h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 overflow-hidden">
+    <div className="h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50">
       {/* Desktop Layout */}
       <div className="hidden lg:flex h-screen">
         {/* Left Side - Form (Scrollable) */}
-        <div className="w-1/2 bg-gradient-to-br from-gray-50 via-white to-blue-50 overflow-y-auto scrollbar-hide">
+        <div className="w-1/2 bg-gradient-to-br from-gray-50 via-white to-blue-50 overflow-y-auto">
           <div className="min-h-screen flex items-center justify-center p-12">
             <div className="w-full max-w-md space-y-8">
-              {/* Enhanced Header */}
+              {/* Header */}
               <motion.div 
                 className="space-y-4"
                 initial={{ opacity: 0, y: 20 }}
@@ -102,7 +100,7 @@ const Signup = () => {
                   </Link>
                 </motion.div>
                 
-                {/* Enhanced Company Logo */}
+                {/* Company Logo */}
                 <motion.div 
                   className="flex justify-center mb-6"
                   initial={{ opacity: 0, scale: 0.8 }}
@@ -129,13 +127,13 @@ const Signup = () => {
                   transition={{ duration: 0.6, delay: 0.3 }}
                 >
                   <h1 className="text-3xl font-bold text-gray-900 bg-gradient-to-r from-gray-900 via-blue-900 to-gray-900 bg-clip-text text-transparent">
-                    Create Your Account
+                    Create Account
                   </h1>
-                  <p className="text-gray-600 mt-2">Join Bill Station and unlock financial freedom</p>
+                  <p className="text-gray-600 mt-2">Sign up to get started</p>
                 </motion.div>
               </motion.div>
 
-              {/* Enhanced Form */}
+              {/* Form */}
               <motion.form 
                 onSubmit={handleSubmit}
                 className="space-y-6"
@@ -143,55 +141,34 @@ const Signup = () => {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: 0.4 }}
               >
-                <div className="grid grid-cols-2 gap-4">
-                  <motion.div 
-                    className="space-y-2"
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ duration: 0.6, delay: 0.5 }}
-                  >
-                    <Label htmlFor="firstName">First Name</Label>
-                    <div className="relative">
-                      <User className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
-                      <Input
-                        id="firstName"
-                        type="text"
-                        placeholder="John"
-                        value={formData.firstName}
-                        onChange={(e) => handleInputChange('firstName', e.target.value)}
-                        className="h-12 pl-10 border-2 border-gray-200 focus:border-blue-500 transition-colors duration-300"
-                        required
-                      />
-                    </div>
-                  </motion.div>
-                  
-                  <motion.div 
-                    className="space-y-2"
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ duration: 0.6, delay: 0.6 }}
-                  >
-                    <Label htmlFor="lastName">Last Name</Label>
-                    <div className="relative">
-                      <User className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
-                      <Input
-                        id="lastName"
-                        type="text"
-                        placeholder="Doe"
-                        value={formData.lastName}
-                        onChange={(e) => handleInputChange('lastName', e.target.value)}
-                        className="h-12 pl-10 border-2 border-gray-200 focus:border-blue-500 transition-colors duration-300"
-                        required
-                      />
-                    </div>
-                  </motion.div>
-                </div>
-
+                {/* Full Name Field */}
                 <motion.div 
                   className="space-y-2"
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
-                  transition={{ duration: 0.6, delay: 0.7 }}
+                  transition={{ duration: 0.6, delay: 0.5 }}
+                >
+                  <Label htmlFor="fullName">Full Name</Label>
+                  <div className="relative">
+                    <User className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                    <Input
+                      id="fullName"
+                      type="text"
+                      placeholder="Enter your full name"
+                      value={formData.fullName}
+                      onChange={(e) => handleInputChange('fullName', e.target.value)}
+                      className="h-12 pl-10 border-2 border-gray-200 focus:border-blue-500 transition-colors duration-300"
+                      required
+                    />
+                  </div>
+                </motion.div>
+
+                {/* Email Field */}
+                <motion.div 
+                  className="space-y-2"
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.6, delay: 0.6 }}
                 >
                   <Label htmlFor="email">Email Address</Label>
                   <div className="relative">
@@ -199,7 +176,7 @@ const Signup = () => {
                     <Input
                       id="email"
                       type="email"
-                      placeholder="john.doe@example.com"
+                      placeholder="Enter your email address"
                       value={formData.email}
                       onChange={(e) => handleInputChange('email', e.target.value)}
                       className="h-12 pl-10 border-2 border-gray-200 focus:border-blue-500 transition-colors duration-300"
@@ -208,11 +185,12 @@ const Signup = () => {
                   </div>
                 </motion.div>
 
+                {/* Phone Field */}
                 <motion.div 
                   className="space-y-2"
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
-                  transition={{ duration: 0.6, delay: 0.8 }}
+                  transition={{ duration: 0.6, delay: 0.7 }}
                 >
                   <Label htmlFor="phone">Phone Number</Label>
                   <div className="relative">
@@ -229,11 +207,12 @@ const Signup = () => {
                   </div>
                 </motion.div>
 
+                {/* Company Field */}
                 <motion.div 
                   className="space-y-2"
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
-                  transition={{ duration: 0.6, delay: 0.9 }}
+                  transition={{ duration: 0.6, delay: 0.8 }}
                 >
                   <Label htmlFor="company">Company (Optional)</Label>
                   <div className="relative">
@@ -249,11 +228,12 @@ const Signup = () => {
                   </div>
                 </motion.div>
 
+                {/* Password Field */}
                 <motion.div 
                   className="space-y-2"
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
-                  transition={{ duration: 0.6, delay: 1.0 }}
+                  transition={{ duration: 0.6, delay: 0.9 }}
                 >
                   <Label htmlFor="password">Password</Label>
                   <div className="relative">
@@ -261,7 +241,7 @@ const Signup = () => {
                     <Input
                       id="password"
                       type={showPassword ? "text" : "password"}
-                      placeholder="Create a strong password"
+                      placeholder="Create a password"
                       value={formData.password}
                       onChange={(e) => handleInputChange('password', e.target.value)}
                       className="h-12 pl-10 pr-12 border-2 border-gray-200 focus:border-blue-500 transition-colors duration-300"
@@ -279,11 +259,12 @@ const Signup = () => {
                   </div>
                 </motion.div>
 
+                {/* Confirm Password Field */}
                 <motion.div 
                   className="space-y-2"
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
-                  transition={{ duration: 0.6, delay: 1.1 }}
+                  transition={{ duration: 0.6, delay: 1.0 }}
                 >
                   <Label htmlFor="confirmPassword">Confirm Password</Label>
                   <div className="relative">
@@ -309,7 +290,7 @@ const Signup = () => {
                   </div>
                 </motion.div>
 
-                {/* Enhanced Error Display */}
+                {/* Error Display */}
                 <AnimatePresence>
                   {error && (
                     <motion.div 
@@ -324,11 +305,12 @@ const Signup = () => {
                   )}
                 </AnimatePresence>
 
+                {/* Terms Checkbox */}
                 <motion.div 
                   className="space-y-4"
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.6, delay: 1.2 }}
+                  transition={{ duration: 0.6, delay: 1.1 }}
                 >
                   <div className="flex items-start space-x-3">
                     <Checkbox
@@ -348,10 +330,11 @@ const Signup = () => {
                   </div>
                 </motion.div>
 
+                {/* Submit Button */}
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.6, delay: 1.3 }}
+                  transition={{ duration: 0.6, delay: 1.2 }}
                 >
                   <Button
                     type="submit"
@@ -372,11 +355,60 @@ const Signup = () => {
                   </Button>
                 </motion.div>
 
+                {/* Divider */}
+                <motion.div 
+                  className="relative my-6"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.6, delay: 1.3 }}
+                >
+                  <div className="absolute inset-0 flex items-center">
+                    <div className="w-full border-t border-gray-200"></div>
+                  </div>
+                  <div className="relative flex justify-center text-sm">
+                    <span className="px-4 bg-white text-gray-500">Or continue with</span>
+                  </div>
+                </motion.div>
+
+                {/* Social Login Buttons */}
+                <motion.div 
+                  className="grid grid-cols-2 gap-4"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.6, delay: 1.4 }}
+                >
+                  {/* Google Button */}
+                  <button
+                    type="button"
+                    className="w-full inline-flex justify-center items-center py-3 px-4 border border-gray-300 rounded-lg bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+                  >
+                    <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24">
+                      <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                      <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                      <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                      <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                    </svg>
+                    Google
+                  </button>
+
+                  {/* Apple Button */}
+                  <button
+                    type="button"
+                    className="w-full inline-flex justify-center items-center py-3 px-4 border border-gray-300 rounded-lg bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+                  >
+                    <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/>
+                    </svg>
+                    Apple
+                  </button>
+                </motion.div>
+
+                {/* Login Link */}
                 <motion.div 
                   className="text-center"
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.6, delay: 1.4 }}
+                  transition={{ duration: 0.6, delay: 1.5 }}
                 >
                   <p className="text-gray-600">
                     Already have an account?{' '}
@@ -390,7 +422,7 @@ const Signup = () => {
           </div>
         </div>
 
-        {/* Enhanced Right Side - Image & Content */}
+        {/* Right Side - Image & Content (Fixed) */}
         <div className="w-1/2 relative overflow-hidden">
           <img
             src="/money2.jpg"
@@ -400,7 +432,7 @@ const Signup = () => {
           <div className="absolute inset-0 bg-gradient-to-r from-blue-900/40 to-purple-900/40"></div>
           <div className="absolute inset-0 bg-black/20"></div>
           
-          {/* Enhanced Overlay Content */}
+          {/* Overlay Content */}
           <div className="absolute inset-0 flex flex-col justify-center p-12 text-white">
             <motion.div 
               className="space-y-8"
@@ -476,7 +508,7 @@ const Signup = () => {
         </div>
       </div>
 
-      {/* Enhanced Mobile Layout */}
+      {/* Mobile Layout */}
       <div className="lg:hidden min-h-screen relative">
         {/* Background Image */}
         <div className="absolute inset-0">
@@ -488,10 +520,10 @@ const Signup = () => {
           <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/30 to-black/40"></div>
         </div>
 
-        {/* Enhanced White Fading Overlay */}
+        {/* White Fading Overlay */}
         <div className="absolute inset-0 bg-gradient-to-b from-white/95 via-white/90 to-white/95"></div>
 
-        {/* Enhanced Mobile Form Content */}
+        {/* Mobile Form Content */}
         <div className="relative z-10 min-h-screen p-6">
           <motion.div 
             className="w-full max-w-md mx-auto space-y-8"
@@ -499,7 +531,7 @@ const Signup = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
           >
-            {/* Enhanced Header */}
+            {/* Header */}
             <motion.div 
               className="space-y-4"
               initial={{ opacity: 0, y: 20 }}
@@ -542,13 +574,13 @@ const Signup = () => {
                 transition={{ duration: 0.6, delay: 0.4 }}
               >
                 <h1 className="text-3xl font-bold text-gray-900 bg-gradient-to-r from-gray-900 via-blue-900 to-gray-900 bg-clip-text text-transparent">
-                  Create Your Account
+                  Create Account
                 </h1>
-                <p className="text-gray-600 mt-2">Join Bill Station and unlock financial freedom</p>
+                <p className="text-gray-600 mt-2">Sign up to get started</p>
               </motion.div>
             </motion.div>
 
-            {/* Enhanced Mobile Form */}
+            {/* Mobile Form */}
             <motion.form 
               onSubmit={handleSubmit}
               className="space-y-6"
@@ -556,55 +588,34 @@ const Signup = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.5 }}
             >
-              <div className="grid grid-cols-2 gap-4">
-                <motion.div 
-                  className="space-y-2"
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ duration: 0.6, delay: 0.6 }}
-                >
-                  <Label htmlFor="firstName">First Name</Label>
-                  <div className="relative">
-                    <User className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
-                    <Input
-                      id="firstName"
-                      type="text"
-                      placeholder="John"
-                      value={formData.firstName}
-                      onChange={(e) => handleInputChange('firstName', e.target.value)}
-                      className="h-12 pl-10 border-2 border-gray-200 focus:border-blue-500 transition-colors duration-300"
-                      required
-                    />
-                  </div>
-                </motion.div>
-                
-                <motion.div 
-                  className="space-y-2"
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ duration: 0.6, delay: 0.7 }}
-                >
-                  <Label htmlFor="lastName">Last Name</Label>
-                  <div className="relative">
-                    <User className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
-                    <Input
-                      id="lastName"
-                      type="text"
-                      placeholder="Doe"
-                      value={formData.lastName}
-                      onChange={(e) => handleInputChange('lastName', e.target.value)}
-                      className="h-12 pl-10 border-2 border-gray-200 focus:border-blue-500 transition-colors duration-300"
-                      required
-                    />
-                  </div>
-                </motion.div>
-              </div>
-
+              {/* Full Name Field */}
               <motion.div 
                 className="space-y-2"
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.6, delay: 0.8 }}
+                transition={{ duration: 0.6, delay: 0.6 }}
+              >
+                <Label htmlFor="fullName">Full Name</Label>
+                <div className="relative">
+                  <User className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                  <Input
+                    id="fullName"
+                    type="text"
+                    placeholder="Enter your full name"
+                    value={formData.fullName}
+                    onChange={(e) => handleInputChange('fullName', e.target.value)}
+                    className="h-12 pl-10 border-2 border-gray-200 focus:border-blue-500 transition-colors duration-300"
+                    required
+                  />
+                </div>
+              </motion.div>
+
+              {/* Email Field */}
+              <motion.div 
+                className="space-y-2"
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.6, delay: 0.7 }}
               >
                 <Label htmlFor="email">Email Address</Label>
                 <div className="relative">
@@ -612,7 +623,7 @@ const Signup = () => {
                   <Input
                     id="email"
                     type="email"
-                    placeholder="john.doe@example.com"
+                    placeholder="Enter your email address"
                     value={formData.email}
                     onChange={(e) => handleInputChange('email', e.target.value)}
                     className="h-12 pl-10 border-2 border-gray-200 focus:border-blue-500 transition-colors duration-300"
@@ -621,11 +632,12 @@ const Signup = () => {
                 </div>
               </motion.div>
 
+              {/* Phone Field */}
               <motion.div 
                 className="space-y-2"
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.6, delay: 0.9 }}
+                transition={{ duration: 0.6, delay: 0.8 }}
               >
                 <Label htmlFor="phone">Phone Number</Label>
                 <div className="relative">
@@ -642,11 +654,12 @@ const Signup = () => {
                 </div>
               </motion.div>
 
+              {/* Company Field */}
               <motion.div 
                 className="space-y-2"
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.6, delay: 1.0 }}
+                transition={{ duration: 0.6, delay: 0.9 }}
               >
                 <Label htmlFor="company">Company (Optional)</Label>
                 <div className="relative">
@@ -662,11 +675,12 @@ const Signup = () => {
                 </div>
               </motion.div>
 
+              {/* Password Field */}
               <motion.div 
                 className="space-y-2"
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.6, delay: 1.1 }}
+                transition={{ duration: 0.6, delay: 1.0 }}
               >
                 <Label htmlFor="password">Password</Label>
                 <div className="relative">
@@ -674,7 +688,7 @@ const Signup = () => {
                   <Input
                     id="password"
                     type={showPassword ? "text" : "password"}
-                    placeholder="Create a strong password"
+                    placeholder="Create a password"
                     value={formData.password}
                     onChange={(e) => handleInputChange('password', e.target.value)}
                     className="h-12 pl-10 pr-12 border-2 border-gray-200 focus:border-blue-500 transition-colors duration-300"
@@ -692,11 +706,12 @@ const Signup = () => {
                 </div>
               </motion.div>
 
+              {/* Confirm Password Field */}
               <motion.div 
                 className="space-y-2"
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.6, delay: 1.2 }}
+                transition={{ duration: 0.6, delay: 1.1 }}
               >
                 <Label htmlFor="confirmPassword">Confirm Password</Label>
                 <div className="relative">
@@ -722,7 +737,7 @@ const Signup = () => {
                 </div>
               </motion.div>
 
-              {/* Enhanced Error Display */}
+              {/* Error Display */}
               <AnimatePresence>
                 {error && (
                   <motion.div 
@@ -737,11 +752,12 @@ const Signup = () => {
                 )}
               </AnimatePresence>
 
+              {/* Terms Checkbox */}
               <motion.div 
                 className="space-y-4"
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: 1.3 }}
+                transition={{ duration: 0.6, delay: 1.2 }}
               >
                 <div className="flex items-start space-x-3">
                   <Checkbox
@@ -761,10 +777,11 @@ const Signup = () => {
                 </div>
               </motion.div>
 
+              {/* Submit Button */}
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: 1.4 }}
+                transition={{ duration: 0.6, delay: 1.3 }}
               >
                 <Button
                   type="submit"
@@ -785,11 +802,60 @@ const Signup = () => {
                 </Button>
               </motion.div>
 
+              {/* Divider */}
+              <motion.div 
+                className="relative my-6"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 1.4 }}
+              >
+                <div className="absolute inset-0 flex items-center">
+                  <div className="w-full border-t border-gray-200"></div>
+                </div>
+                <div className="relative flex justify-center text-sm">
+                  <span className="px-4 bg-white text-gray-500">Or continue with</span>
+                </div>
+              </motion.div>
+
+              {/* Social Login Buttons */}
+              <motion.div 
+                className="grid grid-cols-2 gap-4"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 1.5 }}
+              >
+                {/* Google Button */}
+                <button
+                  type="button"
+                  className="w-full inline-flex justify-center items-center py-3 px-4 border border-gray-300 rounded-lg bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+                >
+                  <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24">
+                    <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                    <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                    <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                    <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                  </svg>
+                  Google
+                </button>
+
+                {/* Apple Button */}
+                <button
+                  type="button"
+                  className="w-full inline-flex justify-center items-center py-3 px-4 border border-gray-300 rounded-lg bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+                >
+                  <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/>
+                  </svg>
+                  Apple
+                </button>
+              </motion.div>
+
+              {/* Login Link */}
               <motion.div 
                 className="text-center"
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: 1.5 }}
+                transition={{ duration: 0.6, delay: 1.6 }}
               >
                 <p className="text-gray-600">
                   Already have an account?{' '}
