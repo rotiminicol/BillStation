@@ -10,7 +10,7 @@ import { Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import Navigation from "@/components/Navigation";
 import DesktopLayout from "@/components/DesktopLayout";
-import BackButton from "@/components/ui/back-button";
+
 import { useToast } from "@/hooks/use-toast";
 import { paystackService, Bank } from "@/services/paystack";
 import { transactionAPI, authAPI } from "@/services/api";
@@ -183,7 +183,6 @@ const Transfer = () => {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
       >
-        <BackButton to="/dashboard" className="mr-4" />
         <div className="flex items-center gap-3">
           <h1 className="text-3xl font-bold text-gray-900 bg-gradient-to-r from-gray-900 via-blue-900 to-gray-900 bg-clip-text text-transparent">
             Send Money

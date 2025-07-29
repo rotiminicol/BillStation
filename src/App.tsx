@@ -26,6 +26,11 @@ import AirtimeSwap from "./pages/AirtimeSwap";
 import FlightBooking from "./pages/FlightBooking";
 import BitcoinTrading from "./pages/BitcoinTrading";
 import VirtualCard from "./pages/VirtualCard";
+import GiftCard from "./pages/GiftCard";
+import HotelBooking from "./pages/HotelBooking";
+import ChauffeurService from "./pages/ChauffeurService";
+import Transactions from "./pages/Transactions";
+import TransactionDetails from "./pages/TransactionDetails";
 import NotFound from "./pages/NotFound";
 
 // Mobile Imports
@@ -122,6 +127,11 @@ const AppRouter = () => {
       <Route path="/flight-booking" element={<FlightBooking />} />
       <Route path="/bitcoin-trading" element={<BitcoinTrading />} />
       <Route path="/virtual-card" element={<VirtualCard />} />
+      <Route path="/gift-card" element={<GiftCard />} />
+      <Route path="/hotel-booking" element={<HotelBooking />} />
+      <Route path="/chauffeur-service" element={<ChauffeurService />} />
+      <Route path="/transactions" element={<Transactions />} />
+      <Route path="/transactions/:id" element={<TransactionDetails />} />
       <Route path="*" element={<NotFound />} />
     </Routes>
   );
