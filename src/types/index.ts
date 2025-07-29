@@ -6,9 +6,9 @@ export interface User {
   phone: string;
   balance: number;
   accountNumber: string;
-  name?: string;
   created_at?: string;
   address?: string;
+  // Note: Removed optional 'name' field to enforce consistent use of firstName/lastName
 }
 
 export interface Transaction {

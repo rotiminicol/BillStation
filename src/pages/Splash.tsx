@@ -8,6 +8,11 @@ const Splash = () => {
   const isMobile = useIsMobile();
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
+  // Debug logging
+  console.log('Splash component rendered', { stage, isMobile });
+
+
+
   // Brand colors
   const brandColors = {
     primary: '#0057FF', // Deep blue
@@ -17,11 +22,11 @@ const Splash = () => {
   };
 
   useEffect(() => {
-    // Stage timing for exactly 7 seconds total
-    const timer = setTimeout(() => setStage('logo'), 1000);       // 0-1s: Init
-    const timer2 = setTimeout(() => setStage('showcase'), 3000);  // 1-3s: Logo reveal
-    const timer3 = setTimeout(() => setStage('exit'), 6000);      // 3-6s: Showcase
-    const timer4 = setTimeout(() => navigate("/welcome"), 7000);  // 6-7s: Exit
+    // Stage timing for exactly 5 seconds total
+    const timer = setTimeout(() => setStage('logo'), 800);        // 0-0.8s: Init
+    const timer2 = setTimeout(() => setStage('showcase'), 2000);  // 0.8-2s: Logo reveal
+    const timer3 = setTimeout(() => setStage('exit'), 4000);      // 2-4s: Showcase
+    const timer4 = setTimeout(() => navigate("/welcome"), 5000);  // 4-5s: Exit
 
     return () => {
       clearTimeout(timer);

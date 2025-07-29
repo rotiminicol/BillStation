@@ -30,6 +30,14 @@ const makeRequest = async (url: string, options: RequestInit = {}) => {
   return response.json();
 };
 
+// Utility function to generate account numbers
+const generateAccountNumber = (): string => {
+  // Generate 10-digit account number starting with 1234 for Kuda
+  const prefix = '1234';
+  const suffix = Math.floor(Math.random() * 1000000).toString().padStart(6, '0');
+  return prefix + suffix;
+};
+
 // Authentication API
 export const authAPI = {
   login: async (email: string, password: string) => {
@@ -262,12 +270,4 @@ export const paystackAPI = {
     
     return response.json();
   },
-};
-
-// Utility function to generate account numbers
-const generateAccountNumber = (): string => {
-  // Generate 10-digit account number starting with 1234 for Kuda
-  const prefix = '1234';
-  const suffix = Math.floor(Math.random() * 1000000).toString().padStart(6, '0');
-  return prefix + suffix;
 };

@@ -25,9 +25,15 @@ import {
   Sparkles,
   Activity,
   CheckCircle,
-  ArrowRight
+  ArrowRight,
+  Globe,
+  Zap,
+  Lock,
+  Clock,
+  Building
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
+import { motion, AnimatePresence } from "framer-motion";
 import Navigation from "@/components/Navigation";
 import DesktopLayout from "@/components/DesktopLayout";
 import BackButton from "@/components/ui/back-button";
@@ -82,20 +88,9 @@ const Profile = () => {
     fetchUserData();
   }, [toast]);
 
-  // Extract name parts from the user data
-  const getNameParts = (userData: UserType | null) => {
-    if (!userData) return { firstName: "User", lastName: "" };
-    
-    const fullName = userData.name || userData.firstName || "";
-    const nameParts = fullName.trim().split(" ");
-    
-    return {
-      firstName: nameParts[0] || "User",
-      lastName: nameParts.slice(1).join(" ") || ""
-    };
-  };
-
-  const { firstName, lastName } = getNameParts(userData);
+  // Get user's first and last name with fallbacks
+  const firstName = userData?.firstName || 'User';
+  const lastName = userData?.lastName || '';
 
   // Build profile data with proper fallbacks
   const profileData = {
@@ -109,71 +104,29 @@ const Profile = () => {
     bank: "Bill Station Digital Hub",
     accountType: "Digital Wallet",
     bvn: "***********",
-    tier: "Tier 2",
-    balance: userData?.balance ? `₦${userData.balance.toLocaleString()}` : "₦20,000"
+    balance: userData?.balance || 0,
+    currency: "NGN"
   };
-
-  const quickActions = [
-    { 
-      icon: User, 
-      label: "Personal Information", 
-      subtitle: "Update your basic information",
-      action: () => setActiveModal("personal"),
-      gradient: "from-blue-500 to-blue-600"
-    },
-    { 
-      icon: Settings, 
-      label: "Account Settings", 
-      subtitle: "Security and preferences",
-      action: () => setActiveModal("settings"),
-      gradient: "from-blue-600 to-blue-700"
-    },
-    { 
-      icon: Bell, 
-      label: "Notifications", 
-      subtitle: "Manage your alerts",
-      action: () => setActiveModal("notifications"),
-      gradient: "from-blue-700 to-blue-800"
-    },
-    { 
-      icon: HelpCircle, 
-      label: "Help & Support", 
-      subtitle: "Get assistance",
-      action: () => setActiveModal("help"),
-      gradient: "from-blue-800 to-blue-900"
-    },
-  ];
-
-  const accountStats = [
-    { label: "Wallet Balance", value: showBalance ? profileData.balance : "••••••", icon: CreditCard, color: "text-green-600", bg: "bg-green-50" },
-    { label: "Account Tier", value: profileData.tier, icon: Shield, color: "text-blue-600", bg: "bg-blue-50" },
-    { label: "Gift Cards", value: cards.length.toString(), icon: CreditCard, color: "text-purple-600", bg: "bg-purple-50" },
-    { label: "This Month", value: transactions.length === 0 ? "No transactions" : `${transactions.length} transactions`, icon: TrendingUp, color: "text-orange-600", bg: "bg-orange-50" },
-  ];
 
   const handleLogout = async () => {
     try {
-      authAPI.logout();
+      await authAPI.logout();
       toast({
-        title: "Logged out",
-        description: "You have been successfully logged out.",
+        title: "Logged out successfully",
+        description: "You have been logged out of your account",
       });
-      navigate("/");
+      navigate('/login');
     } catch (error) {
       console.error('Logout error:', error);
+      toast({
+        title: "Error",
+        description: "Failed to logout. Please try again.",
+        variant: "destructive"
+      });
     }
   };
 
   const copyAccountNumber = () => {
-    if (profileData.accountNumber === "No account number") {
-      toast({
-        title: "No account number",
-        description: "Account number not available",
-        variant: "destructive"
-      });
-      return;
-    }
-    
     navigator.clipboard.writeText(profileData.accountNumber);
     toast({
       title: "Copied!",
@@ -181,226 +134,516 @@ const Profile = () => {
     });
   };
 
-  // Get initials safely
   const getInitials = (firstName: string, lastName: string) => {
-    const firstInitial = firstName && firstName.length > 0 ? firstName[0].toUpperCase() : 'U';
-    const lastInitial = lastName && lastName.length > 0 ? lastName[0].toUpperCase() : '';
-    return firstInitial + lastInitial;
+    return `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase();
   };
 
   const ProfileContent = () => (
     <div className="space-y-8">
-      {/* Header with Animation */}
-      <div className={`flex items-center justify-between mb-8 transition-all duration-1000 ${animateCards ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
-        <div className="flex items-center">
-          <BackButton to="/dashboard" className="mr-4 rounded-full w-10 h-10 p-0 lg:hidden" />
-          <div className="flex items-center gap-3">
-            <h1 className="text-3xl font-bold text-gray-900 bg-gradient-to-r from-gray-900 via-blue-900 to-gray-900 bg-clip-text text-transparent">
-              Profile
-            </h1>
-            <Sparkles className="h-6 w-6 text-blue-500 animate-pulse" />
-          </div>
+      {/* Enhanced Header */}
+      <motion.div 
+        className="flex items-center mb-8"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6 }}
+      >
+        <BackButton to="/dashboard" className="mr-4" />
+        <div className="flex items-center gap-3">
+          <h1 className="text-3xl font-bold text-gray-900 bg-gradient-to-r from-gray-900 via-blue-900 to-gray-900 bg-clip-text text-transparent">
+            Profile
+          </h1>
+          <motion.div
+            animate={{ rotate: 360 }}
+            transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+          >
+            <Sparkles className="h-6 w-6 text-blue-500" />
+          </motion.div>
         </div>
-        <Button 
-          onClick={() => setActiveModal("personal")}
-          size="sm" 
-          className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
-        >
-          <Edit className="h-4 w-4 mr-2" />
-          Edit
-        </Button>
-      </div>
+      </motion.div>
 
       <div className="lg:grid lg:grid-cols-3 lg:gap-8">
-        {/* Main Content */}
+        {/* Enhanced Main Content */}
         <div className="lg:col-span-2 space-y-8">
-          {/* Profile Header Card with Premium Design */}
-          <div className={`transition-all duration-1000 delay-200 ${animateCards ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
-            <Card className="mb-8 border-0 shadow-2xl bg-gradient-to-br from-blue-900 via-blue-800 to-blue-900 text-white overflow-hidden relative group">
-              {/* Animated Background Elements */}
-              <div className="absolute inset-0 bg-gradient-to-r from-blue-900/50 via-blue-800/50 to-blue-900/50"></div>
-              <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full -translate-y-16 translate-x-16 group-hover:scale-150 transition-transform duration-700"></div>
-              <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/5 rounded-full translate-y-12 -translate-x-12 group-hover:scale-150 transition-transform duration-700 delay-300"></div>
-              <div className="absolute top-1/2 left-1/2 w-64 h-64 bg-gradient-to-r from-white/5 to-white/10 rounded-full -translate-x-1/2 -translate-y-1/2 blur-3xl group-hover:blur-2xl transition-all duration-1000"></div>
-              
+          {/* Enhanced Profile Header */}
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+          >
+            <Card className="border-0 shadow-2xl bg-gradient-to-br from-white to-gray-50 overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-r from-blue-50/30 to-indigo-50/30 opacity-50"></div>
               <CardContent className="p-8 relative z-10">
                 <div className="flex items-start gap-6">
-                <div className="relative">
-                    <Avatar className="w-20 h-20 lg:w-24 lg:h-24 border-4 border-white/20 shadow-2xl">
-                    <AvatarImage src="/placeholder-avatar.jpg" alt={`${firstName} ${lastName}`} />
-                      <AvatarFallback className="bg-gradient-to-br from-blue-500 to-blue-600 text-white text-2xl lg:text-3xl font-bold">
-                      {getInitials(firstName, lastName)}
-                    </AvatarFallback>
-                  </Avatar>
-                    <div className="absolute -top-2 -right-2 w-6 h-6 bg-green-500 rounded-full border-3 border-white shadow-lg"></div>
-                  </div>
+                  <motion.div 
+                    className="relative"
+                    whileHover={{ scale: 1.05 }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    <Avatar className="w-24 h-24 border-4 border-white shadow-xl">
+                      <AvatarImage src={userData?.avatar} alt={`${firstName} ${lastName}`} />
+                      <AvatarFallback className="text-2xl font-bold bg-gradient-to-br from-blue-500 to-blue-600 text-white">
+                        {getInitials(firstName, lastName)}
+                      </AvatarFallback>
+                    </Avatar>
+                    <motion.div 
+                      className="absolute -bottom-2 -right-2 w-8 h-8 bg-green-500 rounded-full flex items-center justify-center border-2 border-white shadow-lg"
+                      animate={{ scale: [1, 1.2, 1] }}
+                      transition={{ duration: 2, repeat: Infinity }}
+                    >
+                      <CheckCircle className="h-4 w-4 text-white" />
+                    </motion.div>
+                  </motion.div>
+                  
                   <div className="flex-1">
-                    <h2 className="text-2xl lg:text-3xl font-bold mb-2">{firstName} {lastName}</h2>
-                    <div className="flex items-center gap-3 text-white/80 mb-3">
-                      <Mail className="h-4 w-4 lg:h-5 lg:w-5" />
-                      <span className="text-base lg:text-lg">{profileData.email}</span>
-                    </div>
-                    <div className="flex items-center gap-4">
-                    <Badge className="bg-white/20 text-white border-white/30 hover:bg-white/30">
-                        <Star className="h-4 w-4 lg:h-5 lg:w-5 mr-2" />
-                      {profileData.tier} Verified
-                    </Badge>
-                      <div className="flex items-center gap-2 text-sm lg:text-base text-white/70">
-                        <Calendar className="h-4 w-4 lg:h-5 lg:w-5" />
-                      <span>Since {profileData.dateJoined}</span>
-                    </div>
+                    <motion.div 
+                      className="flex items-center justify-between mb-4"
+                      initial={{ opacity: 0, x: 20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ duration: 0.6, delay: 0.3 }}
+                    >
+                      <div>
+                        <h2 className="text-2xl font-bold text-gray-900">{firstName} {lastName}</h2>
+                        <p className="text-gray-600">{profileData.email}</p>
+                      </div>
+                      <motion.div
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                      >
+                        <Button
+                          onClick={() => setActiveModal('personal-info')}
+                          variant="outline"
+                          className="border-2 hover:border-blue-500 hover:bg-blue-50 transition-all duration-300"
+                        >
+                          <Edit className="h-4 w-4 mr-2" />
+                          Edit Profile
+                        </Button>
+                      </motion.div>
+                    </motion.div>
+                    
+                    <motion.div 
+                      className="grid grid-cols-2 lg:grid-cols-4 gap-4"
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.6, delay: 0.4 }}
+                    >
+                      <div className="text-center p-4 bg-blue-50 rounded-xl border border-blue-200">
+                        <p className="text-sm text-blue-600 font-semibold">Member Since</p>
+                        <p className="text-lg font-bold text-blue-800">{profileData.dateJoined}</p>
+                      </div>
+                      <div className="text-center p-4 bg-green-50 rounded-xl border border-green-200">
+                        <p className="text-sm text-green-600 font-semibold">Account Type</p>
+                        <p className="text-lg font-bold text-green-800">{profileData.accountType}</p>
+                      </div>
+                      <div className="text-center p-4 bg-purple-50 rounded-xl border border-purple-200">
+                        <p className="text-sm text-purple-600 font-semibold">Status</p>
+                        <p className="text-lg font-bold text-purple-800">Active</p>
+                      </div>
+                      <div className="text-center p-4 bg-orange-50 rounded-xl border border-orange-200">
+                        <p className="text-sm text-orange-600 font-semibold">Verification</p>
+                        <p className="text-lg font-bold text-orange-800">Verified</p>
+                      </div>
+                    </motion.div>
                   </div>
                 </div>
-              </div>
-            </CardContent>
-          </Card>
-          </div>
+              </CardContent>
+            </Card>
+          </motion.div>
 
-          {/* Account Stats with Enhanced Design */}
-          <div className={`grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8 transition-all duration-1000 delay-400 ${animateCards ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
-            {accountStats.map((stat, index) => (
-              <Card key={index} className="border-0 shadow-lg hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 bg-gradient-to-br from-white to-gray-50">
-                <CardContent className="p-6">
-                  <div className="flex items-center gap-4">
-                    <div className={`w-12 h-12 lg:w-14 lg:h-14 ${stat.bg} rounded-xl flex items-center justify-center shadow-lg`}>
-                      <stat.icon className={`h-6 w-6 lg:h-7 lg:w-7 ${stat.color}`} />
+          {/* Enhanced Account Information */}
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.5 }}
+          >
+            <Card className="border-0 shadow-2xl bg-gradient-to-br from-white to-gray-50 overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-r from-green-50/30 to-blue-50/30 opacity-50"></div>
+              <CardHeader className="pb-6 relative z-10">
+                <CardTitle className="text-xl flex items-center gap-3">
+                  <motion.div 
+                    className="w-10 h-10 bg-blue-50 rounded-xl flex items-center justify-center shadow-lg"
+                    whileHover={{ scale: 1.1, rotate: 5 }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    <Shield className="h-5 w-5 text-blue-600" />
+                  </motion.div>
+                  Account Information
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="relative z-10">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  <motion.div 
+                    className="space-y-4"
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 0.6, delay: 0.6 }}
+                  >
+                    <div className="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 bg-blue-50 rounded-lg flex items-center justify-center">
+                          <CreditCard className="h-4 w-4 text-blue-600" />
+                        </div>
+                        <div>
+                          <p className="text-sm text-gray-600">Account Number</p>
+                          <p className="font-semibold text-gray-900">{profileData.accountNumber}</p>
+                        </div>
+                      </div>
+                      <motion.button
+                        onClick={copyAccountNumber}
+                        className="p-2 hover:bg-gray-200 rounded-lg transition-colors duration-200"
+                        whileHover={{ scale: 1.1 }}
+                        whileTap={{ scale: 0.9 }}
+                      >
+                        <Copy className="h-4 w-4 text-gray-500" />
+                      </motion.button>
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm lg:text-base text-gray-500 mb-1">{stat.label}</p>
-                      <div className="flex items-center gap-2">
-                        <p className="font-bold text-gray-900 truncate text-base lg:text-lg">{stat.value}</p>
-                        {stat.label === "Wallet Balance" && (
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => setShowBalance(!showBalance)}
-                            className="p-1 h-6 w-6 hover:bg-gray-100 rounded-full"
-                          >
-                            <Eye className="h-3 w-3" />
-                          </Button>
-                        )}
+                    
+                    <div className="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
+                          <Building className="h-4 w-4 text-green-600" />
+                        </div>
+                        <div>
+                          <p className="text-sm text-gray-600">Bank</p>
+                          <p className="font-semibold text-gray-900">{profileData.bank}</p>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+                  </motion.div>
+                  
+                  <motion.div 
+                    className="space-y-4"
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 0.6, delay: 0.7 }}
+                  >
+                    <div className="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">
+                          <User className="h-4 w-4 text-purple-600" />
+                        </div>
+                        <div>
+                          <p className="text-sm text-gray-600">BVN</p>
+                          <p className="font-semibold text-gray-900">{profileData.bvn}</p>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 bg-orange-100 rounded-lg flex items-center justify-center">
+                          <Calendar className="h-4 w-4 text-orange-600" />
+                        </div>
+                        <div>
+                          <p className="text-sm text-gray-600">Account Type</p>
+                          <p className="font-semibold text-gray-900">{profileData.accountType}</p>
+                        </div>
+                      </div>
+                    </div>
+                  </motion.div>
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
 
-          {/* Account Information with Enhanced Design */}
-          <div className={`transition-all duration-1000 delay-600 ${animateCards ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
-            <Card className="mb-8 border-0 shadow-2xl bg-gradient-to-br from-white to-gray-50">
-              <CardHeader className="pb-6">
-                <CardTitle className="text-xl lg:text-2xl flex items-center gap-3">
-                  <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center shadow-lg">
-                    <CreditCard className="h-6 w-6 text-white" />
-                  </div>
-                Account Details
-              </CardTitle>
-            </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex justify-between items-center p-4 lg:p-6 bg-gradient-to-r from-gray-50 to-gray-100 rounded-2xl border border-gray-200">
-                <div>
-                    <p className="text-base lg:text-lg text-gray-600 mb-1">Account Number</p>
-                    <p className="font-bold text-base lg:text-lg">{profileData.accountNumber}</p>
+          {/* Enhanced Personal Information */}
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.8 }}
+          >
+            <Card className="border-0 shadow-2xl bg-gradient-to-br from-white to-gray-50 overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-r from-purple-50/30 to-pink-50/30 opacity-50"></div>
+              <CardHeader className="pb-6 relative z-10">
+                <CardTitle className="text-xl flex items-center gap-3">
+                  <motion.div 
+                    className="w-10 h-10 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg"
+                    whileHover={{ scale: 1.1, rotate: 5 }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    <User className="h-5 w-5 text-white" />
+                  </motion.div>
+                  Personal Information
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="relative z-10">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  <motion.div 
+                    className="space-y-4"
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 0.6, delay: 0.9 }}
+                  >
+                    <div className="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
+                          <Mail className="h-4 w-4 text-blue-600" />
+                        </div>
+                        <div>
+                          <p className="text-sm text-gray-600">Email</p>
+                          <p className="font-semibold text-gray-900">{profileData.email}</p>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
+                          <Phone className="h-4 w-4 text-green-600" />
+                        </div>
+                        <div>
+                          <p className="text-sm text-gray-600">Phone</p>
+                          <p className="font-semibold text-gray-900">{profileData.phone}</p>
+                        </div>
+                      </div>
+                    </div>
+                  </motion.div>
+                  
+                  <motion.div 
+                    className="space-y-4"
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 0.6, delay: 1.0 }}
+                  >
+                    <div className="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 bg-blue-50 rounded-lg flex items-center justify-center">
+                          <MapPin className="h-4 w-4 text-blue-600" />
+                        </div>
+                        <div>
+                          <p className="text-sm text-gray-600">Address</p>
+                          <p className="font-semibold text-gray-900">{profileData.address}</p>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 bg-blue-50 rounded-lg flex items-center justify-center">
+                          <Calendar className="h-4 w-4 text-blue-600" />
+                        </div>
+                        <div>
+                          <p className="text-sm text-gray-600">Joined</p>
+                          <p className="font-semibold text-gray-900">{profileData.dateJoined}</p>
+                        </div>
+                      </div>
+                    </div>
+                  </motion.div>
                 </div>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={copyAccountNumber}
-                    className="rounded-full w-10 h-10 lg:w-12 lg:h-12 p-0 hover:bg-gray-200 transition-all duration-300 hover:scale-110"
-                >
-                    <Copy className="h-5 w-5 lg:h-6 lg:w-6" />
-                </Button>
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="p-4 lg:p-6 bg-gradient-to-r from-gray-50 to-gray-100 rounded-2xl border border-gray-200">
-                    <p className="text-base lg:text-lg text-gray-600 mb-1">Platform</p>
-                    <p className="font-bold text-base lg:text-lg">{profileData.bank}</p>
-                  </div>
-                  <div className="p-4 lg:p-6 bg-gradient-to-r from-gray-50 to-gray-100 rounded-2xl border border-gray-200">
-                    <p className="text-base lg:text-lg text-gray-600 mb-1">Account Type</p>
-                    <p className="font-bold text-base lg:text-lg">{profileData.accountType}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          </div>
+              </CardContent>
+            </Card>
+          </motion.div>
         </div>
 
-        {/* Sidebar with Enhanced Design */}
-        <div className="lg:col-span-1 space-y-6">
-          {/* Quick Actions with Premium Design */}
-          <div className={`transition-all duration-1000 delay-800 ${animateCards ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
-            <Card className="mb-8 border-0 shadow-2xl bg-gradient-to-br from-white to-gray-50 lg:sticky lg:top-8">
-              <CardHeader className="pb-6">
-                <CardTitle className="text-xl lg:text-2xl flex items-center gap-3">
-                  <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center shadow-lg">
-                    <Activity className="h-5 w-5 text-white" />
-                  </div>
+        {/* Enhanced Sidebar */}
+        <div className="lg:col-span-1 space-y-6 hidden lg:block">
+          {/* Enhanced Quick Actions */}
+          <motion.div 
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.6, delay: 0.6 }}
+          >
+            <Card className="border-0 shadow-2xl bg-gradient-to-br from-white to-gray-50 lg:sticky lg:top-8 overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-r from-blue-50/30 to-indigo-50/30 opacity-50"></div>
+              <CardHeader className="pb-6 relative z-10">
+                <CardTitle className="text-xl flex items-center gap-3">
+                  <motion.div 
+                    className="w-10 h-10 bg-blue-50 rounded-xl flex items-center justify-center shadow-lg"
+                    whileHover={{ scale: 1.1 }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    <Settings className="h-5 w-5 text-blue-600" />
+                  </motion.div>
                   Quick Actions
                 </CardTitle>
-            </CardHeader>
-            <CardContent className="p-0">
-              {quickActions.map((item, index) => (
-                <div
-                  key={index}
-                  onClick={item.action}
-                    className="flex items-center justify-between p-6 hover:bg-gray-50 cursor-pointer border-b border-gray-100 last:border-b-0 transition-all duration-300 active:bg-gray-100 group"
-                >
-                  <div className="flex items-center gap-4">
-                      <div className={`w-14 h-14 lg:w-16 lg:h-16 bg-gradient-to-br ${item.gradient} rounded-2xl flex items-center justify-center shadow-lg group-hover:shadow-xl transition-all duration-300 group-hover:scale-110`}>
-                        <item.icon className="h-7 w-7 lg:h-8 lg:w-8 text-white" />
-                    </div>
-                    <div>
-                        <span className="font-bold text-gray-900 block text-base lg:text-lg">{item.label}</span>
-                        <span className="text-base lg:text-lg text-gray-500">{item.subtitle}</span>
+              </CardHeader>
+              <CardContent className="relative z-10">
+                <div className="space-y-4">
+                  {[
+                    { icon: <User className="h-5 w-5" />, title: "Personal Info", action: () => setActiveModal('personal-info') },
+                    { icon: <Settings className="h-5 w-5" />, title: "Account Settings", action: () => setActiveModal('account-settings') },
+                    { icon: <Bell className="h-5 w-5" />, title: "Notifications", action: () => setActiveModal('notifications') },
+                    { icon: <HelpCircle className="h-5 w-5" />, title: "Help & Support", action: () => setActiveModal('help-support') }
+                  ].map((item, index) => (
+                    <motion.div 
+                      key={index}
+                      className="flex items-center justify-between p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors duration-200 cursor-pointer group"
+                      onClick={item.action}
+                      initial={{ opacity: 0, x: 20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ duration: 0.6, delay: 0.7 + index * 0.1 }}
+                      whileHover={{ x: 5 }}
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 bg-blue-50 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform duration-200">
+                          <div className="text-blue-600">
+                            {item.icon}
+                          </div>
+                        </div>
+                        <span className="font-semibold text-gray-900">{item.title}</span>
                       </div>
-                    </div>
-                    <ChevronRight className="h-6 w-6 lg:h-7 lg:w-7 text-gray-400 group-hover:text-blue-600 transition-colors duration-300" />
+                      <ChevronRight className="h-4 w-4 text-gray-400 group-hover:text-gray-600 transition-colors duration-200" />
+                    </motion.div>
+                  ))}
                 </div>
-              ))}
-            </CardContent>
-          </Card>
-          </div>
+              </CardContent>
+            </Card>
+          </motion.div>
 
-          {/* Logout Button with Enhanced Design */}
-          <div className={`transition-all duration-1000 delay-1000 ${animateCards ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
-          <Button
-            onClick={handleLogout}
-            variant="outline"
-              className="w-full h-14 text-red-600 border-red-200 hover:bg-red-50 border-2 rounded-2xl text-lg lg:text-xl font-semibold shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
+          {/* Enhanced Security Status */}
+          <motion.div 
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.6, delay: 0.8 }}
           >
-              <LogOut className="h-5 w-5 lg:h-6 lg:w-6 mr-3" />
-            Logout
-          </Button>
-          </div>
+            <Card className="border-0 shadow-2xl bg-gradient-to-br from-white to-gray-50 overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-r from-green-50/30 to-blue-50/30 opacity-50"></div>
+              <CardHeader className="pb-6 relative z-10">
+                <CardTitle className="text-xl flex items-center gap-3">
+                  <motion.div 
+                    className="w-10 h-10 bg-gradient-to-br from-green-500 to-green-600 rounded-xl flex items-center justify-center shadow-lg"
+                    whileHover={{ scale: 1.1 }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    <Shield className="h-5 w-5 text-white" />
+                  </motion.div>
+                  Security Status
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="relative z-10">
+                <div className="space-y-4">
+                  {[
+                    { icon: <CheckCircle className="h-5 w-5" />, title: "Email Verified", status: "Verified", color: "text-green-600", bgColor: "bg-green-100" },
+                    { icon: <CheckCircle className="h-5 w-5" />, title: "Phone Verified", status: "Verified", color: "text-green-600", bgColor: "bg-green-100" },
+                    { icon: <CheckCircle className="h-5 w-5" />, title: "BVN Verified", status: "Verified", color: "text-green-600", bgColor: "bg-green-100" },
+                    { icon: <Lock className="h-5 w-5" />, title: "2FA Enabled", status: "Active", color: "text-blue-600", bgColor: "bg-blue-100" }
+                  ].map((item, index) => (
+                    <motion.div 
+                      key={index}
+                      className="flex items-center justify-between p-3 rounded-lg"
+                      initial={{ opacity: 0, x: 20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ duration: 0.6, delay: 0.9 + index * 0.1 }}
+                      whileHover={{ x: 5 }}
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className={`w-6 h-6 ${item.bgColor} rounded-lg flex items-center justify-center`}>
+                          <div className={item.color}>
+                            {item.icon}
+                          </div>
+                        </div>
+                        <span className="text-sm font-medium text-gray-900">{item.title}</span>
+                      </div>
+                      <Badge variant="secondary" className={item.color}>
+                        {item.status}
+                      </Badge>
+                    </motion.div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
+
+          {/* Enhanced Logout Button */}
+          <motion.div 
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.6, delay: 1.0 }}
+          >
+            <motion.div
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+            >
+              <Button
+                onClick={handleLogout}
+                variant="outline"
+                className="w-full h-12 border-2 border-red-200 hover:border-red-500 hover:bg-red-50 text-red-600 hover:text-red-700 transition-all duration-300"
+              >
+                <LogOut className="h-5 w-5 mr-2" />
+                Logout
+              </Button>
+            </motion.div>
+          </motion.div>
         </div>
       </div>
+
+      {/* New Premium Features Section */}
+      <motion.div 
+        className="hidden lg:block"
+        initial={{ opacity: 0, y: 30 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.8, delay: 1.1 }}
+      >
+        <h3 className="text-xl font-semibold text-gray-900 mb-6 flex items-center gap-2">
+          <Globe className="h-5 w-5 text-blue-500" />
+          Account Features
+        </h3>
+        <div className="grid grid-cols-3 gap-6">
+          {[
+            { icon: <Shield className="h-6 w-6" />, title: "Bank-Level Security", description: "256-bit encryption protection", color: "from-green-500 to-green-600" },
+            { icon: <Zap className="h-6 w-6" />, title: "Instant Access", description: "24/7 account availability", color: "from-blue-500 to-blue-600" },
+            { icon: <Globe className="h-6 w-6" />, title: "Global Support", description: "Worldwide customer assistance", color: "from-purple-500 to-purple-600" }
+          ].map((feature, index) => (
+            <motion.div
+              key={index}
+              className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100 hover:shadow-xl transition-all duration-300 group"
+              whileHover={{ y: -3 }}
+            >
+              <div className={`w-12 h-12 bg-gradient-to-br ${feature.color} rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300`}>
+                <div className="text-white">
+                  {feature.icon}
+                </div>
+              </div>
+              <h4 className="text-lg font-semibold text-gray-900 mb-2">{feature.title}</h4>
+              <p className="text-sm text-gray-600">{feature.description}</p>
+            </motion.div>
+          ))}
+        </div>
+      </motion.div>
+
+      {/* Enhanced Modals */}
+      <AnimatePresence>
+        {activeModal === 'personal-info' && (
+          <PersonalInfoModal
+            isOpen={activeModal === 'personal-info'}
+            onClose={() => setActiveModal(null)}
+            userData={userData}
+          />
+        )}
+        {activeModal === 'account-settings' && (
+          <AccountSettingsModal
+            isOpen={activeModal === 'account-settings'}
+            onClose={() => setActiveModal(null)}
+          />
+        )}
+        {activeModal === 'notifications' && (
+          <NotificationsModal
+            isOpen={activeModal === 'notifications'}
+            onClose={() => setActiveModal(null)}
+          />
+        )}
+        {activeModal === 'help-support' && (
+          <HelpSupportModal
+            isOpen={activeModal === 'help-support'}
+            onClose={() => setActiveModal(null)}
+          />
+        )}
+      </AnimatePresence>
     </div>
   );
+
+  if (loading) {
+    return (
+      <DesktopLayout>
+        <div className="flex items-center justify-center h-64">
+          <div className="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+        </div>
+      </DesktopLayout>
+    );
+  }
 
   return (
     <DesktopLayout>
       <ProfileContent />
-      {/* Modals */}
-      <PersonalInfoModal 
-        isOpen={activeModal === "personal"} 
-        onClose={() => setActiveModal(null)}
-        profileData={profileData}
-      />
-      <AccountSettingsModal 
-        isOpen={activeModal === "settings"} 
-        onClose={() => setActiveModal(null)}
-      />
-      <NotificationsModal 
-        isOpen={activeModal === "notifications"} 
-        onClose={() => setActiveModal(null)}
-      />
-      <HelpSupportModal 
-        isOpen={activeModal === "help"} 
-        onClose={() => setActiveModal(null)}
-      />
     </DesktopLayout>
   );
 };
