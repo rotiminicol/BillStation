@@ -13,6 +13,8 @@ import { useToast } from "@/hooks/use-toast";
 import { getBankLogo } from "@/lib/bankLogos";
 import { User, Transaction } from "@/types";
 import ViewAllButton from "@/components/ui/view-all-button";
+import { currencyRates, currencySymbols, languages } from "@/lib/utils";
+import { useAuth } from "@/hooks/use-auth";
 
 const Dashboard = () => {
   const [showBalance, setShowBalance] = useState(true);
@@ -20,7 +22,10 @@ const Dashboard = () => {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(true);
   const [animateCards, setAnimateCards] = useState(false);
+  const [showCurrencyDropdown, setShowCurrencyDropdown] = useState(false);
+  const [showLanguageDropdown, setShowLanguageDropdown] = useState(false);
   const { toast } = useToast();
+  const { user } = useAuth();
 
   useEffect(() => {
     const fetchDashboardData = async () => {
@@ -50,6 +55,24 @@ const Dashboard = () => {
     fetchDashboardData();
   }, [toast]);
 
+  // Handle clicking outside language dropdown
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as Element;
+      if (!target.closest('.language-dropdown')) {
+        setShowLanguageDropdown(false);
+      }
+    };
+
+    if (showLanguageDropdown) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [showLanguageDropdown]);
+
   // Updated easy actions with real project pages - limited to 8 items
   const easyActions = [
     { icon: Send, label: "Transfer", href: "/transfer" },
@@ -70,7 +93,7 @@ const Dashboard = () => {
     );
   }
 
-  const userName = userData ? `${userData.firstName || ''} ${userData.lastName || ''}`.trim() || "User" : "User";
+  const userEmail = user?.email || userData?.email || "user@example.com";
   const userBalance = userData?.balance || 100000; // Default to 100k if no balance set
 
   const DashboardContent = () => {
@@ -86,27 +109,98 @@ const Dashboard = () => {
               </span>
             </div>
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">Hello {userName}</h1>
+              <h1 className="text-2xl font-bold text-gray-900">Hello {userEmail}</h1>
               <p className="text-gray-600 text-sm">Send save and receive funds in various currencies.</p>
             </div>
           </div>
           <div className="flex items-center gap-4">
-            <Button 
-              variant="outline" 
-              size="sm" 
-              className="text-[#0B63BC] hover:bg-[#0B63BC]/10 border-[#0B63BC]/30 hover:border-[#0B63BC]/50 shadow-sm hover:shadow-md transition-all duration-200 px-4 py-2"
-            >
-              <ArrowRight className="h-4 w-4 mr-2" />
-              See our rates
-            </Button>
-            <Button 
-              variant="outline" 
-              size="sm" 
-              className="flex items-center gap-2 border-gray-200 hover:border-gray-300 shadow-sm hover:shadow-md transition-all duration-200 px-4 py-2"
-            >
-              English (US)
-              <ChevronDown className="h-4 w-4" />
-            </Button>
+            {/* Currency Rates Dropdown */}
+            <div className="relative">
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="text-[#0B63BC] hover:bg-[#0B63BC]/10 border-[#0B63BC]/30 hover:border-[#0B63BC]/50 shadow-sm hover:shadow-md transition-all duration-200 px-4 py-2"
+                onMouseEnter={() => setShowCurrencyDropdown(true)}
+                onMouseLeave={() => setShowCurrencyDropdown(false)}
+              >
+                See our rates
+              </Button>
+              
+              {/* Currency Dropdown */}
+              <AnimatePresence>
+                {showCurrencyDropdown && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -10, scale: 0.95 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: -10, scale: 0.95 }}
+                    transition={{ duration: 0.2 }}
+                    className="absolute top-full left-0 mt-2 w-80 bg-white rounded-xl shadow-xl border border-gray-200 z-50 overflow-hidden"
+                    onMouseEnter={() => setShowCurrencyDropdown(true)}
+                    onMouseLeave={() => setShowCurrencyDropdown(false)}
+                  >
+                    <div className="p-4">
+                      <h3 className="text-sm font-semibold text-gray-900 mb-3">Currency Exchange Rates</h3>
+                      <div className="space-y-2 max-h-64 overflow-y-auto">
+                        {Object.entries(currencyRates).map(([currency, rate]) => (
+                          <div key={currency} className="flex items-center justify-between py-2 px-3 rounded-lg hover:bg-gray-50 transition-colors">
+                            <div className="flex items-center gap-3">
+                              <span className="text-lg">{currencySymbols[currency as keyof typeof currencySymbols]}</span>
+                              <span className="font-medium text-gray-900">{currency}</span>
+                            </div>
+                            <div className="text-right">
+                              <div className="text-sm font-semibold text-gray-900">₦{rate.toLocaleString()}</div>
+                              <div className="text-xs text-gray-500">1 {currency} = ₦{rate}</div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+
+            {/* Language Dropdown */}
+            <div className="relative language-dropdown">
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="flex items-center gap-2 border-gray-200 hover:border-gray-300 shadow-sm hover:shadow-md transition-all duration-200 px-4 py-2"
+                onClick={() => setShowLanguageDropdown(!showLanguageDropdown)}
+              >
+                English (US)
+                <ChevronDown className="h-4 w-4" />
+              </Button>
+              
+              {/* Language Dropdown */}
+              <AnimatePresence>
+                {showLanguageDropdown && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -10, scale: 0.95 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: -10, scale: 0.95 }}
+                    transition={{ duration: 0.2 }}
+                    className="absolute top-full right-0 mt-2 w-48 bg-white rounded-xl shadow-xl border border-gray-200 z-50"
+                  >
+                    <div className="p-2">
+                      {languages.map((language) => (
+                        <button
+                          key={language.code}
+                          className="w-full flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-50 transition-colors text-left"
+                          onClick={() => {
+                            setShowLanguageDropdown(false);
+                            // Handle language change here
+                          }}
+                        >
+                          <span className="text-lg">{language.flag}</span>
+                          <span className="text-sm font-medium text-gray-900">{language.name}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
           </div>
         </div>
 
@@ -197,8 +291,11 @@ const Dashboard = () => {
                 variant="outline" 
                 size="sm" 
                 className="bg-white text-gray-900 border-white hover:bg-gray-50 hover:border-gray-200 transition-all duration-200"
+                asChild
               >
-                Learn More
+                <Link to="/cards">
+                  Learn More
+                </Link>
               </Button>
             </div>
             <div className="relative flex-shrink-0">

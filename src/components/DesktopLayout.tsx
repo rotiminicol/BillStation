@@ -88,17 +88,15 @@ const DesktopLayout = ({ children }: DesktopLayoutProps) => {
     { icon: User, label: "Profile", href: "/profile" },
   ];
 
-
-
   return (
     <div className="min-h-screen bg-white">
       {/* Desktop Layout */}
       {!isMobile && (
         <div className="flex">
           {/* Enhanced Sidebar */}
-          <div className={`w-64 bg-white border-r border-gray-100 min-h-screen ${animateSidebar ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-8'} transition-all duration-500`}>
-            <div className="p-6 h-full flex flex-col">
-              {/* Logo Section */}
+          <div className={`w-64 bg-white border-r border-gray-100 min-h-screen ${animateSidebar ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-8'} transition-all duration-500 flex flex-col`}>
+            {/* Logo Section - Fixed */}
+            <div className="p-6 flex-shrink-0">
               <div className="flex items-center mb-8">
                 <div className="w-10 h-10 rounded-lg flex items-center justify-center overflow-hidden">
                   <img 
@@ -112,9 +110,11 @@ const DesktopLayout = ({ children }: DesktopLayoutProps) => {
                   <p className="text-xs text-gray-500">Financial Services</p>
                 </div>
               </div>
+            </div>
 
-              {/* Navigation */}
-              <nav className="space-y-6 flex-1">
+            {/* Navigation - Scrollable */}
+            <nav className="flex-1 overflow-y-auto px-6">
+              <div className="space-y-6">
                 {/* Main Navigation */}
                 <div>
                   <div className="flex items-center justify-between mb-3">
@@ -234,21 +234,21 @@ const DesktopLayout = ({ children }: DesktopLayoutProps) => {
                     </div>
                   )}
                 </div>
-              </nav>
+              </div>
+            </nav>
 
-              {/* Bottom Section */}
-              <div className="pt-6 border-t border-gray-100">
-                <div className="space-y-2">
-                  <button
-                    onClick={handleLogout}
-                    className="flex items-center w-full px-4 py-3 rounded-xl text-red-600 hover:bg-gradient-to-r hover:from-red-50 hover:to-red-100 hover:border hover:border-red-200 transition-all duration-200"
-                  >
-                    <div className="p-2 rounded-lg mr-3 bg-red-100 text-red-600">
-                      <LogOut className="h-4 w-4" />
-                    </div>
-                    <span className="font-medium">Logout</span>
-                  </button>
-                </div>
+            {/* Bottom Section - Fixed */}
+            <div className="p-6 flex-shrink-0 border-t border-gray-100">
+              <div className="space-y-2">
+                <button
+                  onClick={handleLogout}
+                  className="flex items-center w-full px-4 py-3 rounded-xl text-red-600 hover:bg-gradient-to-r hover:from-red-50 hover:to-red-100 hover:border hover:border-red-200 transition-all duration-200"
+                >
+                  <div className="p-2 rounded-lg mr-3 bg-red-100 text-red-600">
+                    <LogOut className="h-4 w-4" />
+                  </div>
+                  <span className="font-medium">Logout</span>
+                </button>
               </div>
             </div>
           </div>
