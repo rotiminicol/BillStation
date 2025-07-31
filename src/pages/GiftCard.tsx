@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { Gift, ShoppingBag, Star, ArrowRight, CheckCircle, TrendingUp, Sparkles, Activity, CheckCircle2, ArrowRightCircle } from "lucide-react";
+import { Gift, ShoppingBag, Star, ArrowRight, CheckCircle, TrendingUp, Activity, CheckCircle2, ArrowRightCircle } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -99,13 +99,14 @@ const GiftCard = () => {
     }
 
     setIsProcessing(true);
+    
     try {
       // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 2000));
       
       toast({
-        title: "Gift Card Purchased!",
-        description: `Your ${selectedBrand} gift card has been sent to ${recipient}`,
+        title: "Success!",
+        description: `Gift card purchased successfully for ${recipient}`,
       });
       
       // Reset form
@@ -113,10 +114,11 @@ const GiftCard = () => {
       setAmount("");
       setRecipient("");
       setMessage("");
+      
     } catch (error) {
       toast({
-        title: "Purchase Failed",
-        description: "Failed to purchase gift card. Please try again.",
+        title: "Error",
+        description: "Failed to purchase gift card",
         variant: "destructive"
       });
     } finally {
@@ -125,9 +127,9 @@ const GiftCard = () => {
   };
 
   const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-NG', {
+    return new Intl.NumberFormat('en-US', {
       style: 'currency',
-      currency: 'NGN'
+      currency: 'USD'
     }).format(amount);
   };
 
@@ -144,177 +146,197 @@ const GiftCard = () => {
     }
   };
 
-  return (
-    <DesktopLayout>
-      <div className="flex-1 space-y-6 p-6">
-        {/* Header */}
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900">Gift Cards</h1>
-            <p className="text-gray-600 mt-2">Purchase digital gift cards for your loved ones</p>
-          </div>
-          <ViewAllButton category="gift-card" />
+  const GiftCardContent = () => (
+    <div className="space-y-8">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">Gift Cards</h1>
+          <p className="text-gray-600 mt-1">Purchase and send gift cards to your loved ones</p>
         </div>
+      </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Main Content */}
-          <div className="lg:col-span-2 space-y-6">
-            {/* Brand Selection */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Gift className="h-5 w-5 text-purple-600" />
-                  Select Brand
-                </CardTitle>
-                <CardDescription>Choose from popular gift card brands</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                  {giftCardBrands.map((brand) => (
-                    <div
-                      key={brand.value}
-                      onClick={() => setSelectedBrand(brand.value)}
-                      className={`relative cursor-pointer rounded-xl p-4 border-2 transition-all duration-200 hover:scale-105 ${
+      <div className="lg:grid lg:grid-cols-3 lg:gap-8">
+        {/* Main Content */}
+        <div className="lg:col-span-2 space-y-8">
+          {/* Brand Selection */}
+          <Card className="border-0 shadow-lg bg-white">
+            <CardHeader>
+              <CardTitle className="text-xl font-bold text-gray-900 flex items-center gap-2">
+                <Gift className="h-5 w-5 text-blue-600" />
+                Select Gift Card Brand
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
+                {giftCardBrands.map((brand) => (
+                  <Card
+                    key={brand.value}
+                    className={`cursor-pointer transition-all duration-200 hover:shadow-lg ${
+                      selectedBrand === brand.value
+                        ? "border-blue-500 bg-blue-50"
+                        : "border-gray-200 hover:border-blue-300"
+                    }`}
+                    onClick={() => setSelectedBrand(brand.value)}
+                  >
+                    <CardContent className="p-4 text-center">
+                      <div className={`w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3 ${
                         selectedBrand === brand.value
-                          ? 'border-purple-500 bg-purple-50'
-                          : 'border-gray-200 hover:border-purple-300'
-                      }`}
-                    >
-                      <div className={`w-12 h-12 rounded-full bg-blue-50 flex items-center justify-center mb-3`}>
-                        <brand.icon className="h-6 w-6 text-blue-600" />
+                          ? "bg-blue-600 text-white"
+                          : "bg-gray-100 text-gray-600"
+                      }`}>
+                        <brand.icon className="h-6 w-6" />
                       </div>
-                      <h3 className="font-semibold text-gray-900">{brand.label}</h3>
-                      <Badge variant="secondary" className="mt-2">
+                      <h4 className="font-semibold text-gray-900 mb-1">{brand.label}</h4>
+                      <Badge className="bg-green-100 text-green-800 text-xs">
                         {brand.discount} off
                       </Badge>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
 
-            {/* Purchase Form */}
-            <Card>
+          {/* Purchase Form */}
+          {selectedBrand && (
+            <Card className="border-0 shadow-lg bg-white">
               <CardHeader>
-                <CardTitle>Purchase Details</CardTitle>
-                <CardDescription>Enter gift card details</CardDescription>
+                <CardTitle className="text-xl font-bold text-gray-900">
+                  Purchase Gift Card
+                </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="amount">Amount (₦)</Label>
-                    <Input
-                      id="amount"
-                      type="number"
-                      placeholder="Enter amount"
-                      value={amount}
-                      onChange={(e) => setAmount(e.target.value)}
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="recipient">Recipient Email</Label>
-                    <Input
-                      id="recipient"
-                      type="email"
-                      placeholder="recipient@example.com"
-                      value={recipient}
-                      onChange={(e) => setRecipient(e.target.value)}
-                    />
-                  </div>
+              <CardContent className="space-y-6">
+                <div className="space-y-2">
+                  <Label htmlFor="amount">Amount (USD)</Label>
+                  <Input
+                    id="amount"
+                    type="number"
+                    placeholder="Enter amount"
+                    value={amount}
+                    onChange={(e) => setAmount(e.target.value)}
+                    className="h-12"
+                  />
                 </div>
-                <div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="recipient">Recipient Email</Label>
+                  <Input
+                    id="recipient"
+                    type="email"
+                    placeholder="Enter recipient email"
+                    value={recipient}
+                    onChange={(e) => setRecipient(e.target.value)}
+                    className="h-12"
+                  />
+                </div>
+
+                <div className="space-y-2">
                   <Label htmlFor="message">Personal Message (Optional)</Label>
                   <Input
                     id="message"
-                    placeholder="Add a personal message..."
+                    placeholder="Add a personal message"
                     value={message}
                     onChange={(e) => setMessage(e.target.value)}
+                    className="h-12"
                   />
                 </div>
+
                 <Button
                   onClick={handleGiftCardPurchase}
-                  disabled={isProcessing || !selectedBrand || !amount || !recipient}
-                  className="w-full"
+                  disabled={isProcessing || !amount || !recipient}
+                  className="w-full h-12 bg-blue-600 hover:bg-blue-700 text-lg font-semibold"
                 >
                   {isProcessing ? (
-                    <>
-                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                    <div className="flex items-center gap-2">
+                      <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
                       Processing...
-                    </>
+                    </div>
                   ) : (
-                    <>
-                      <Gift className="h-4 w-4 mr-2" />
+                    <div className="flex items-center gap-2">
+                      <CheckCircle className="h-5 w-5" />
                       Purchase Gift Card
-                    </>
+                    </div>
                   )}
                 </Button>
               </CardContent>
             </Card>
-          </div>
+          )}
+        </div>
 
-          {/* Sidebar */}
-          <div className="space-y-6">
-            {/* Recent Purchases */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Activity className="h-5 w-5 text-blue-600" />
-                  Recent Purchases
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {recentPurchases.map((purchase) => (
-                    <div key={purchase.id} className="flex items-center gap-3 p-3 rounded-lg border">
-                      <Avatar className="h-10 w-10">
-                        <AvatarFallback className="bg-blue-100 text-blue-600">
-                          {purchase.brand[0]}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div className="flex-1">
-                        <p className="font-medium text-gray-900">{purchase.brand}</p>
-                        <p className="text-sm text-gray-500">{purchase.recipient}</p>
-                        <p className="text-sm font-semibold text-gray-900">
-                          {formatCurrency(purchase.amount)}
-                        </p>
+        {/* Sidebar */}
+        <div className="space-y-6">
+          {/* Recent Purchases */}
+          <Card className="border-0 shadow-lg bg-white">
+            <CardHeader>
+              <CardTitle className="text-lg font-bold text-gray-900">Recent Purchases</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {recentPurchases.length === 0 ? (
+                  <div className="text-center py-8">
+                    <Gift className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                    <p className="text-gray-500">No recent purchases</p>
+                  </div>
+                ) : (
+                  recentPurchases.map((purchase) => (
+                    <div key={purchase.id} className="flex items-center justify-between p-3 border border-gray-200 rounded-lg">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                          <Gift className="h-5 w-5 text-blue-600" />
+                        </div>
+                        <div>
+                          <p className="font-medium text-gray-900 text-sm">{purchase.brand}</p>
+                          <p className="text-xs text-gray-500">{purchase.recipient}</p>
+                        </div>
                       </div>
-                      <Badge className={getStatusColor(purchase.status)}>
-                        {purchase.status}
-                      </Badge>
+                      <div className="text-right">
+                        <p className="font-bold text-gray-900 text-sm">{formatCurrency(purchase.amount)}</p>
+                        <Badge className={`mt-1 ${getStatusColor(purchase.status)}`}>
+                          {purchase.status}
+                        </Badge>
+                      </div>
                     </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
+                  ))
+                )}
+              </div>
+            </CardContent>
+          </Card>
 
-            {/* Quick Stats */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <TrendingUp className="h-5 w-5 text-green-600" />
-                  This Month
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <span className="text-gray-600">Total Spent</span>
-                    <span className="font-semibold text-gray-900">₦175,000</span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-gray-600">Cards Purchased</span>
-                    <span className="font-semibold text-gray-900">12</span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-gray-600">Savings</span>
-                    <span className="font-semibold text-green-600">₦15,750</span>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
+          {/* Quick Actions */}
+          <Card className="border-0 shadow-lg bg-white">
+            <CardHeader>
+              <CardTitle className="text-lg font-bold text-gray-900">Quick Actions</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <Button variant="outline" size="sm" asChild className="w-full justify-start">
+                <Link to="/cards" className="flex items-center gap-2">
+                  <ShoppingBag className="h-4 w-4" />
+                  Buy Gift Cards
+                </Link>
+              </Button>
+              <Button variant="outline" size="sm" asChild className="w-full justify-start">
+                <Link to="/transactions" className="flex items-center gap-2">
+                  <Activity className="h-4 w-4" />
+                  View History
+                </Link>
+              </Button>
+              <Button variant="outline" size="sm" asChild className="w-full justify-start">
+                <Link to="/transfer" className="flex items-center gap-2">
+                  <ArrowRight className="h-4 w-4" />
+                  Send Money
+                </Link>
+              </Button>
+            </CardContent>
+          </Card>
         </div>
       </div>
+    </div>
+  );
+
+  return (
+    <DesktopLayout>
+      <GiftCardContent />
     </DesktopLayout>
   );
 };

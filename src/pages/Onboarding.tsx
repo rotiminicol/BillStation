@@ -1,24 +1,20 @@
 
 import { useState } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Link, useNavigate } from "react-router-dom";
-import { Eye, EyeOff, CheckCircle, ArrowLeft, ArrowRight, Shield, CreditCard, Smartphone, Globe, Settings, User, Sparkles, Clock, Zap, Lock, Star, Phone, Briefcase } from "lucide-react";
+import { Eye, EyeOff, User, Phone, MapPin, Briefcase, Shield, CheckCircle, ArrowLeft, ArrowRight } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { motion, AnimatePresence } from "framer-motion";
 import { useToast } from "@/hooks/use-toast";
 
 const Onboarding = () => {
   const [currentStep, setCurrentStep] = useState(1);
-  const [pin, setPin] = useState("");
-  const [confirmPin, setConfirmPin] = useState("");
+  const [loading, setLoading] = useState(false);
   const [showPin, setShowPin] = useState(false);
   const [showConfirmPin, setShowConfirmPin] = useState(false);
-  const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     // Step 1: Personal Information
     fullName: '',
@@ -74,6 +70,7 @@ const Onboarding = () => {
     agreeToMarketing: false,
     agreeToDataProcessing: false
   });
+  
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -81,495 +78,57 @@ const Onboarding = () => {
     {
       title: "Personal Information",
       description: "Basic personal details",
-      icon: <User className="h-8 w-8" />,
-      content: (
-        <motion.div 
-          className="space-y-4"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-        >
-          <motion.div 
-            className="space-y-2"
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.6, delay: 0.1 }}
-          >
-            <Label htmlFor="fullName">Full Name (as on ID)</Label>
-            <Input
-              id="fullName"
-              type="text"
-              placeholder="Enter your full name"
-              value={formData.fullName}
-              onChange={(e) => setFormData(prev => ({ ...prev, fullName: e.target.value }))}
-              required
-              className="h-12 border-2 border-gray-200 focus:border-blue-500 transition-colors duration-300"
-            />
-          </motion.div>
-          <motion.div 
-            className="space-y-2"
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.6, delay: 0.2 }}
-          >
-            <Label htmlFor="dateOfBirth">Date of Birth</Label>
-            <Input
-              id="dateOfBirth"
-              type="date"
-              value={formData.dateOfBirth}
-              onChange={(e) => setFormData(prev => ({ ...prev, dateOfBirth: e.target.value }))}
-              required
-              className="h-12 border-2 border-gray-200 focus:border-blue-500 transition-colors duration-300"
-            />
-          </motion.div>
-          <motion.div 
-            className="space-y-2"
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.6, delay: 0.3 }}
-          >
-            <Label htmlFor="gender">Gender</Label>
-            <Select value={formData.gender} onValueChange={(value) => setFormData(prev => ({ ...prev, gender: value }))}>
-              <SelectTrigger className="h-12 border-2 border-gray-200 focus:border-blue-500 transition-colors duration-300">
-                <SelectValue placeholder="Select gender" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="male">Male</SelectItem>
-                <SelectItem value="female">Female</SelectItem>
-                <SelectItem value="other">Other</SelectItem>
-              </SelectContent>
-            </Select>
-          </motion.div>
-          <motion.div 
-            className="space-y-2"
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.6, delay: 0.4 }}
-          >
-            <Label htmlFor="maritalStatus">Marital Status</Label>
-            <Select value={formData.maritalStatus} onValueChange={(value) => setFormData(prev => ({ ...prev, maritalStatus: value }))}>
-              <SelectTrigger className="h-12 border-2 border-gray-200 focus:border-blue-500 transition-colors duration-300">
-                <SelectValue placeholder="Select marital status" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="single">Single</SelectItem>
-                <SelectItem value="married">Married</SelectItem>
-                <SelectItem value="divorced">Divorced</SelectItem>
-                <SelectItem value="widowed">Widowed</SelectItem>
-              </SelectContent>
-            </Select>
-          </motion.div>
-          <motion.div 
-            className="space-y-2"
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.6, delay: 0.5 }}
-          >
-            <Label htmlFor="nationality">Nationality</Label>
-            <Input
-              id="nationality"
-              type="text"
-              placeholder="Enter your nationality"
-              value={formData.nationality}
-              onChange={(e) => setFormData(prev => ({ ...prev, nationality: e.target.value }))}
-              required
-              className="h-12 border-2 border-gray-200 focus:border-blue-500 transition-colors duration-300"
-            />
-          </motion.div>
-          <motion.div 
-            className="space-y-2"
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.6, delay: 0.6 }}
-          >
-            <Label htmlFor="placeOfBirth">Place of Birth</Label>
-            <Input
-              id="placeOfBirth"
-              type="text"
-              placeholder="City, Country"
-              value={formData.placeOfBirth}
-              onChange={(e) => setFormData(prev => ({ ...prev, placeOfBirth: e.target.value }))}
-              className="h-12 border-2 border-gray-200 focus:border-blue-500 transition-colors duration-300"
-            />
-          </motion.div>
-        </motion.div>
-      )
+      step: 1
     },
     {
-      title: "Identity Verification",
+      title: "Identity Verification", 
       description: "ID documents and verification",
-      icon: <Shield className="h-8 w-8" />,
-      content: (
-        <motion.div 
-          className="space-y-4"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-        >
-          <motion.div 
-            className="space-y-2"
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.6, delay: 0.1 }}
-          >
-            <Label htmlFor="idType">ID Type</Label>
-            <Select value={formData.idType} onValueChange={(value) => setFormData(prev => ({ ...prev, idType: value }))}>
-              <SelectTrigger className="h-12 border-2 border-gray-200 focus:border-blue-500 transition-colors duration-300">
-                <SelectValue placeholder="Select ID type" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="national_id">National ID</SelectItem>
-                <SelectItem value="passport">Passport</SelectItem>
-                <SelectItem value="drivers_license">Driver's License</SelectItem>
-                <SelectItem value="voters_card">Voter's Card</SelectItem>
-                <SelectItem value="nin">NIN</SelectItem>
-              </SelectContent>
-            </Select>
-          </motion.div>
-          <motion.div 
-            className="space-y-2"
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.6, delay: 0.2 }}
-          >
-            <Label htmlFor="idNumber">ID Number</Label>
-            <Input
-              id="idNumber"
-              type="text"
-              placeholder="Enter your ID number"
-              value={formData.idNumber}
-              onChange={(e) => setFormData(prev => ({ ...prev, idNumber: e.target.value }))}
-              required
-              className="h-12 border-2 border-gray-200 focus:border-blue-500 transition-colors duration-300"
-            />
-          </motion.div>
-          <motion.div 
-            className="space-y-2"
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.6, delay: 0.3 }}
-          >
-            <Label htmlFor="idIssuingCountry">Issuing Country</Label>
-            <Input
-              id="idIssuingCountry"
-              type="text"
-              placeholder="Country that issued the ID"
-              value={formData.idIssuingCountry}
-              onChange={(e) => setFormData(prev => ({ ...prev, idIssuingCountry: e.target.value }))}
-              required
-              className="h-12 border-2 border-gray-200 focus:border-blue-500 transition-colors duration-300"
-            />
-          </motion.div>
-          <motion.div 
-            className="space-y-2"
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.6, delay: 0.4 }}
-          >
-            <Label htmlFor="idExpiryDate">ID Expiry Date</Label>
-            <Input
-              id="idExpiryDate"
-              type="date"
-              value={formData.idExpiryDate}
-              onChange={(e) => setFormData(prev => ({ ...prev, idExpiryDate: e.target.value }))}
-              required
-              className="h-12 border-2 border-gray-200 focus:border-blue-500 transition-colors duration-300"
-            />
-          </motion.div>
-          <motion.div 
-            className="p-4 bg-blue-50 rounded-lg border border-blue-200"
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.5 }}
-          >
-            <p className="text-sm text-blue-700">
-              <strong>Important:</strong> Please ensure your ID is valid and not expired. We may require additional verification.
-            </p>
-          </motion.div>
-        </motion.div>
-      )
+      step: 2
     },
     {
       title: "Contact & Address",
       description: "Contact details and address",
-      icon: <Phone className="h-8 w-8" />,
-      content: (
-        <motion.div 
-          className="space-y-4"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-        >
-          <motion.div 
-            className="space-y-2"
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.6, delay: 0.1 }}
-          >
-            <Label htmlFor="phoneNumber">Phone Number</Label>
-            <Input
-              id="phoneNumber"
-              type="tel"
-              placeholder="+234 801 234 5678"
-              value={formData.phoneNumber}
-              onChange={(e) => setFormData(prev => ({ ...prev, phoneNumber: e.target.value }))}
-              required
-              className="h-12 border-2 border-gray-200 focus:border-blue-500 transition-colors duration-300"
-            />
-          </motion.div>
-          <motion.div 
-            className="space-y-2"
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.6, delay: 0.2 }}
-          >
-            <Label htmlFor="email">Email Address</Label>
-            <Input
-              id="email"
-              type="email"
-              placeholder="your.email@example.com"
-              value={formData.email}
-              onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
-              className="h-12 border-2 border-gray-200 focus:border-blue-500 transition-colors duration-300"
-            />
-          </motion.div>
-          <motion.div 
-            className="space-y-2"
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.6, delay: 0.3 }}
-          >
-            <Label htmlFor="address">Residential Address</Label>
-            <Textarea
-              id="address"
-              placeholder="Enter your full residential address"
-              value={formData.address}
-              onChange={(e) => setFormData(prev => ({ ...prev, address: e.target.value }))}
-              className="h-12 border-2 border-gray-200 focus:border-blue-500 transition-colors duration-300"
-              rows={3}
-              required
-            />
-          </motion.div>
-          <motion.div 
-            className="grid grid-cols-2 gap-4"
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.6, delay: 0.4 }}
-          >
-            <div className="space-y-2">
-              <Label htmlFor="city">City</Label>
-              <Input
-                id="city"
-                type="text"
-                placeholder="City"
-                value={formData.city}
-                onChange={(e) => setFormData(prev => ({ ...prev, city: e.target.value }))}
-                required
-                className="h-12 border-2 border-gray-200 focus:border-blue-500 transition-colors duration-300"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="state">State</Label>
-              <Input
-                id="state"
-                type="text"
-                placeholder="State"
-                value={formData.state}
-                onChange={(e) => setFormData(prev => ({ ...prev, state: e.target.value }))}
-                required
-                className="h-12 border-2 border-gray-200 focus:border-blue-500 transition-colors duration-300"
-              />
-            </div>
-          </motion.div>
-          <motion.div 
-            className="grid grid-cols-2 gap-4"
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.6, delay: 0.5 }}
-          >
-            <div className="space-y-2">
-              <Label htmlFor="postalCode">Postal Code</Label>
-              <Input
-                id="postalCode"
-                type="text"
-                placeholder="Postal Code"
-                value={formData.postalCode}
-                onChange={(e) => setFormData(prev => ({ ...prev, postalCode: e.target.value }))}
-                className="h-12 border-2 border-gray-200 focus:border-blue-500 transition-colors duration-300"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="country">Country</Label>
-              <Input
-                id="country"
-                type="text"
-                placeholder="Country"
-                value={formData.country}
-                onChange={(e) => setFormData(prev => ({ ...prev, country: e.target.value }))}
-                required
-                className="h-12 border-2 border-gray-200 focus:border-blue-500 transition-colors duration-300"
-              />
-            </div>
-          </motion.div>
-          <motion.div 
-            className="border-t pt-4"
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.6, delay: 0.6 }}
-          >
-            <h4 className="font-medium text-gray-900 mb-3">Emergency Contact</h4>
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="emergencyContactName">Emergency Contact Name</Label>
-                <Input
-                  id="emergencyContactName"
-                  type="text"
-                  placeholder="Full name of emergency contact"
-                  value={formData.emergencyContactName}
-                  onChange={(e) => setFormData(prev => ({ ...prev, emergencyContactName: e.target.value }))}
-                  className="h-12 border-2 border-gray-200 focus:border-blue-500 transition-colors duration-300"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="emergencyContactPhone">Emergency Contact Phone</Label>
-                <Input
-                  id="emergencyContactPhone"
-                  type="tel"
-                  placeholder="+234 801 234 5678"
-                  value={formData.emergencyContactPhone}
-                  onChange={(e) => setFormData(prev => ({ ...prev, emergencyContactPhone: e.target.value }))}
-                  className="h-12 border-2 border-gray-200 focus:border-blue-500 transition-colors duration-300"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="emergencyContactRelationship">Relationship</Label>
-                <Select value={formData.emergencyContactRelationship} onValueChange={(value) => setFormData(prev => ({ ...prev, emergencyContactRelationship: value }))}>
-                  <SelectTrigger className="h-12 border-2 border-gray-200 focus:border-blue-500 transition-colors duration-300">
-                    <SelectValue placeholder="Select relationship" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="spouse">Spouse</SelectItem>
-                    <SelectItem value="parent">Parent</SelectItem>
-                    <SelectItem value="sibling">Sibling</SelectItem>
-                    <SelectItem value="friend">Friend</SelectItem>
-                    <SelectItem value="other">Other</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-          </motion.div>
-        </motion.div>
-      )
+      step: 3
     },
     {
       title: "Employment & Income",
       description: "Work and income details",
-      icon: <Briefcase className="h-8 w-8" />,
-      content: (
-        <motion.div 
-          className="space-y-4"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-        >
-          <motion.div 
-            className="space-y-4"
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.1 }}
-          >
-            <div className="flex items-start space-x-3">
-              <Checkbox
-                id="terms"
-                checked={formData.agreeToTerms}
-                onCheckedChange={(checked) => setFormData(prev => ({ ...prev, agreeToTerms: checked as boolean }))}
-                className="mt-1"
-              />
-              <div className="space-y-1">
-                <Label htmlFor="terms" className="text-sm font-medium">
-                  I agree to the Terms of Service and Privacy Policy
-                </Label>
-                <p className="text-xs text-gray-500">
-                  By checking this box, you acknowledge that you have read and agree to our terms of service and privacy policy.
-                </p>
-              </div>
-            </div>
-            <div className="flex items-start space-x-3">
-              <Checkbox
-                id="marketing"
-                checked={formData.agreeToMarketing}
-                onCheckedChange={(checked) => setFormData(prev => ({ ...prev, agreeToMarketing: checked as boolean }))}
-                className="mt-1"
-              />
-              <div className="space-y-1">
-                <Label htmlFor="marketing" className="text-sm font-medium">
-                  I agree to receive marketing communications
-                </Label>
-                <p className="text-xs text-gray-500">
-                  Receive updates about new features, promotions, and financial tips. You can unsubscribe anytime.
-                </p>
-              </div>
-            </div>
-          </motion.div>
-          <motion.div 
-            className="p-4 bg-blue-50 rounded-lg border border-blue-200"
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.2 }}
-          >
-            <p className="text-sm text-blue-700">
-              <strong>Your Privacy:</strong> We take your privacy seriously. Your personal information is encrypted and protected by bank-level security.
-            </p>
-          </motion.div>
-        </motion.div>
-      )
+      step: 4
     },
     {
-      title: "Setup Complete!",
-      description: "Your account is ready to use",
-      icon: <CheckCircle className="h-8 w-8" />,
-      content: (
-        <motion.div 
-          className="text-center space-y-6"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-        >
-          <motion.div 
-            className="w-20 h-20 bg-gradient-to-br from-green-600 to-green-700 rounded-full flex items-center justify-center mx-auto shadow-lg"
-            whileHover={{ scale: 1.1, rotate: 5 }}
-            transition={{ duration: 0.2 }}
-          >
-            <CheckCircle className="h-10 w-10 text-white" />
-          </motion.div>
-          <div>
-            <h3 className="text-lg font-semibold mb-2">Welcome to Bill Station!</h3>
-            <p className="text-gray-600">Your account has been successfully created. You can now enjoy all our services.</p>
-          </div>
-          <motion.div 
-            className="bg-green-50 p-4 rounded-lg border border-green-200"
-            whileHover={{ y: -2 }}
-          >
-            <p className="text-sm text-green-700">
-              <strong>Next Steps:</strong> Complete your profile, add funds, and start using our services.
-            </p>
-          </motion.div>
-        </motion.div>
-      )
+      title: "Financial Profile",
+      description: "Banking history and preferences",
+      step: 5
+    },
+    {
+      title: "Security & Terms",
+      description: "PIN, security questions, and agreements",
+      step: 6
     }
   ];
 
   const handleNext = async () => {
     if (currentStep === 6) {
       setLoading(true);
-      setTimeout(() => {
+      try {
+        // Simulate API call
+        await new Promise(resolve => setTimeout(resolve, 2000));
+        
         toast({
-          title: "Account Created!",
+          title: "Account Setup Complete!",
           description: "Welcome to Bill Station. Your account is ready to use.",
         });
-        setLoading(false);
+        
         navigate('/dashboard');
-      }, 2000);
+      } catch (error) {
+        toast({
+          title: "Error",
+          description: "Failed to complete setup. Please try again.",
+          variant: "destructive",
+        });
+      } finally {
+        setLoading(false);
+      }
       return;
     }
 
@@ -620,23 +179,15 @@ const Onboarding = () => {
         return;
       }
     } else if (currentStep === 6) {
-      if (!pin || !confirmPin) {
+      if (formData.pin !== formData.confirmPin) {
         toast({
           title: "Error",
-          description: "Please create and confirm your PIN.",
+          description: "PINs do not match.",
           variant: "destructive"
         });
         return;
       }
-      if (pin !== confirmPin) {
-        toast({
-          title: "Error",
-          description: "PINs do not match. Please try again.",
-          variant: "destructive"
-        });
-        return;
-      }
-      if (pin.length !== 4) {
+      if (formData.pin.length !== 4) {
         toast({
           title: "Error",
           description: "PIN must be exactly 4 digits.",
@@ -661,247 +212,900 @@ const Onboarding = () => {
     setCurrentStep(prev => Math.max(1, prev - 1));
   };
 
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 flex items-center justify-center p-4">
-      <div className="w-full max-w-4xl">
-        <motion.div 
-          className="text-center mb-8"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-        >
-          <motion.div
-            animate={{ rotate: 360 }}
-            transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-            className="inline-block mb-4"
-          >
-            <Sparkles className="h-8 w-8 text-blue-500" />
-          </motion.div>
-          <h1 className="text-3xl font-bold text-gray-900 bg-gradient-to-r from-gray-900 via-blue-900 to-gray-900 bg-clip-text text-transparent">
-            Bill Station
-          </h1>
-          <p className="text-gray-600 mt-2">Complete your account setup</p>
-        </motion.div>
-
-        <div className="lg:grid lg:grid-cols-3 lg:gap-8">
-          {/* Enhanced Main Content */}
-          <div className="lg:col-span-2">
-            <motion.div 
-              className="mb-8"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.2 }}
-            >
-              <Card className="border-0 shadow-2xl bg-gradient-to-br from-white to-gray-50 overflow-hidden">
-                <div className="absolute inset-0 bg-gradient-to-r from-blue-50/30 to-indigo-50/30 opacity-50"></div>
-                <CardHeader className="pb-6 relative z-10">
-                  <div className="flex items-center gap-3 mb-4">
-                    <motion.div 
-                      className="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center shadow-lg"
-                      whileHover={{ scale: 1.1, rotate: 5 }}
-                      transition={{ duration: 0.2 }}
-                    >
-                      {steps[currentStep].icon}
-                    </motion.div>
-                    <div>
-                      <CardTitle className="text-2xl">{steps[currentStep].title}</CardTitle>
-                      <CardDescription className="text-lg">{steps[currentStep].description}</CardDescription>
-                    </div>
+  const renderStepContent = () => {
+    switch (currentStep) {
+      case 1:
+        return (
+          <div className="space-y-6">
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="fullName">Full Name (as on ID)</Label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <User className="h-5 w-5 text-gray-400" />
                   </div>
-                  
-                  {/* Enhanced Progress Bar */}
-                  <div className="w-full bg-gray-200 rounded-full h-2">
-                    <motion.div 
-                      className="bg-gradient-to-r from-blue-500 to-blue-600 h-2 rounded-full"
-                      initial={{ width: 0 }}
-                      animate={{ width: `${(currentStep / 6) * 100}%` }}
-                      transition={{ duration: 0.6, delay: 0.3 }}
+                  <Input
+                    id="fullName"
+                    type="text"
+                    placeholder="Enter your full name"
+                    value={formData.fullName}
+                    onChange={(e) => setFormData(prev => ({ ...prev, fullName: e.target.value }))}
+                    className="pl-10 py-3 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="dateOfBirth">Date of Birth</Label>
+                <Input
+                  id="dateOfBirth"
+                  type="date"
+                  value={formData.dateOfBirth}
+                  onChange={(e) => setFormData(prev => ({ ...prev, dateOfBirth: e.target.value }))}
+                  className="py-3 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                  required
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="gender">Gender</Label>
+                <Select value={formData.gender} onValueChange={(value) => setFormData(prev => ({ ...prev, gender: value }))}>
+                  <SelectTrigger className="py-3 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
+                    <SelectValue placeholder="Select gender" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="male">Male</SelectItem>
+                    <SelectItem value="female">Female</SelectItem>
+                    <SelectItem value="other">Other</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="maritalStatus">Marital Status</Label>
+                <Select value={formData.maritalStatus} onValueChange={(value) => setFormData(prev => ({ ...prev, maritalStatus: value }))}>
+                  <SelectTrigger className="py-3 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
+                    <SelectValue placeholder="Select marital status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="single">Single</SelectItem>
+                    <SelectItem value="married">Married</SelectItem>
+                    <SelectItem value="divorced">Divorced</SelectItem>
+                    <SelectItem value="widowed">Widowed</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="nationality">Nationality</Label>
+                <Input
+                  id="nationality"
+                  type="text"
+                  placeholder="Enter your nationality"
+                  value={formData.nationality}
+                  onChange={(e) => setFormData(prev => ({ ...prev, nationality: e.target.value }))}
+                  className="py-3 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                  required
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="placeOfBirth">Place of Birth</Label>
+                <Input
+                  id="placeOfBirth"
+                  type="text"
+                  placeholder="City, Country"
+                  value={formData.placeOfBirth}
+                  onChange={(e) => setFormData(prev => ({ ...prev, placeOfBirth: e.target.value }))}
+                  className="py-3 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                />
+              </div>
+            </div>
+          </div>
+        );
+
+      case 2:
+        return (
+          <div className="space-y-6">
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="idType">ID Type</Label>
+                <Select value={formData.idType} onValueChange={(value) => setFormData(prev => ({ ...prev, idType: value }))}>
+                  <SelectTrigger className="py-3 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
+                    <SelectValue placeholder="Select ID type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="national_id">National ID</SelectItem>
+                    <SelectItem value="passport">Passport</SelectItem>
+                    <SelectItem value="drivers_license">Driver's License</SelectItem>
+                    <SelectItem value="voters_card">Voter's Card</SelectItem>
+                    <SelectItem value="nin">NIN</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="idNumber">ID Number</Label>
+                <Input
+                  id="idNumber"
+                  type="text"
+                  placeholder="Enter your ID number"
+                  value={formData.idNumber}
+                  onChange={(e) => setFormData(prev => ({ ...prev, idNumber: e.target.value }))}
+                  className="py-3 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                  required
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="idIssuingCountry">Issuing Country</Label>
+                <Input
+                  id="idIssuingCountry"
+                  type="text"
+                  placeholder="Country that issued the ID"
+                  value={formData.idIssuingCountry}
+                  onChange={(e) => setFormData(prev => ({ ...prev, idIssuingCountry: e.target.value }))}
+                  className="py-3 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                  required
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="idExpiryDate">ID Expiry Date</Label>
+                <Input
+                  id="idExpiryDate"
+                  type="date"
+                  value={formData.idExpiryDate}
+                  onChange={(e) => setFormData(prev => ({ ...prev, idExpiryDate: e.target.value }))}
+                  className="py-3 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                  required
+                />
+              </div>
+
+              <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
+                <p className="text-sm text-blue-700">
+                  <strong>Important:</strong> Please ensure your ID is valid and not expired. We may require additional verification.
+                </p>
+              </div>
+            </div>
+          </div>
+        );
+
+      case 3:
+        return (
+          <div className="space-y-6">
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="phoneNumber">Phone Number</Label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <Phone className="h-5 w-5 text-gray-400" />
+                  </div>
+                  <Input
+                    id="phoneNumber"
+                    type="tel"
+                    placeholder="+234 801 234 5678"
+                    value={formData.phoneNumber}
+                    onChange={(e) => setFormData(prev => ({ ...prev, phoneNumber: e.target.value }))}
+                    className="pl-10 py-3 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="email">Email Address</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="your.email@example.com"
+                  value={formData.email}
+                  onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
+                  className="py-3 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="address">Residential Address</Label>
+                <Textarea
+                  id="address"
+                  placeholder="Enter your full residential address"
+                  value={formData.address}
+                  onChange={(e) => setFormData(prev => ({ ...prev, address: e.target.value }))}
+                  className="py-3 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                  rows={3}
+                  required
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="city">City</Label>
+                  <Input
+                    id="city"
+                    type="text"
+                    placeholder="City"
+                    value={formData.city}
+                    onChange={(e) => setFormData(prev => ({ ...prev, city: e.target.value }))}
+                    className="py-3 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="state">State</Label>
+                  <Input
+                    id="state"
+                    type="text"
+                    placeholder="State"
+                    value={formData.state}
+                    onChange={(e) => setFormData(prev => ({ ...prev, state: e.target.value }))}
+                    className="py-3 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="postalCode">Postal Code</Label>
+                  <Input
+                    id="postalCode"
+                    type="text"
+                    placeholder="Postal Code"
+                    value={formData.postalCode}
+                    onChange={(e) => setFormData(prev => ({ ...prev, postalCode: e.target.value }))}
+                    className="py-3 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="country">Country</Label>
+                  <Input
+                    id="country"
+                    type="text"
+                    placeholder="Country"
+                    value={formData.country}
+                    onChange={(e) => setFormData(prev => ({ ...prev, country: e.target.value }))}
+                    className="py-3 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className="border-t pt-4">
+                <h4 className="font-medium text-gray-900 mb-3">Emergency Contact</h4>
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="emergencyContactName">Emergency Contact Name</Label>
+                    <Input
+                      id="emergencyContactName"
+                      type="text"
+                      placeholder="Full name of emergency contact"
+                      value={formData.emergencyContactName}
+                      onChange={(e) => setFormData(prev => ({ ...prev, emergencyContactName: e.target.value }))}
+                      className="py-3 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
                     />
                   </div>
-                  <p className="text-sm text-gray-600 mt-2">
-                    Step {currentStep} of 6
-                  </p>
-                </CardHeader>
-                <CardContent className="relative z-10">
-                  <AnimatePresence mode="wait">
-                    <motion.div
-                      key={currentStep}
-                      initial={{ opacity: 0, x: 20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      exit={{ opacity: 0, x: -20 }}
-                      transition={{ duration: 0.3 }}
-                    >
-                      {steps[currentStep].content}
-                    </motion.div>
-                  </AnimatePresence>
-                </CardContent>
-              </Card>
-            </motion.div>
+                  <div className="space-y-2">
+                    <Label htmlFor="emergencyContactPhone">Emergency Contact Phone</Label>
+                    <Input
+                      id="emergencyContactPhone"
+                      type="tel"
+                      placeholder="+234 801 234 5678"
+                      value={formData.emergencyContactPhone}
+                      onChange={(e) => setFormData(prev => ({ ...prev, emergencyContactPhone: e.target.value }))}
+                      className="py-3 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="emergencyContactRelationship">Relationship</Label>
+                    <Select value={formData.emergencyContactRelationship} onValueChange={(value) => setFormData(prev => ({ ...prev, emergencyContactRelationship: value }))}>
+                      <SelectTrigger className="py-3 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
+                        <SelectValue placeholder="Select relationship" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="spouse">Spouse</SelectItem>
+                        <SelectItem value="parent">Parent</SelectItem>
+                        <SelectItem value="sibling">Sibling</SelectItem>
+                        <SelectItem value="friend">Friend</SelectItem>
+                        <SelectItem value="other">Other</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        );
 
-            {/* Enhanced Navigation Buttons */}
-            <motion.div 
-              className="flex justify-between"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.4 }}
-            >
-              <motion.div
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-              >
+      case 4:
+        return (
+          <div className="space-y-6">
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="occupation">Occupation</Label>
+                <Input
+                  id="occupation"
+                  type="text"
+                  placeholder="e.g., Software Engineer, Business Owner"
+                  value={formData.occupation}
+                  onChange={(e) => setFormData(prev => ({ ...prev, occupation: e.target.value }))}
+                  className="py-3 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                  required
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="employerName">Employer Name</Label>
+                <Input
+                  id="employerName"
+                  type="text"
+                  placeholder="Company or organization name"
+                  value={formData.employerName}
+                  onChange={(e) => setFormData(prev => ({ ...prev, employerName: e.target.value }))}
+                  className="py-3 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                  required
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="employerAddress">Employer Address</Label>
+                <Textarea
+                  id="employerAddress"
+                  placeholder="Employer's address"
+                  value={formData.employerAddress}
+                  onChange={(e) => setFormData(prev => ({ ...prev, employerAddress: e.target.value }))}
+                  className="py-3 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                  rows={2}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="employmentType">Employment Type</Label>
+                <Select value={formData.employmentType} onValueChange={(value) => setFormData(prev => ({ ...prev, employmentType: value }))}>
+                  <SelectTrigger className="py-3 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
+                    <SelectValue placeholder="Select employment type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="full_time">Full-time</SelectItem>
+                    <SelectItem value="part_time">Part-time</SelectItem>
+                    <SelectItem value="contract">Contract</SelectItem>
+                    <SelectItem value="self_employed">Self-employed</SelectItem>
+                    <SelectItem value="unemployed">Unemployed</SelectItem>
+                    <SelectItem value="student">Student</SelectItem>
+                    <SelectItem value="retired">Retired</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="monthlyIncome">Monthly Income</Label>
+                <Select value={formData.monthlyIncome} onValueChange={(value) => setFormData(prev => ({ ...prev, monthlyIncome: value }))}>
+                  <SelectTrigger className="py-3 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
+                    <SelectValue placeholder="Select income range" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="under_100k">Under ₦100,000</SelectItem>
+                    <SelectItem value="100k_300k">₦100,000 - ₦300,000</SelectItem>
+                    <SelectItem value="300k_500k">₦300,000 - ₦500,000</SelectItem>
+                    <SelectItem value="500k_1m">₦500,000 - ₦1,000,000</SelectItem>
+                    <SelectItem value="1m_2m">₦1,000,000 - ₦2,000,000</SelectItem>
+                    <SelectItem value="over_2m">Over ₦2,000,000</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="sourceOfFunds">Primary Source of Funds</Label>
+                <Select value={formData.sourceOfFunds} onValueChange={(value) => setFormData(prev => ({ ...prev, sourceOfFunds: value }))}>
+                  <SelectTrigger className="py-3 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
+                    <SelectValue placeholder="Select source of funds" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="salary">Salary/Wages</SelectItem>
+                    <SelectItem value="business">Business Income</SelectItem>
+                    <SelectItem value="investment">Investment Returns</SelectItem>
+                    <SelectItem value="inheritance">Inheritance</SelectItem>
+                    <SelectItem value="gift">Gift</SelectItem>
+                    <SelectItem value="other">Other</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="additionalIncome">Additional Income Sources</Label>
+                <Textarea
+                  id="additionalIncome"
+                  placeholder="Describe any additional income sources"
+                  value={formData.additionalIncome}
+                  onChange={(e) => setFormData(prev => ({ ...prev, additionalIncome: e.target.value }))}
+                  className="py-3 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                  rows={2}
+                />
+              </div>
+            </div>
+          </div>
+        );
+
+      case 5:
+        return (
+          <div className="space-y-6">
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="bankAccountHistory">Do you have existing bank accounts?</Label>
+                <Select value={formData.bankAccountHistory} onValueChange={(value) => setFormData(prev => ({ ...prev, bankAccountHistory: value }))}>
+                  <SelectTrigger className="py-3 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
+                    <SelectValue placeholder="Select option" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="yes_current">Yes, I have current accounts</SelectItem>
+                    <SelectItem value="yes_savings">Yes, I have savings accounts</SelectItem>
+                    <SelectItem value="yes_both">Yes, I have both current and savings</SelectItem>
+                    <SelectItem value="no">No, this is my first bank account</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="creditHistory">Credit History</Label>
+                <Select value={formData.creditHistory} onValueChange={(value) => setFormData(prev => ({ ...prev, creditHistory: value }))}>
+                  <SelectTrigger className="py-3 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
+                    <SelectValue placeholder="Select your credit history" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="excellent">Excellent (No late payments)</SelectItem>
+                    <SelectItem value="good">Good (1-2 late payments)</SelectItem>
+                    <SelectItem value="fair">Fair (3-5 late payments)</SelectItem>
+                    <SelectItem value="poor">Poor (Many late payments)</SelectItem>
+                    <SelectItem value="no_history">No credit history</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="investmentExperience">Investment Experience</Label>
+                <Select value={formData.investmentExperience} onValueChange={(value) => setFormData(prev => ({ ...prev, investmentExperience: value }))}>
+                  <SelectTrigger className="py-3 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
+                    <SelectValue placeholder="Select your experience level" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">No experience</SelectItem>
+                    <SelectItem value="beginner">Beginner (1-2 years)</SelectItem>
+                    <SelectItem value="intermediate">Intermediate (3-5 years)</SelectItem>
+                    <SelectItem value="advanced">Advanced (5+ years)</SelectItem>
+                    <SelectItem value="professional">Professional</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="riskTolerance">Risk Tolerance</Label>
+                <Select value={formData.riskTolerance} onValueChange={(value) => setFormData(prev => ({ ...prev, riskTolerance: value }))}>
+                  <SelectTrigger className="py-3 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
+                    <SelectValue placeholder="Select your risk tolerance" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="conservative">Conservative (Low risk)</SelectItem>
+                    <SelectItem value="moderate">Moderate (Balanced risk)</SelectItem>
+                    <SelectItem value="aggressive">Aggressive (High risk)</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="expectedMonthlyTransactions">Expected Monthly Transactions</Label>
+                <Select value={formData.expectedMonthlyTransactions} onValueChange={(value) => setFormData(prev => ({ ...prev, expectedMonthlyTransactions: value }))}>
+                  <SelectTrigger className="py-3 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
+                    <SelectValue placeholder="Select expected volume" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="under_10">Under 10 transactions</SelectItem>
+                    <SelectItem value="10_30">10-30 transactions</SelectItem>
+                    <SelectItem value="30_50">30-50 transactions</SelectItem>
+                    <SelectItem value="over_50">Over 50 transactions</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="purposeOfAccount">Primary Purpose of Account</Label>
+                <Select value={formData.purposeOfAccount} onValueChange={(value) => setFormData(prev => ({ ...prev, purposeOfAccount: value }))}>
+                  <SelectTrigger className="py-3 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
+                    <SelectValue placeholder="Select primary purpose" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="personal">Personal banking</SelectItem>
+                    <SelectItem value="business">Business banking</SelectItem>
+                    <SelectItem value="savings">Savings and investment</SelectItem>
+                    <SelectItem value="salary">Salary account</SelectItem>
+                    <SelectItem value="student">Student account</SelectItem>
+                    <SelectItem value="other">Other</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          </div>
+        );
+
+      case 6:
+        return (
+          <div className="space-y-6">
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="pin">Create 4-Digit PIN</Label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <Shield className="h-5 w-5 text-gray-400" />
+                  </div>
+                  <Input
+                    id="pin"
+                    type={showPin ? "text" : "password"}
+                    placeholder="Enter 4-digit PIN"
+                    value={formData.pin}
+                    onChange={(e) => setFormData(prev => ({ ...prev, pin: e.target.value }))}
+                    maxLength={4}
+                    className="pl-10 pr-12 py-3 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                    required
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPin(!showPin)}
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                  >
+                    {showPin ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                  </button>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="confirmPin">Confirm PIN</Label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <Shield className="h-5 w-5 text-gray-400" />
+                  </div>
+                  <Input
+                    id="confirmPin"
+                    type={showConfirmPin ? "text" : "password"}
+                    placeholder="Confirm your PIN"
+                    value={formData.confirmPin}
+                    onChange={(e) => setFormData(prev => ({ ...prev, confirmPin: e.target.value }))}
+                    maxLength={4}
+                    className="pl-10 pr-12 py-3 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                    required
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirmPin(!showConfirmPin)}
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                  >
+                    {showConfirmPin ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                  </button>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="securityQuestion1">Security Question 1</Label>
+                <Select value={formData.securityQuestion1} onValueChange={(value) => setFormData(prev => ({ ...prev, securityQuestion1: value }))}>
+                  <SelectTrigger className="py-3 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
+                    <SelectValue placeholder="Select a security question" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="first_pet">What was the name of your first pet?</SelectItem>
+                    <SelectItem value="birth_city">In which city were you born?</SelectItem>
+                    <SelectItem value="mother_maiden">What is your mother's maiden name?</SelectItem>
+                    <SelectItem value="favorite_teacher">What was the name of your favorite teacher?</SelectItem>
+                    <SelectItem value="first_car">What was your first car model?</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="securityAnswer1">Security Answer 1</Label>
+                <Input
+                  id="securityAnswer1"
+                  type="text"
+                  placeholder="Enter your answer"
+                  value={formData.securityAnswer1}
+                  onChange={(e) => setFormData(prev => ({ ...prev, securityAnswer1: e.target.value }))}
+                  className="py-3 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="securityQuestion2">Security Question 2</Label>
+                <Select value={formData.securityQuestion2} onValueChange={(value) => setFormData(prev => ({ ...prev, securityQuestion2: value }))}>
+                  <SelectTrigger className="py-3 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
+                    <SelectValue placeholder="Select a security question" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="favorite_color">What is your favorite color?</SelectItem>
+                    <SelectItem value="high_school">What high school did you attend?</SelectItem>
+                    <SelectItem value="dream_job">What was your dream job as a child?</SelectItem>
+                    <SelectItem value="favorite_food">What is your favorite food?</SelectItem>
+                    <SelectItem value="vacation_spot">What is your favorite vacation spot?</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="securityAnswer2">Security Answer 2</Label>
+                <Input
+                  id="securityAnswer2"
+                  type="text"
+                  placeholder="Enter your answer"
+                  value={formData.securityAnswer2}
+                  onChange={(e) => setFormData(prev => ({ ...prev, securityAnswer2: e.target.value }))}
+                  className="py-3 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                />
+              </div>
+
+              <div className="p-4 bg-yellow-50 rounded-lg border border-yellow-200">
+                <p className="text-sm text-yellow-800">
+                  <strong>Security Tip:</strong> Choose a PIN that's easy to remember but hard to guess. Never share your PIN or security answers with anyone.
+                </p>
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              <div className="flex items-start space-x-3">
+                <Checkbox
+                  id="terms"
+                  checked={formData.agreeToTerms}
+                  onCheckedChange={(checked) => setFormData(prev => ({ ...prev, agreeToTerms: checked as boolean }))}
+                  className="mt-1"
+                />
+                <div className="space-y-1">
+                  <Label htmlFor="terms" className="text-sm font-medium">
+                    I agree to the Terms of Service and Privacy Policy
+                  </Label>
+                  <p className="text-xs text-gray-500">
+                    By checking this box, you acknowledge that you have read and agree to our terms of service and privacy policy.
+                  </p>
+                </div>
+              </div>
+              
+              <div className="flex items-start space-x-3">
+                <Checkbox
+                  id="marketing"
+                  checked={formData.agreeToMarketing}
+                  onCheckedChange={(checked) => setFormData(prev => ({ ...prev, agreeToMarketing: checked as boolean }))}
+                  className="mt-1"
+                />
+                <div className="space-y-1">
+                  <Label htmlFor="marketing" className="text-sm font-medium">
+                    I agree to receive marketing communications
+                  </Label>
+                  <p className="text-xs text-gray-500">
+                    Receive updates about new features, promotions, and financial tips. You can unsubscribe anytime.
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-start space-x-3">
+                <Checkbox
+                  id="dataProcessing"
+                  checked={formData.agreeToDataProcessing}
+                  onCheckedChange={(checked) => setFormData(prev => ({ ...prev, agreeToDataProcessing: checked as boolean }))}
+                  className="mt-1"
+                />
+                <div className="space-y-1">
+                  <Label htmlFor="dataProcessing" className="text-sm font-medium">
+                    I consent to data processing for account verification
+                  </Label>
+                  <p className="text-xs text-gray-500">
+                    We may process your data for identity verification and regulatory compliance purposes.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
+              <p className="text-sm text-blue-700">
+                <strong>Your Privacy:</strong> We take your privacy seriously. Your personal information is encrypted and protected by bank-level security.
+              </p>
+            </div>
+          </div>
+        );
+
+      default:
+        return null;
+    }
+  };
+
+  return (
+    <div className="h-screen bg-gradient-to-br from-[#0B63BC]/10 via-white to-indigo-50 overflow-hidden">
+      {/* Desktop Layout */}
+      <div className="hidden lg:flex h-screen">
+        {/* Left Side - Form (Scrollable) */}
+                  <div className="w-1/2 bg-gradient-to-br from-gray-50 via-white to-[#0B63BC]/10 overflow-y-auto">
+          <div className="min-h-screen flex flex-col p-8">
+            {/* Header */}
+            <div className="text-center mb-8">
+              <div className="flex justify-center mb-4">
+                <img 
+                  src="/logo.png" 
+                  alt="Bill Station Logo" 
+                  className="w-16 h-16 object-contain"
+                />
+              </div>
+              <h1 className="text-3xl font-bold text-gray-900 mb-2">Complete Your Profile</h1>
+              <p className="text-gray-600">Step {currentStep} of 6</p>
+            </div>
+
+            {/* Progress Bar */}
+            <div className="max-w-2xl mx-auto mb-8">
+              <div className="w-full bg-gray-200 rounded-full h-2">
+                <div 
+                  className="bg-[#0B63BC] h-2 rounded-full transition-all duration-300"
+                  style={{ width: `${(currentStep / 6) * 100}%` }}
+                />
+              </div>
+            </div>
+
+            {/* Main Content */}
+            <div className="flex-1">
+              <div className="bg-white rounded-2xl shadow-xl p-8">
+                {/* Step Header */}
+                <div className="mb-8">
+                  <h2 className="text-2xl font-bold text-gray-900 mb-2">
+                    {steps[currentStep - 1].title}
+                  </h2>
+                  <p className="text-gray-600">
+                    {steps[currentStep - 1].description}
+                  </p>
+                </div>
+
+                {/* Step Content */}
+                <div className="mb-8">
+                  {renderStepContent()}
+                </div>
+
+                {/* Navigation */}
+                <div className="flex justify-between items-center pt-6 border-t border-gray-200">
+                  <Button
+                    variant="outline"
+                    onClick={handleBack}
+                    disabled={currentStep === 1}
+                    className="px-6 py-3"
+                  >
+                    <ArrowLeft className="h-5 w-5 mr-2" />
+                    Back
+                  </Button>
+                  
+                  <Button
+                    onClick={handleNext}
+                    disabled={loading}
+                    className="px-6 py-3 bg-[#0B63BC] hover:bg-[#0B63BC]/90"
+                  >
+                    {loading ? (
+                      <div className="flex items-center">
+                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
+                        <span>Setting up...</span>
+                      </div>
+                    ) : currentStep === 6 ? (
+                      <div className="flex items-center">
+                        <CheckCircle className="w-4 h-4 mr-2" />
+                        <span>Complete Setup</span>
+                      </div>
+                    ) : (
+                      <div className="flex items-center">
+                        <span>Next</span>
+                        <ArrowRight className="h-5 w-5 ml-2" />
+                      </div>
+                    )}
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Right Side - Image */}
+        <div className="w-1/2 relative overflow-hidden">
+          <img
+            src="/money2.jpg"
+            alt="Financial Services"
+            className="w-full h-full object-cover"
+          />
+          <div className="absolute inset-0 bg-gradient-to-r from-[#0B63BC]/80 to-purple-900/40"></div>
+          <div className="absolute inset-0 bg-black/20"></div>
+        </div>
+      </div>
+
+      {/* Mobile Layout */}
+      <div className="lg:hidden h-screen relative overflow-hidden">
+        {/* Background Image */}
+        <div className="absolute inset-0">
+          <img
+            src="/money2.jpg"
+            alt="Financial Services"
+            className="w-full h-full object-cover"
+          />
+          <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/30 to-black/40"></div>
+        </div>
+
+        {/* White Fading Overlay */}
+        <div className="absolute inset-0 bg-gradient-to-b from-white/95 via-white/90 to-white/95"></div>
+
+        {/* Mobile Form Content */}
+        <div className="relative z-10 h-screen p-6 flex flex-col">
+          {/* Header */}
+          <div className="text-center mb-6">
+            <div className="flex justify-center mb-4">
+              <img 
+                src="/logo.png" 
+                alt="Bill Station Logo" 
+                className="w-12 h-12 object-contain"
+              />
+            </div>
+            <h1 className="text-2xl font-bold text-gray-900 mb-2">Complete Your Profile</h1>
+            <p className="text-gray-600 text-sm">Step {currentStep} of 6</p>
+          </div>
+
+          {/* Progress Bar */}
+          <div className="mb-6">
+            <div className="w-full bg-gray-200 rounded-full h-2">
+              <div 
+                className="bg-[#0B63BC] h-2 rounded-full transition-all duration-300"
+                style={{ width: `${(currentStep / 6) * 100}%` }}
+              />
+            </div>
+          </div>
+
+          {/* Mobile Form */}
+          <div className="flex-1 overflow-y-auto">
+            <div className="bg-white rounded-2xl shadow-xl p-6">
+              {/* Step Header */}
+              <div className="mb-6">
+                <h2 className="text-xl font-bold text-gray-900 mb-2">
+                  {steps[currentStep - 1].title}
+                </h2>
+                <p className="text-gray-600 text-sm">
+                  {steps[currentStep - 1].description}
+                </p>
+              </div>
+
+              {/* Step Content */}
+              <div className="mb-6">
+                {renderStepContent()}
+              </div>
+
+              {/* Navigation */}
+              <div className="flex justify-between items-center pt-4 border-t border-gray-200">
                 <Button
                   variant="outline"
                   onClick={handleBack}
-                  disabled={currentStep === 0}
-                  className="h-12 px-6 border-2 hover:border-blue-500 hover:bg-blue-50 transition-all duration-300"
+                  disabled={currentStep === 1}
+                  className="px-4 py-2 text-sm"
                 >
-                  <ArrowLeft className="h-5 w-5 mr-2" />
+                  <ArrowLeft className="h-4 w-4 mr-1" />
                   Back
                 </Button>
-              </motion.div>
-              
-              <motion.div
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-              >
+                
                 <Button
                   onClick={handleNext}
                   disabled={loading}
-                  className="h-12 px-6 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 shadow-lg hover:shadow-xl transition-all duration-300"
+                  className="px-4 py-2 bg-[#0B63BC] hover:bg-[#0B63BC]/90 text-sm"
                 >
                   {loading ? (
-                    <div className="flex items-center gap-2">
-                      <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                      Creating Account...
+                    <div className="flex items-center">
+                      <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin mr-1"></div>
+                      <span>Setting up...</span>
+                    </div>
+                  ) : currentStep === 6 ? (
+                    <div className="flex items-center">
+                      <CheckCircle className="w-3 h-3 mr-1" />
+                      <span>Complete</span>
                     </div>
                   ) : (
-                    <div className="flex items-center gap-2">
-                      {currentStep === 6 ? (
-                        <>
-                          <CheckCircle className="h-5 w-5" />
-                          Complete Setup
-                        </>
-                      ) : (
-                        <>
-                          Next
-                          <ArrowRight className="h-5 w-5" />
-                        </>
-                      )}
+                    <div className="flex items-center">
+                      <span>Next</span>
+                      <ArrowRight className="h-4 w-4 ml-1" />
                     </div>
                   )}
                 </Button>
-              </motion.div>
-            </motion.div>
-          </div>
-
-          {/* Enhanced Sidebar */}
-          <div className="lg:col-span-1 space-y-6 hidden lg:block">
-            {/* Enhanced Features */}
-            <motion.div 
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.6, delay: 0.6 }}
-            >
-              <Card className="border-0 shadow-2xl bg-gradient-to-br from-white to-gray-50 lg:sticky lg:top-8 overflow-hidden">
-                <div className="absolute inset-0 bg-gradient-to-r from-green-50/30 to-blue-50/30 opacity-50"></div>
-                <CardHeader className="pb-6 relative z-10">
-                  <CardTitle className="text-xl flex items-center gap-3">
-                    <motion.div 
-                      className="w-10 h-10 bg-gradient-to-br from-green-500 to-green-600 rounded-xl flex items-center justify-center shadow-lg"
-                      whileHover={{ scale: 1.1 }}
-                      transition={{ duration: 0.2 }}
-                    >
-                      <Star className="h-5 w-5 text-white" />
-                    </motion.div>
-                    Features
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="relative z-10">
-                  <div className="space-y-4">
-                    {[
-                      { icon: <Shield className="h-5 w-5" />, title: "Bank-Level Security", description: "256-bit encryption" },
-                      { icon: <Zap className="h-5 w-5" />, title: "Instant Setup", description: "Ready in minutes" },
-                      { icon: <Globe className="h-5 w-5" />, title: "Global Access", description: "Use anywhere" }
-                    ].map((feature, index) => (
-                      <motion.div 
-                        key={index}
-                        className="flex items-start gap-3"
-                        initial={{ opacity: 0, x: 20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ duration: 0.6, delay: 0.7 + index * 0.1 }}
-                        whileHover={{ x: 5 }}
-                      >
-                        <div className="p-1 bg-green-100 rounded-lg">
-                          <div className="text-green-600">
-                            {feature.icon}
-                          </div>
-                        </div>
-                        <div>
-                          <p className="font-semibold text-gray-900">{feature.title}</p>
-                          <p className="text-sm text-gray-600">{feature.description}</p>
-                        </div>
-                      </motion.div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            </motion.div>
-
-            {/* Enhanced Progress */}
-            <motion.div 
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.6, delay: 0.8 }}
-            >
-              <Card className="border-0 shadow-2xl bg-gradient-to-br from-white to-gray-50 overflow-hidden">
-                <div className="absolute inset-0 bg-gradient-to-r from-blue-50/30 to-purple-50/30 opacity-50"></div>
-                <CardHeader className="pb-6 relative z-10">
-                  <CardTitle className="text-xl flex items-center gap-3">
-                    <motion.div 
-                      className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center shadow-lg"
-                      whileHover={{ scale: 1.1 }}
-                      transition={{ duration: 0.2 }}
-                    >
-                      <Clock className="h-5 w-5 text-white" />
-                    </motion.div>
-                    Progress
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="relative z-10">
-                  <div className="space-y-4">
-                    {steps.map((step, index) => (
-                      <motion.div 
-                        key={index}
-                        className={`flex items-center gap-3 py-2 px-3 rounded-lg transition-colors duration-200 ${
-                          index <= currentStep ? 'bg-blue-50 border border-blue-200' : 'bg-gray-50'
-                        }`}
-                        initial={{ opacity: 0, x: 20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ duration: 0.6, delay: 0.9 + index * 0.1 }}
-                        whileHover={{ x: 5 }}
-                      >
-                        <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-semibold ${
-                          index < currentStep 
-                            ? 'bg-green-500 text-white' 
-                            : index === currentStep 
-                            ? 'bg-blue-500 text-white' 
-                            : 'bg-gray-300 text-gray-600'
-                        }`}>
-                          {index < currentStep ? <CheckCircle className="h-3 w-3" /> : index + 1}
-                        </div>
-                        <div>
-                          <p className={`text-sm font-semibold ${
-                            index <= currentStep ? 'text-gray-900' : 'text-gray-500'
-                          }`}>
-                            {step.title}
-                          </p>
-                        </div>
-                      </motion.div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            </motion.div>
+              </div>
+            </div>
           </div>
         </div>
       </div>

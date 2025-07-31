@@ -1,13 +1,12 @@
 import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
-import { ArrowLeft, ArrowUpRight, ArrowDownLeft, CreditCard, Building2, Plane, Gift, RefreshCw, Copy, Download, Share2, CheckCircle, Clock, XCircle, TrendingUp } from "lucide-react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { ArrowLeft, ArrowUpRight, ArrowDownLeft, CreditCard, Building2, Plane, Gift, RefreshCw, Copy, Download, Share2, CheckCircle, Clock, XCircle } from "lucide-react";
+import DesktopLayout from "@/components/DesktopLayout";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useToast } from "@/hooks/use-toast";
-import DesktopLayout from "@/components/DesktopLayout";
-import Navigation from "@/components/Navigation";
+import Loader from "@/components/Loader";
 
 interface TransactionDetails {
   id: string;
@@ -34,6 +33,7 @@ interface TransactionDetails {
 
 const TransactionDetails = () => {
   const { id } = useParams<{ id: string }>();
+  const [loading, setLoading] = useState(true);
   const [transaction, setTransaction] = useState<TransactionDetails | null>(null);
   const { toast } = useToast();
 
@@ -41,7 +41,7 @@ const TransactionDetails = () => {
     const fetchTransactionDetails = async () => {
       try {
         // Simulate API call
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        await new Promise(resolve => setTimeout(resolve, 1500));
         
         // Mock transaction details data
         const mockTransaction: TransactionDetails = {
@@ -74,6 +74,8 @@ const TransactionDetails = () => {
           description: "Failed to load transaction details",
           variant: "destructive"
         });
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -81,9 +83,11 @@ const TransactionDetails = () => {
   }, [id, toast]);
 
   const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-NG', {
+    return new Intl.NumberFormat('en-US', {
       style: 'currency',
-      currency: 'NGN'
+      currency: 'USD',
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
     }).format(amount);
   };
 
@@ -120,9 +124,9 @@ const TransactionDetails = () => {
       case 'bills':
         return Building2;
       case 'airtime':
-        return CreditCard;
+        return RefreshCw;
       case 'crypto':
-        return TrendingUp;
+        return CreditCard;
       case 'flight':
         return Plane;
       case 'gift-card':
@@ -139,23 +143,23 @@ const TransactionDetails = () => {
   const getCategoryColor = (category: string) => {
     switch (category) {
       case 'transfer':
-        return 'text-blue-600';
+        return 'bg-[#0B63BC]/10 text-[#0B63BC]';
       case 'bills':
-        return 'text-green-600';
+        return 'bg-yellow-100 text-yellow-600';
       case 'airtime':
-        return 'text-purple-600';
+        return 'bg-purple-100 text-purple-600';
       case 'crypto':
-        return 'text-orange-600';
+        return 'bg-orange-100 text-orange-600';
       case 'flight':
-        return 'text-indigo-600';
+        return 'bg-blue-100 text-blue-600';
       case 'gift-card':
-        return 'text-pink-600';
+        return 'bg-pink-100 text-pink-600';
       case 'hotel':
-        return 'text-teal-600';
+        return 'bg-indigo-100 text-indigo-600';
       case 'chauffeur':
-        return 'text-cyan-600';
+        return 'bg-green-100 text-green-600';
       default:
-        return 'text-gray-600';
+        return 'bg-gray-100 text-gray-600';
     }
   };
 
@@ -169,25 +173,38 @@ const TransactionDetails = () => {
 
   const downloadReceipt = () => {
     toast({
-      title: "Receipt Downloaded",
-      description: "Transaction receipt has been downloaded",
+      title: "Download",
+      description: "Receipt downloaded successfully",
     });
   };
 
   const shareTransaction = () => {
     toast({
-      title: "Shared!",
+      title: "Share",
       description: "Transaction details shared successfully",
     });
   };
 
+  if (loading) {
+    return (
+      <DesktopLayout>
+        <div className="flex items-center justify-center h-full">
+          <Loader text="Loading transaction details..." />
+        </div>
+      </DesktopLayout>
+    );
+  }
+
   if (!transaction) {
     return (
       <DesktopLayout>
-        <div className="flex-1 flex items-center justify-center">
+        <div className="flex items-center justify-center h-full">
           <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-            <p className="text-gray-600">Loading transaction details...</p>
+            <XCircle className="h-12 w-12 text-gray-400 mx-auto mb-3" />
+            <p className="text-gray-500 text-sm">Transaction not found</p>
+            <Link to="/transactions" className="text-[#0B63BC] text-sm mt-2 block">
+              Back to Transactions
+            </Link>
           </div>
         </div>
       </DesktopLayout>
@@ -197,186 +214,251 @@ const TransactionDetails = () => {
   const StatusIcon = getStatusIcon(transaction.status);
   const CategoryIcon = getCategoryIcon(transaction.category);
 
-  return (
-    <DesktopLayout>
-      <div className="flex-1 space-y-6 p-6">
-        {/* Header */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <Link to="/transactions">
-              <Button variant="ghost" size="sm">
-                Back to Transactions
-              </Button>
-            </Link>
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900">Transaction Details</h1>
-              <p className="text-gray-600 mt-2">Reference: {transaction.reference}</p>
-            </div>
-          </div>
-          <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm" onClick={() => copyToClipboard(transaction.reference, "Reference")}>
-              <Copy className="h-4 w-4 mr-2" />
-              Copy Reference
-            </Button>
-            <Button variant="outline" size="sm" onClick={downloadReceipt}>
-              <Download className="h-4 w-4 mr-2" />
-              Download Receipt
-            </Button>
-            <Button variant="outline" size="sm" onClick={shareTransaction}>
-              <Share2 className="h-4 w-4 mr-2" />
-              Share
-            </Button>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Main Content */}
-          <div className="lg:col-span-2 space-y-6">
-            {/* Transaction Summary */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Avatar className="h-10 w-10">
-                    <AvatarFallback className={`bg-blue-100 ${getCategoryColor(transaction.category)}`}>
-                      <CategoryIcon className="h-5 w-5" />
-                    </AvatarFallback>
-                  </Avatar>
-                  Transaction Summary
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-gray-500">Amount</p>
-                    <p className={`text-3xl font-bold ${
-                      transaction.type === 'credit' ? 'text-green-600' : 'text-red-600'
-                    }`}>
-                      {transaction.type === 'credit' ? '+' : '-'} {formatCurrency(transaction.amount)}
-                    </p>
-                  </div>
-                  <Badge className={`text-sm ${getStatusColor(transaction.status)}`}>
-                    <StatusIcon className="h-4 w-4 mr-1" />
-                    {transaction.status}
-                  </Badge>
-                </div>
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <p className="text-sm text-gray-500">Description</p>
-                    <p className="font-medium text-gray-900">{transaction.description}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-gray-500">Category</p>
-                    <p className="font-medium text-gray-900 capitalize">{transaction.category.replace('-', ' ')}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-gray-500">Date & Time</p>
-                    <p className="font-medium text-gray-900">{transaction.date} at {transaction.time}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-gray-500">Reference</p>
-                    <p className="font-medium text-gray-900">{transaction.reference}</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Transaction Details */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Transaction Details</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {transaction.recipient && (
-                    <div>
-                      <p className="text-sm text-gray-500">Recipient</p>
-                      <p className="font-medium text-gray-900">{transaction.recipient}</p>
-                    </div>
-                  )}
-                  {transaction.sender && (
-                    <div>
-                      <p className="text-sm text-gray-500">Sender</p>
-                      <p className="font-medium text-gray-900">{transaction.sender}</p>
-                    </div>
-                  )}
-                  {transaction.bankName && (
-                    <div>
-                      <p className="text-sm text-gray-500">Bank Name</p>
-                      <p className="font-medium text-gray-900">{transaction.bankName}</p>
-                    </div>
-                  )}
-                  {transaction.accountNumber && (
-                    <div>
-                      <p className="text-sm text-gray-500">Account Number</p>
-                      <p className="font-medium text-gray-900">{transaction.accountNumber}</p>
-                    </div>
-                  )}
-                  {transaction.narration && (
-                    <div>
-                      <p className="text-sm text-gray-500">Narration</p>
-                      <p className="font-medium text-gray-900">{transaction.narration}</p>
-                    </div>
-                  )}
-                  <div>
-                    <p className="text-sm text-gray-500">Channel</p>
-                    <p className="font-medium text-gray-900 capitalize">{transaction.channel}</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Sidebar */}
-          <div className="space-y-6">
-            {/* Fee Information */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Fee Information</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <span className="text-gray-600">Transaction Fee</span>
-                  <span className="font-semibold text-gray-900">
-                    {transaction.fee ? formatCurrency(transaction.fee) : 'Free'}
-                  </span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-gray-600">Balance After</span>
-                  <span className="font-semibold text-gray-900">{formatCurrency(transaction.balance)}</span>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Security Information */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Security Information</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {transaction.location && (
-                  <div>
-                    <p className="text-sm text-gray-500">Location</p>
-                    <p className="font-medium text-gray-900">{transaction.location}</p>
-                  </div>
-                )}
-                {transaction.ipAddress && (
-                  <div>
-                    <p className="text-sm text-gray-500">IP Address</p>
-                    <p className="font-medium text-gray-900">{transaction.ipAddress}</p>
-                  </div>
-                )}
-                {transaction.deviceInfo && (
-                  <div>
-                    <p className="text-sm text-gray-500">Device</p>
-                    <p className="font-medium text-gray-900">{transaction.deviceInfo}</p>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </div>
+  const TransactionDetailsContent = () => (
+    <div className="max-w-4xl mx-auto p-8">
+      {/* Header */}
+      <div className="flex items-center justify-between mb-8">
+        <Link to="/transactions" className="flex items-center text-gray-600 hover:text-gray-900 transition-colors">
+          <ArrowLeft className="h-5 w-5 mr-2" />
+          Back to Transactions
+        </Link>
+        <div className="flex space-x-3">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => copyToClipboard(transaction.reference, "Reference")}
+          >
+            <Copy className="h-4 w-4 mr-2" />
+            Copy Reference
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={downloadReceipt}
+          >
+            <Download className="h-4 w-4 mr-2" />
+            Download Receipt
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={shareTransaction}
+          >
+            <Share2 className="h-4 w-4 mr-2" />
+            Share
+          </Button>
         </div>
       </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        {/* Main Content */}
+        <div className="lg:col-span-2 space-y-6">
+          {/* Transaction Summary Card */}
+          <Card className="border-0 shadow-lg bg-gradient-to-r from-[#0B63BC] to-[#0B63BC]/90 text-white">
+            <CardContent className="p-8">
+              <div className="text-center mb-6">
+                <div className="w-20 h-20 rounded-full bg-white/20 flex items-center justify-center mx-auto mb-4">
+                  <CategoryIcon className="h-10 w-10" />
+                </div>
+                <h1 className="text-3xl font-bold mb-2">{transaction.description}</h1>
+                <p className={`text-2xl font-medium ${
+                  transaction.type === 'credit' ? 'text-green-300' : 'text-red-300'
+                }`}>
+                  {transaction.type === 'credit' ? '+' : '-'}{formatCurrency(transaction.amount)}
+                </p>
+              </div>
+              
+              <div className="flex items-center justify-center mb-4">
+                <StatusIcon className="h-6 w-6 mr-2" />
+                <span className="text-lg font-medium">
+                  {transaction.status.charAt(0).toUpperCase() + transaction.status.slice(1)}
+                </span>
+              </div>
+              
+              <div className="text-center text-lg text-[#0B63BC]/80">
+                <p>{transaction.date} at {transaction.time}</p>
+                <p>Reference: {transaction.reference}</p>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Transaction Details */}
+          <Card className="border-0 shadow-lg">
+            <CardHeader>
+              <CardTitle className="text-xl font-bold text-gray-900">Transaction Details</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="grid grid-cols-2 gap-6">
+                <div>
+                  <p className="text-sm text-gray-500 mb-2">Type</p>
+                  <p className="text-lg font-medium text-gray-900">
+                    {transaction.type.charAt(0).toUpperCase() + transaction.type.slice(1)}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-500 mb-2">Category</p>
+                  <Badge className={getCategoryColor(transaction.category)}>
+                    {transaction.category.charAt(0).toUpperCase() + transaction.category.slice(1)}
+                  </Badge>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-500 mb-2">Amount</p>
+                  <p className="text-lg font-medium text-gray-900">
+                    {formatCurrency(transaction.amount)}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-500 mb-2">Fee</p>
+                  <p className="text-lg font-medium text-gray-900">
+                    {transaction.fee ? formatCurrency(transaction.fee) : 'N/A'}
+                  </p>
+                </div>
+              </div>
+              
+              {transaction.narration && (
+                <div>
+                  <p className="text-sm text-gray-500 mb-2">Narration</p>
+                  <p className="text-lg font-medium text-gray-900">{transaction.narration}</p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Account Information */}
+          <Card className="border-0 shadow-lg">
+            <CardHeader>
+              <CardTitle className="text-xl font-bold text-gray-900">Account Information</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="grid grid-cols-2 gap-6">
+                {transaction.recipient && (
+                  <div>
+                    <p className="text-sm text-gray-500 mb-2">Recipient</p>
+                    <p className="text-lg font-medium text-gray-900">{transaction.recipient}</p>
+                  </div>
+                )}
+                
+                {transaction.sender && (
+                  <div>
+                    <p className="text-sm text-gray-500 mb-2">Sender</p>
+                    <p className="text-lg font-medium text-gray-900">{transaction.sender}</p>
+                  </div>
+                )}
+                
+                {transaction.bankName && (
+                  <div>
+                    <p className="text-sm text-gray-500 mb-2">Bank</p>
+                    <p className="text-lg font-medium text-gray-900">{transaction.bankName}</p>
+                  </div>
+                )}
+                
+                {transaction.accountNumber && (
+                  <div>
+                    <p className="text-sm text-gray-500 mb-2">Account Number</p>
+                    <p className="text-lg font-medium text-gray-900">{transaction.accountNumber}</p>
+                  </div>
+                )}
+              </div>
+              
+              <div>
+                <p className="text-sm text-gray-500 mb-2">Balance After Transaction</p>
+                <p className="text-lg font-medium text-gray-900">{formatCurrency(transaction.balance)}</p>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Technical Information */}
+          <Card className="border-0 shadow-lg">
+            <CardHeader>
+              <CardTitle className="text-xl font-bold text-gray-900">Technical Information</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="grid grid-cols-2 gap-6">
+                <div>
+                  <p className="text-sm text-gray-500 mb-2">Channel</p>
+                  <p className="text-lg font-medium text-gray-900">
+                    {transaction.channel.charAt(0).toUpperCase() + transaction.channel.slice(1)}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-500 mb-2">Location</p>
+                  <p className="text-lg font-medium text-gray-900">
+                    {transaction.location || 'N/A'}
+                  </p>
+                </div>
+              </div>
+              
+              {transaction.ipAddress && (
+                <div>
+                  <p className="text-sm text-gray-500 mb-2">IP Address</p>
+                  <p className="text-lg font-medium text-gray-900">{transaction.ipAddress}</p>
+                </div>
+              )}
+              
+              {transaction.deviceInfo && (
+                <div>
+                  <p className="text-sm text-gray-500 mb-2">Device</p>
+                  <p className="text-lg font-medium text-gray-900">{transaction.deviceInfo}</p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Sidebar */}
+        <div className="space-y-6">
+          {/* Quick Actions */}
+          <Card className="border-0 shadow-lg">
+            <CardHeader>
+              <CardTitle className="text-lg font-bold text-gray-900">Quick Actions</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <Button variant="outline" size="sm" asChild className="w-full justify-start">
+                <Link to="/transfer" className="flex items-center gap-2">
+                  <ArrowUpRight className="h-4 w-4" />
+                  New Transfer
+                </Link>
+              </Button>
+              <Button variant="outline" size="sm" asChild className="w-full justify-start">
+                <Link to="/transactions" className="flex items-center gap-2">
+                  <CreditCard className="h-4 w-4" />
+                  View All Transactions
+                </Link>
+              </Button>
+              <Button variant="outline" size="sm" asChild className="w-full justify-start">
+                <Link to="/bills" className="flex items-center gap-2">
+                  <Building2 className="h-4 w-4" />
+                  Pay Bills
+                </Link>
+              </Button>
+            </CardContent>
+          </Card>
+
+          {/* Transaction Status */}
+          <Card className="border-0 shadow-lg">
+            <CardHeader>
+              <CardTitle className="text-lg font-bold text-gray-900">Status</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-center gap-3">
+                <StatusIcon className="h-6 w-6 text-[#0B63BC]" />
+                <div>
+                  <p className="font-medium text-gray-900">
+                    {transaction.status.charAt(0).toUpperCase() + transaction.status.slice(1)}
+                  </p>
+                  <p className="text-sm text-gray-500">{transaction.date} at {transaction.time}</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    </div>
+  );
+
+  return (
+    <DesktopLayout>
+      <TransactionDetailsContent />
     </DesktopLayout>
   );
 };

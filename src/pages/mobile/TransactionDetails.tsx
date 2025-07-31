@@ -142,7 +142,7 @@ const TransactionDetails = () => {
   const getCategoryColor = (category: string) => {
     switch (category) {
       case 'transfer':
-        return 'bg-blue-100 text-blue-600';
+        return 'bg-[#0B63BC]/10 text-[#0B63BC]';
       case 'bills':
         return 'bg-yellow-100 text-yellow-600';
       case 'airtime':
@@ -201,7 +201,7 @@ const TransactionDetails = () => {
           <div className="text-center">
             <XCircle className="h-12 w-12 text-gray-400 mx-auto mb-3" />
             <p className="text-gray-500 text-sm">Transaction not found</p>
-            <Link to="/transactions" className="text-blue-600 text-sm mt-2 block">
+            <Link to="/transactions" className="text-[#0B63BC] text-sm mt-2 block">
               Back to Transactions
             </Link>
           </div>
@@ -251,7 +251,7 @@ const TransactionDetails = () => {
         </div>
 
         {/* Transaction Summary Card */}
-        <MobileCard className="bg-gradient-to-r from-blue-600 to-blue-800 text-white p-6">
+        <MobileCard className="bg-gradient-to-r from-[#0B63BC] to-[#0B63BC]/90 text-white p-6">
           <div className="text-center mb-6">
             <div className={`w-16 h-16 rounded-full bg-white/20 flex items-center justify-center mx-auto mb-4`}>
               <CategoryIcon className="h-8 w-8" />
@@ -271,7 +271,7 @@ const TransactionDetails = () => {
             </span>
           </div>
           
-          <div className="text-center text-sm text-blue-200">
+          <div className="text-center text-sm text-[#0B63BC]/80">
             <p>{transaction.date} at {transaction.time}</p>
             <p>Reference: {transaction.reference}</p>
           </div>

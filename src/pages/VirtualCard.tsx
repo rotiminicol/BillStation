@@ -4,9 +4,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useState, useEffect } from "react";
-import { CreditCard, DollarSign, Sparkles, Activity, CheckCircle, ArrowRight, Shield, TrendingUp, Copy, Eye, EyeOff, RefreshCw, Calculator, Clock, Globe, Zap, Users, Lock } from "lucide-react";
+import { CreditCard, DollarSign, Activity, CheckCircle, ArrowRight, Shield, TrendingUp, Copy, Eye, EyeOff, RefreshCw, Calculator, Clock, Globe, Zap, Users, Lock } from "lucide-react";
 import { Link } from "react-router-dom";
-import { motion, AnimatePresence } from "framer-motion";
 import Navigation from "@/components/Navigation";
 import DesktopLayout from "@/components/DesktopLayout";
 
@@ -18,14 +17,8 @@ const VirtualCard = () => {
   const [cardAmount, setCardAmount] = useState("");
   const [cardName, setCardName] = useState("");
   const [loading, setLoading] = useState(false);
-  const [animateCards, setAnimateCards] = useState(false);
   const [showCardDetails, setShowCardDetails] = useState(false);
   const { toast } = useToast();
-
-  useEffect(() => {
-    // Trigger animations after component mounts
-    setTimeout(() => setAnimateCards(true), 100);
-  }, []);
 
   const virtualCards = [
     {
@@ -93,419 +86,238 @@ const VirtualCard = () => {
 
   const VirtualCardContent = () => (
     <div className="space-y-8">
-      {/* Enhanced Header with Animation */}
-      <motion.div 
-        className="flex items-center mb-8"
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6 }}
-      >
+      {/* Header */}
+      <div className="flex items-center mb-8">
         <div className="flex items-center gap-3">
-          <h1 className="text-3xl font-bold text-gray-900 bg-gradient-to-r from-gray-900 via-blue-900 to-gray-900 bg-clip-text text-transparent">
-            Virtual Card
+          <h1 className="text-3xl font-bold text-gray-900">
+            Virtual Cards
           </h1>
-          <motion.div
-            animate={{ rotate: 360 }}
-            transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-          >
-            <Sparkles className="h-6 w-6 text-blue-500" />
-          </motion.div>
         </div>
-      </motion.div>
+      </div>
 
-      {/* Enhanced Tab Navigation */}
-      <motion.div 
-        className="flex bg-white rounded-xl p-1 mb-8 shadow-lg max-w-md"
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6, delay: 0.2 }}
-      >
+      {/* Tab Navigation */}
+      <div className="flex bg-white rounded-xl p-1 mb-8 shadow-lg max-w-md">
         {[
           { id: 'create', icon: <CreditCard className="h-5 w-5" />, label: 'Create Card' },
           { id: 'manage', icon: <Shield className="h-5 w-5" />, label: 'Manage Cards' }
         ].map((tab) => (
-          <motion.button
+          <button
             key={tab.id}
-            onClick={() => setActiveTab(tab.id as any)}
+            onClick={() => setActiveTab(tab.id as 'create' | 'manage')}
             className={`flex-1 py-3 px-6 rounded-lg text-base font-semibold transition-all duration-300 ${
               activeTab === tab.id
-                ? 'bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-lg'
+                ? 'bg-blue-600 text-white shadow-lg'
                 : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
             }`}
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
           >
             <span className="inline mr-2">{tab.icon}</span>
             {tab.label}
-          </motion.button>
+          </button>
         ))}
-      </motion.div>
+      </div>
 
       <div className="lg:grid lg:grid-cols-3 lg:gap-8">
-        {/* Enhanced Main Content */}
-        <div className="lg:col-span-2 space-y-8 pb-20 lg:pb-0">
+        {/* Main Content */}
+        <div className="lg:col-span-2 space-y-8">
           {activeTab === 'create' ? (
-            /* Enhanced Create Card */
-            <motion.div 
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.4 }}
-            >
-              <Card className="border-0 shadow-2xl bg-gradient-to-br from-white to-gray-50 overflow-hidden">
-                <div className="absolute inset-0 bg-gradient-to-r from-blue-50/30 to-indigo-50/30 opacity-50"></div>
-                <CardHeader className="pb-6 relative z-10">
-                  <CardTitle className="text-2xl flex items-center gap-3">
-                    <motion.div 
-                      className="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center shadow-lg"
-                      whileHover={{ scale: 1.1, rotate: 5 }}
-                      transition={{ duration: 0.2 }}
-                    >
-                      <CreditCard className="h-6 w-6 text-white" />
-                    </motion.div>
-                    Create Virtual Card
-                  </CardTitle>
-                  <p className="text-gray-600 text-lg">Create a secure virtual card for online transactions</p>
-                </CardHeader>
-                <CardContent className="space-y-6 relative z-10">
-                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6">
-                    <motion.div 
-                      className="space-y-2"
-                      initial={{ opacity: 0, x: -20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ duration: 0.6, delay: 0.5 }}
-                    >
-                      <Label htmlFor="cardName" className="text-base font-semibold">Card Name</Label>
-                      <Input
-                        id="cardName"
-                        type="text"
-                        placeholder="Enter card name"
-                        value={cardName}
-                        onChange={(e) => setCardName(e.target.value)}
-                        className="h-14 border-2 border-gray-200 focus:border-blue-500 transition-colors duration-300"
-                      />
-                    </motion.div>
+            /* Create Card Form */
+            <Card className="border-0 shadow-lg bg-white">
+              <CardHeader>
+                <CardTitle className="text-xl font-bold text-gray-900 flex items-center gap-2">
+                  <CreditCard className="h-5 w-5 text-blue-600" />
+                  Create Virtual Card
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="space-y-2">
+                  <Label htmlFor="cardName">Card Name</Label>
+                  <Input
+                    id="cardName"
+                    placeholder="Enter card name"
+                    value={cardName}
+                    onChange={(e) => setCardName(e.target.value)}
+                    className="h-12"
+                  />
+                </div>
 
-                    <motion.div 
-                      className="space-y-2"
-                      initial={{ opacity: 0, x: -20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ duration: 0.6, delay: 0.6 }}
-                    >
-                      <Label htmlFor="cardAmount" className="text-base font-semibold">Amount in Naira</Label>
-                      <Input
-                        id="cardAmount"
-                        type="number"
-                        placeholder="Enter amount"
-                        value={cardAmount}
-                        onChange={(e) => setCardAmount(e.target.value)}
-                        className="h-14 border-2 border-gray-200 focus:border-blue-500 transition-colors duration-300"
-                      />
-                    </motion.div>
-                  </div>
+                <div className="space-y-2">
+                  <Label htmlFor="cardAmount">Amount in Naira (₦)</Label>
+                  <Input
+                    id="cardAmount"
+                    type="number"
+                    placeholder="Enter amount"
+                    value={cardAmount}
+                    onChange={(e) => setCardAmount(e.target.value)}
+                    className="h-12"
+                  />
+                  {cardAmount && (
+                    <div className="p-3 bg-green-50 border border-green-200 rounded-lg">
+                      <p className="text-green-800 text-sm">
+                        USD Equivalent: <span className="font-bold">${calculateUSD().toFixed(2)}</span>
+                      </p>
+                    </div>
+                  )}
+                </div>
 
-                  {/* Enhanced Conversion Preview */}
-                  <AnimatePresence>
-                    {cardAmount && (
-                      <motion.div 
-                        className="p-4 bg-gradient-to-r from-green-50 to-green-100 rounded-2xl border border-green-200"
-                        initial={{ opacity: 0, scale: 0.9 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        exit={{ opacity: 0, scale: 0.9 }}
-                        transition={{ duration: 0.3 }}
-                      >
-                        <div className="flex items-center gap-3 mb-2">
-                          <Calculator className="h-5 w-5 text-green-600" />
-                          <p className="text-base font-semibold text-green-800">Conversion Preview</p>
-                        </div>
-                        <div className="grid grid-cols-2 gap-4">
-                          <div>
-                            <p className="text-sm text-green-700">Naira Amount</p>
-                            <p className="text-lg font-bold text-green-800">₦{parseFloat(cardAmount || '0').toLocaleString()}</p>
-                          </div>
-                          <div>
-                            <p className="text-sm text-green-700">USD Amount</p>
-                            <p className="text-lg font-bold text-green-800">${calculateUSD().toFixed(2)}</p>
-                          </div>
-                        </div>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-
-                  <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.6, delay: 0.7 }}
-                  >
-                    <Button
-                      onClick={handleCreateCard}
-                      className="w-full h-14 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
-                      disabled={!cardAmount || !cardName || loading}
-                    >
-                      {loading ? (
-                        <div className="flex items-center gap-2">
-                          <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                          Creating...
-                        </div>
-                      ) : (
-                        <div className="flex items-center gap-2">
-                          <CheckCircle className="h-5 w-5" />
-                          Create Virtual Card
-                        </div>
-                      )}
-                    </Button>
-                  </motion.div>
-                </CardContent>
-              </Card>
-            </motion.div>
+                <Button
+                  onClick={handleCreateCard}
+                  disabled={loading || !cardAmount || !cardName}
+                  className="w-full h-12 bg-blue-600 hover:bg-blue-700 text-lg font-semibold"
+                >
+                  {loading ? (
+                    <div className="flex items-center gap-2">
+                      <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                      Creating...
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-2">
+                      <CheckCircle className="h-5 w-5" />
+                      Create Virtual Card
+                    </div>
+                  )}
+                </Button>
+              </CardContent>
+            </Card>
           ) : (
-            /* Enhanced Manage Cards */
-            <motion.div 
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.4 }}
-            >
-              <Card className="border-0 shadow-2xl bg-gradient-to-br from-white to-gray-50 overflow-hidden">
-                <div className="absolute inset-0 bg-gradient-to-r from-green-50/30 to-blue-50/30 opacity-50"></div>
-                <CardHeader className="pb-6 relative z-10">
-                  <CardTitle className="text-2xl flex items-center gap-3">
-                    <motion.div 
-                      className="w-12 h-12 bg-gradient-to-br from-green-500 to-green-600 rounded-xl flex items-center justify-center shadow-lg"
-                      whileHover={{ scale: 1.1, rotate: 5 }}
-                      transition={{ duration: 0.2 }}
-                    >
-                      <Shield className="h-6 w-6 text-white" />
-                    </motion.div>
-                    Manage Virtual Cards
-                  </CardTitle>
-                  <p className="text-gray-600 text-lg">View and manage your virtual cards</p>
-                </CardHeader>
-                <CardContent className="space-y-6 relative z-10">
-                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    {virtualCards.map((card, index) => (
-                      <motion.div
-                        key={card.id}
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.6, delay: 0.5 + index * 0.1 }}
-                        whileHover={{ y: -5, scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
-                      >
-                        <div className="p-6 rounded-2xl border-2 border-gray-200 hover:border-gray-300 shadow-lg hover:shadow-xl transition-all duration-300 group overflow-hidden">
-                          {/* Realistic ATM Card Display */}
-                          <div className="relative bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-white p-6 rounded-xl mb-4">
-                            {/* Card Network Logo */}
-                            <div className="absolute top-4 left-4">
-                              <div className="w-12 h-8 bg-blue-600 rounded flex items-center justify-center">
-                                <div className="text-white font-bold text-xs">VISA</div>
-                              </div>
-                            </div>
-                            
+            /* Manage Cards */
+            <div className="space-y-6">
+              {virtualCards.map((card) => (
+                <Card key={card.id} className="border-0 shadow-lg bg-white">
+                  <CardContent className="p-6">
+                    <div className="flex items-center justify-between mb-4">
+                      <div>
+                        <h3 className="text-lg font-semibold text-gray-900">{card.name}</h3>
+                        <p className="text-sm text-gray-500">Virtual Card</p>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => copyCardNumber(card.number)}
+                          className="flex items-center gap-1"
+                        >
+                          <Copy className="h-4 w-4" />
+                          Copy
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setShowCardDetails(!showCardDetails)}
+                          className="flex items-center gap-1"
+                        >
+                          {showCardDetails ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                          {showCardDetails ? 'Hide' : 'Show'}
+                        </Button>
+                      </div>
+                    </div>
 
-                            
-                            {/* Card Number */}
-                            <div className="mt-12 mb-6">
-                              <p className="text-xs text-gray-300 mb-2">CARD NUMBER</p>
-                              <p className="text-xl font-mono font-bold tracking-wider">{card.number}</p>
-                            </div>
-                            
-                            {/* Card Holder Name */}
-                            <div className="mb-4">
-                              <p className="text-xs text-gray-300 mb-1">CARD HOLDER</p>
-                              <p className="font-semibold text-lg">JOHN DOE</p>
-                            </div>
-                            
-                            {/* Expiry Date and CVV */}
-                            <div className="flex items-center justify-between">
-                              <div>
-                                <p className="text-xs text-gray-300 mb-1">EXPIRES</p>
-                                <p className="font-semibold">{card.expiry}</p>
-                              </div>
-                              <div>
-                                <p className="text-xs text-gray-300 mb-1">CVV</p>
-                                <p className="font-semibold">***</p>
-                              </div>
-                            </div>
-                            
-                            {/* Bank Logo */}
-                            <div className="absolute bottom-4 right-4">
-                              <div className="text-white font-bold text-sm">BILL STATION</div>
-                            </div>
-                          </div>
-                          
-                          {/* Card Details */}
-                          <div className="space-y-3">
-                            <div className="flex items-center justify-between">
-                              <span className="text-sm text-gray-600">Card Name</span>
-                              <span className="font-semibold text-gray-900">{card.name}</span>
-                            </div>
-                            
-                            <div className="flex items-center justify-between">
-                              <span className="text-sm text-gray-600">Balance</span>
-                              <span className="font-bold text-gray-900">${(card.balance / 100).toFixed(2)}</span>
-                            </div>
-                            
-                            <div className="flex items-center justify-between">
-                              <span className="text-sm text-gray-600">Status</span>
-                              <span className={`px-2 py-1 rounded-full text-xs font-semibold ${
-                                card.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                              }`}>
-                                {card.status}
-                              </span>
-                            </div>
-                            
-                            <div className="flex items-center justify-between">
-                              <span className="text-sm text-gray-600">Card Number</span>
-                              <div className="flex items-center gap-2">
-                                <span className="font-mono text-sm">{card.number}</span>
-                                <motion.button
-                                  onClick={() => copyCardNumber(card.number)}
-                                  className="p-1 hover:bg-gray-100 rounded transition-colors duration-200"
-                                  whileHover={{ scale: 1.1 }}
-                                  whileTap={{ scale: 0.9 }}
-                                >
-                                  <Copy className="h-4 w-4 text-gray-500" />
-                                </motion.button>
-                              </div>
-                            </div>
-                          </div>
+                    <div className="bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg p-4 text-white mb-4">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-sm opacity-80">Card Number</span>
+                        <CreditCard className="h-4 w-4" />
+                      </div>
+                      <p className="text-lg font-mono mb-2">
+                        {showCardDetails ? card.number.replace('****', '1234') : card.number}
+                      </p>
+                      <div className="flex items-center justify-between text-sm">
+                        <div>
+                          <span className="opacity-80">Expires</span>
+                          <p className="font-mono">{card.expiry}</p>
                         </div>
-                      </motion.div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            </motion.div>
+                        <div>
+                          <span className="opacity-80">CVV</span>
+                          <p className="font-mono">{showCardDetails ? card.cvv : '***'}</p>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm text-gray-500">Balance</p>
+                        <p className="text-lg font-semibold text-gray-900">
+                          ${(card.balance / 100).toFixed(2)} {card.currency}
+                        </p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-sm text-gray-500">Status</p>
+                        <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                          {card.status}
+                        </span>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
           )}
         </div>
 
-        {/* Enhanced Sidebar */}
-        <div className="lg:col-span-1 space-y-6 hidden lg:block">
-          {/* Enhanced Card Benefits */}
-          <motion.div 
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.6, delay: 0.6 }}
-          >
-            <Card className="border-0 shadow-2xl bg-gradient-to-br from-white to-gray-50 lg:sticky lg:top-8 overflow-hidden">
-              <div className="absolute inset-0 bg-gradient-to-r from-green-50/30 to-blue-50/30 opacity-50"></div>
-              <CardHeader className="pb-6 relative z-10">
-                <CardTitle className="text-xl flex items-center gap-3">
-                  <motion.div 
-                    className="w-10 h-10 bg-gradient-to-br from-green-500 to-green-600 rounded-xl flex items-center justify-center shadow-lg"
-                    whileHover={{ scale: 1.1 }}
-                    transition={{ duration: 0.2 }}
-                  >
-                    <CheckCircle className="h-5 w-5 text-white" />
-                  </motion.div>
-                  Card Benefits
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="relative z-10">
-                <div className="space-y-4">
-                  {[
-                    { icon: <Lock className="h-5 w-5" />, title: "Secure Transactions", description: "Bank-level encryption" },
-                    { icon: <Zap className="h-5 w-5" />, title: "Instant Creation", description: "Cards ready in seconds" },
-                    { icon: <Globe className="h-5 w-5" />, title: "Global Acceptance", description: "Accepted worldwide" }
-                  ].map((benefit, index) => (
-                    <motion.div 
-                      key={index}
-                      className="flex items-start gap-3"
-                      initial={{ opacity: 0, x: 20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ duration: 0.6, delay: 0.7 + index * 0.1 }}
-                      whileHover={{ x: 5 }}
-                    >
-                      <div className="p-1 bg-green-100 rounded-lg">
-                        <div className="text-green-600">
-                          {benefit.icon}
-                        </div>
-                      </div>
-                      <div>
-                        <p className="font-semibold text-gray-900">{benefit.title}</p>
-                        <p className="text-sm text-gray-600">{benefit.description}</p>
-                      </div>
-                    </motion.div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          </motion.div>
+        {/* Sidebar */}
+        <div className="space-y-6">
+          {/* Quick Actions */}
+          <Card className="border-0 shadow-lg bg-white">
+            <CardHeader>
+              <CardTitle className="text-lg font-bold text-gray-900">Quick Actions</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <Button variant="outline" size="sm" asChild className="w-full justify-start">
+                <Link to="/cards" className="flex items-center gap-2">
+                  <CreditCard className="h-4 w-4" />
+                  Gift Cards
+                </Link>
+              </Button>
+              <Button variant="outline" size="sm" asChild className="w-full justify-start">
+                <Link to="/transactions" className="flex items-center gap-2">
+                  <Activity className="h-4 w-4" />
+                  View History
+                </Link>
+              </Button>
+              <Button variant="outline" size="sm" asChild className="w-full justify-start">
+                <Link to="/transfer" className="flex items-center gap-2">
+                  <ArrowRight className="h-4 w-4" />
+                  Send Money
+                </Link>
+              </Button>
+            </CardContent>
+          </Card>
 
-          {/* Enhanced Exchange Rate */}
-          <motion.div 
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.6, delay: 0.8 }}
-          >
-            <Card className="border-0 shadow-2xl bg-gradient-to-br from-white to-gray-50 overflow-hidden">
-              <div className="absolute inset-0 bg-gradient-to-r from-blue-50/30 to-purple-50/30 opacity-50"></div>
-              <CardHeader className="pb-6 relative z-10">
-                <CardTitle className="text-xl flex items-center gap-3">
-                  <motion.div 
-                    className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center shadow-lg"
-                    whileHover={{ scale: 1.1 }}
-                    transition={{ duration: 0.2 }}
-                  >
-                    <TrendingUp className="h-5 w-5 text-white" />
-                  </motion.div>
-                  Exchange Rate
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="relative z-10">
-                <div className="space-y-4">
-                  <motion.div 
-                    className="p-4 bg-blue-50 rounded-xl"
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.6, delay: 0.9 }}
-                    whileHover={{ y: -2 }}
-                  >
-                    <div className="flex justify-between items-center">
-                      <span className="text-blue-800 font-semibold">USD to NGN</span>
-                      <span className="text-blue-800 font-bold text-lg">₦{exchangeRate.toLocaleString()}</span>
-                    </div>
-                    <p className="text-xs text-blue-600 mt-1">Current exchange rate</p>
-                  </motion.div>
+          {/* Features */}
+          <Card className="border-0 shadow-lg bg-white">
+            <CardHeader>
+              <CardTitle className="text-lg font-bold text-gray-900">Features</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
+                  <CheckCircle className="h-4 w-4 text-green-600" />
                 </div>
-              </CardContent>
-            </Card>
-          </motion.div>
-        </div>
-      </div>
-
-      {/* New Premium Features Section */}
-      <motion.div 
-        className="hidden lg:block"
-        initial={{ opacity: 0, y: 30 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8, delay: 1 }}
-      >
-        <h3 className="text-xl font-semibold text-gray-900 mb-6 flex items-center gap-2">
-          <Globe className="h-5 w-5 text-blue-500" />
-          Virtual Card Features
-        </h3>
-        <div className="grid grid-cols-3 gap-6">
-          {[
-            { icon: <Lock className="h-6 w-6" />, title: "Enhanced Security", description: "Multi-layer fraud protection", color: "from-green-500 to-green-600" },
-            { icon: <Zap className="h-6 w-6" />, title: "Instant Activation", description: "Ready to use immediately", color: "from-blue-500 to-blue-600" },
-            { icon: <Users className="h-6 w-6" />, title: "Global Support", description: "24/7 customer assistance", color: "from-purple-500 to-purple-600" }
-          ].map((feature, index) => (
-            <motion.div
-              key={index}
-              className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100 hover:shadow-xl transition-all duration-300 group"
-              whileHover={{ y: -3 }}
-            >
-              <div className={`w-12 h-12 bg-gradient-to-br ${feature.color} rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300`}>
-                <div className="text-white">
-                  {feature.icon}
+                <div>
+                  <p className="font-medium text-gray-900 text-sm">Instant Creation</p>
+                  <p className="text-xs text-gray-500">Get cards instantly</p>
                 </div>
               </div>
-              <h4 className="text-lg font-semibold text-gray-900 mb-2">{feature.title}</h4>
-              <p className="text-sm text-gray-600">{feature.description}</p>
-            </motion.div>
-          ))}
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                  <Shield className="h-4 w-4 text-blue-600" />
+                </div>
+                <div>
+                  <p className="font-medium text-gray-900 text-sm">Secure Cards</p>
+                  <p className="text-xs text-gray-500">Bank-level security</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">
+                  <Globe className="h-4 w-4 text-purple-600" />
+                </div>
+                <div>
+                  <p className="font-medium text-gray-900 text-sm">Global Use</p>
+                  <p className="text-xs text-gray-500">Accepted worldwide</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         </div>
-      </motion.div>
+      </div>
     </div>
   );
 

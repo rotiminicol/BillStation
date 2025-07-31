@@ -201,12 +201,12 @@ const Bills = () => {
               onClick={() => setSelectedCategory(category.value)}
               className={`flex flex-col items-center justify-center p-4 rounded-xl transition-all duration-200 ${
                 selectedCategory === category.value
-                  ? 'bg-blue-50 border-2 border-blue-200'
+                  ? 'bg-[#0B63BC]/10 border-2 border-[#0B63BC]/20'
                   : 'bg-white border border-gray-200 hover:bg-gray-50'
               }`}
             >
-              <div className="w-12 h-12 rounded-full bg-blue-50 flex items-center justify-center mb-3">
-                <category.icon className="h-5 w-5 text-blue-600" />
+                              <div className="w-12 h-12 rounded-full bg-[#0B63BC]/10 flex items-center justify-center mb-3">
+                                  <category.icon className="h-5 w-5 text-[#0B63BC]" />
               </div>
               <span className="text-xs font-medium text-gray-700 text-center leading-tight">{category.label}</span>
             </button>
@@ -256,7 +256,7 @@ const Bills = () => {
               <Button
                 onClick={handleBillPayment}
                 disabled={isProcessing}
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+                className="w-full bg-[#0B63BC] hover:bg-[#0B63BC]/90 text-white"
               >
                 {isProcessing ? (
                   <div className="flex items-center">
@@ -283,8 +283,8 @@ const Bills = () => {
               recentBills.map((bill) => (
                 <div key={bill.id} className="flex items-center justify-between py-3 border-b border-gray-100 last:border-b-0">
                   <div className="flex items-center">
-                    <div className="w-10 h-10 bg-blue-50 rounded-full flex items-center justify-center mr-3">
-                      <CreditCard className="h-5 w-5 text-blue-600" />
+                    <div className="w-10 h-10 bg-[#0B63BC]/10 rounded-full flex items-center justify-center mr-3">
+                                              <CreditCard className="h-5 w-5 text-[#0B63BC]" />
                     </div>
                     <div>
                       <p className="text-sm font-medium text-gray-900">{bill.name}</p>

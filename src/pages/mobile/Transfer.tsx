@@ -168,7 +168,7 @@ const Transfer = () => {
   };
 
   const transferTypes = [
-    { id: "billstation", label: "Bill Station", icon: Building2, color: "bg-blue-50 text-blue-600" },
+    { id: "billstation", label: "Bill Station", icon: Building2, color: "bg-[#0B63BC]/10 text-[#0B63BC]" },
     { id: "bank", label: "Other Banks", icon: CreditCard, color: "bg-green-50 text-green-600" },
   ];
 
@@ -215,7 +215,7 @@ const Transfer = () => {
                 }}
                 className={`p-4 rounded-xl border-2 transition-all duration-200 ${
                   transferType === type.id
-                    ? "border-blue-500 bg-blue-50"
+                    ? "border-[#0B63BC] bg-[#0B63BC]/10"
                     : "border-gray-200 bg-white hover:border-gray-300"
                 }`}
               >
@@ -233,17 +233,17 @@ const Transfer = () => {
         </div>
 
         {/* Amount Card */}
-        <MobileCard className="bg-gradient-to-r from-blue-600 to-blue-800 text-white p-6">
+        <MobileCard className="bg-gradient-to-r from-[#0B63BC] to-[#0B63BC]/80 text-white p-6">
           <div className="text-center mb-6">
-            <p className="text-sm text-blue-100 mb-2">Transfer Amount</p>
+                            <p className="text-sm text-[#0B63BC]/80 mb-2">Transfer Amount</p>
             <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center">
-                <Banknote className="h-5 w-5 text-blue-200" />
+                                  <Banknote className="h-5 w-5 text-[#0B63BC]/60" />
               </div>
               <Input
                 type="number"
                 placeholder="0.00"
-                className="pl-10 text-3xl font-bold text-center bg-transparent border-white/20 text-white placeholder:text-blue-200 focus:border-white/40"
+                                  className="pl-10 text-3xl font-bold text-center bg-transparent border-white/20 text-white placeholder:text-[#0B63BC]/60 focus:border-white/40"
                 value={amount}
                 onChange={(e) => setAmount(e.target.value)}
               />
@@ -306,10 +306,10 @@ const Transfer = () => {
               )}
 
               {verifyingAccount && (
-                <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                <div className="p-3 bg-[#0B63BC]/10 border border-[#0B63BC]/20 rounded-lg">
                   <div className="flex items-center gap-2">
-                    <div className="w-4 h-4 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
-                    <span className="text-sm text-blue-800">Verifying account...</span>
+                                          <div className="w-4 h-4 border-2 border-[#0B63BC] border-t-transparent rounded-full animate-spin"></div>
+                                          <span className="text-sm text-[#0B63BC]">Verifying account...</span>
                   </div>
                 </div>
               )}
@@ -332,7 +332,7 @@ const Transfer = () => {
             </div>
 
             <Button 
-              className="w-full py-3 text-base font-medium bg-blue-600 hover:bg-blue-700"
+                              className="w-full py-3 text-base font-medium bg-[#0B63BC] hover:bg-[#0B63BC]/90"
               onClick={handleTransfer}
               disabled={isProcessing || verifyingAccount}
             >
@@ -358,7 +358,7 @@ const Transfer = () => {
             <Button 
               variant="ghost" 
               size="sm"
-              className="text-blue-600 hover:text-blue-700"
+                              className="text-[#0B63BC] hover:text-[#0B63BC]/80"
               onClick={() => navigate('/add-recipient')}
             >
               <UserPlus className="h-4 w-4 mr-1" />
@@ -377,8 +377,8 @@ const Transfer = () => {
                 className="w-full flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 transition-colors border border-gray-100"
               >
                 <div className="flex items-center space-x-3">
-                  <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
-                    <UserIcon className="h-5 w-5 text-blue-600" />
+                  <div className="w-10 h-10 bg-[#0B63BC]/10 rounded-full flex items-center justify-center">
+                                          <UserIcon className="h-5 w-5 text-[#0B63BC]" />
                   </div>
                   <div className="text-left">
                     <p className="text-sm font-medium text-gray-900">{recipient.name}</p>

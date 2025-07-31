@@ -149,16 +149,16 @@ const Profile = () => {
         {/* Quick Stats */}
         <div className="grid grid-cols-2 gap-3">
           <MobileCard className="text-center p-4">
-            <div className="w-12 h-12 bg-blue-50 rounded-full flex items-center justify-center mx-auto mb-2">
-              <ArrowRight className="h-6 w-6 text-blue-600" />
+                            <div className="w-12 h-12 bg-[#0B63BC]/10 rounded-full flex items-center justify-center mx-auto mb-2">
+                  <ArrowRight className="h-6 w-6 text-[#0B63BC]" />
             </div>
             <p className="text-2xl font-bold text-gray-900">{profileData?.totalTransactions}</p>
             <p className="text-xs text-gray-500">Total Transactions</p>
           </MobileCard>
           
           <MobileCard className="text-center p-4">
-            <div className="w-12 h-12 bg-blue-50 rounded-full flex items-center justify-center mx-auto mb-2">
-              <CheckCircle className="h-6 w-6 text-blue-600" />
+                            <div className="w-12 h-12 bg-[#0B63BC]/10 rounded-full flex items-center justify-center mx-auto mb-2">
+                  <CheckCircle className="h-6 w-6 text-[#0B63BC]" />
             </div>
             <p className="text-2xl font-bold text-gray-900">98%</p>
             <p className="text-xs text-gray-500">Success Rate</p>
@@ -172,8 +172,8 @@ const Profile = () => {
               <MobileCard className="hover:shadow-md transition-shadow">
                 <div className="flex items-center justify-between p-4">
                   <div className="flex items-center space-x-3">
-                                      <div className="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center">
-                    <item.icon className="h-5 w-5 text-blue-600" />
+                                                          <div className="w-10 h-10 rounded-full bg-[#0B63BC]/10 flex items-center justify-center">
+                      <item.icon className="h-5 w-5 text-[#0B63BC]" />
                   </div>
                     <span className="font-medium text-gray-900">{item.label}</span>
                   </div>

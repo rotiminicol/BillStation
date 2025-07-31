@@ -243,7 +243,7 @@ const Onboarding = () => {
                   type="date"
                   value={formData.dateOfBirth}
                   onChange={(e) => setFormData(prev => ({ ...prev, dateOfBirth: e.target.value }))}
-                  className="py-3 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                  className="py-3 border-gray-300 rounded-lg focus:border-[#0B63BC] focus:ring-1 focus:ring-[#0B63BC]"
                   required
                 />
               </div>
@@ -251,7 +251,7 @@ const Onboarding = () => {
               <div className="space-y-2">
                 <Label htmlFor="gender">Gender</Label>
                 <Select value={formData.gender} onValueChange={(value) => setFormData(prev => ({ ...prev, gender: value }))}>
-                  <SelectTrigger className="py-3 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
+                  <SelectTrigger className="py-3 border-gray-300 rounded-lg focus:border-[#0B63BC] focus:ring-1 focus:ring-[#0B63BC]">
                     <SelectValue placeholder="Select gender" />
                   </SelectTrigger>
                   <SelectContent>
@@ -265,7 +265,7 @@ const Onboarding = () => {
               <div className="space-y-2">
                 <Label htmlFor="maritalStatus">Marital Status</Label>
                 <Select value={formData.maritalStatus} onValueChange={(value) => setFormData(prev => ({ ...prev, maritalStatus: value }))}>
-                  <SelectTrigger className="py-3 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
+                  <SelectTrigger className="py-3 border-gray-300 rounded-lg focus:border-[#0B63BC] focus:ring-1 focus:ring-[#0B63BC]">
                     <SelectValue placeholder="Select marital status" />
                   </SelectTrigger>
                   <SelectContent>
@@ -285,7 +285,7 @@ const Onboarding = () => {
                   placeholder="Enter your nationality"
                   value={formData.nationality}
                   onChange={(e) => setFormData(prev => ({ ...prev, nationality: e.target.value }))}
-                  className="py-3 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                  className="py-3 border-gray-300 rounded-lg focus:border-[#0B63BC] focus:ring-1 focus:ring-[#0B63BC]"
                   required
                 />
               </div>
@@ -298,7 +298,7 @@ const Onboarding = () => {
                   placeholder="City, Country"
                   value={formData.placeOfBirth}
                   onChange={(e) => setFormData(prev => ({ ...prev, placeOfBirth: e.target.value }))}
-                  className="py-3 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                  className="py-3 border-gray-300 rounded-lg focus:border-[#0B63BC] focus:ring-1 focus:ring-[#0B63BC]"
                 />
               </div>
             </div>
@@ -312,7 +312,7 @@ const Onboarding = () => {
               <div className="space-y-2">
                 <Label htmlFor="idType">ID Type</Label>
                 <Select value={formData.idType} onValueChange={(value) => setFormData(prev => ({ ...prev, idType: value }))}>
-                  <SelectTrigger className="py-3 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
+                  <SelectTrigger className="py-3 border-gray-300 rounded-lg focus:border-[#0B63BC] focus:ring-1 focus:ring-[#0B63BC]">
                     <SelectValue placeholder="Select ID type" />
                   </SelectTrigger>
                   <SelectContent>
@@ -333,7 +333,7 @@ const Onboarding = () => {
                   placeholder="Enter your ID number"
                   value={formData.idNumber}
                   onChange={(e) => setFormData(prev => ({ ...prev, idNumber: e.target.value }))}
-                  className="py-3 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                  className="py-3 border-gray-300 rounded-lg focus:border-[#0B63BC] focus:ring-1 focus:ring-[#0B63BC]"
                   required
                 />
               </div>
@@ -363,8 +363,8 @@ const Onboarding = () => {
                 />
               </div>
 
-              <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
-                <p className="text-sm text-blue-700">
+              <div className="p-4 bg-[#0B63BC]/10 rounded-lg border border-[#0B63BC]/20">
+                <p className="text-sm text-[#0B63BC]">
                   <strong>Important:</strong> Please ensure your ID is valid and not expired. We may require additional verification.
                 </p>
               </div>
@@ -388,7 +388,7 @@ const Onboarding = () => {
                     placeholder="+234 801 234 5678"
                     value={formData.phoneNumber}
                     onChange={(e) => setFormData(prev => ({ ...prev, phoneNumber: e.target.value }))}
-                    className="pl-10 py-3 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                    className="pl-10 py-3 border-gray-300 rounded-lg focus:border-[#0B63BC] focus:ring-1 focus:ring-[#0B63BC]"
                     required
                   />
                 </div>
@@ -899,8 +899,8 @@ const Onboarding = () => {
               </div>
             </div>
 
-            <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
-              <p className="text-sm text-blue-700">
+            <div className="p-4 bg-[#0B63BC]/10 rounded-lg border border-[#0B63BC]/20">
+              <p className="text-sm text-[#0B63BC]">
                 <strong>Your Privacy:</strong> We take your privacy seriously. Your personal information is encrypted and protected by bank-level security.
               </p>
             </div>
@@ -915,7 +915,7 @@ const Onboarding = () => {
   return (
     <div className="min-h-screen bg-white">
       {/* Header */}
-      <div className="bg-blue-600 text-white p-6">
+      <div className="bg-[#0B63BC] text-white p-6">
         <div className="text-center">
           <div className="mb-4">
             <img 
@@ -925,7 +925,7 @@ const Onboarding = () => {
             />
           </div>
           <h1 className="text-xl font-bold mb-2">Complete Your Profile</h1>
-          <p className="text-blue-100 text-sm">Step {currentStep} of 6</p>
+          <p className="text-[#0B63BC]/80 text-sm">Step {currentStep} of 6</p>
         </div>
       </div>
 
@@ -933,7 +933,7 @@ const Onboarding = () => {
       <div className="px-6 py-4">
         <div className="w-full bg-gray-200 rounded-full h-2">
           <div 
-            className="bg-blue-600 h-2 rounded-full transition-all duration-300"
+            className="bg-[#0B63BC] h-2 rounded-full transition-all duration-300"
             style={{ width: `${(currentStep / 6) * 100}%` }}
           />
         </div>
@@ -970,7 +970,7 @@ const Onboarding = () => {
           <Button
             onClick={handleNext}
             disabled={loading}
-            className="px-6 py-3 bg-blue-600 hover:bg-blue-700"
+            className="px-6 py-3 bg-[#0B63BC] hover:bg-[#0B63BC]/90"
           >
             {loading ? (
               <div className="flex items-center">

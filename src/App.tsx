@@ -32,6 +32,10 @@ import ChauffeurService from "./pages/ChauffeurService";
 import Transactions from "./pages/Transactions";
 import TransactionDetails from "./pages/TransactionDetails";
 import NotFound from "./pages/NotFound";
+import FlightBookPrivateJet from "./pages/FlightBookPrivateJet";
+import BuyTickets from "./pages/BuyTickets";
+import ConvertAsset from "./pages/ConvertAsset";
+import BookRide from "./pages/BookRide";
 
 // Mobile Imports
 import MobileDashboard from "./pages/mobile/Dashboard";
@@ -39,6 +43,7 @@ import MobileLogin from "./pages/mobile/Login";
 import MobileSignup from "./pages/mobile/Signup";
 import MobileForgotPassword from "./pages/mobile/ForgotPassword";
 import MobileOnboarding from "./pages/mobile/Onboarding";
+import MobileWelcome from "./pages/mobile/Welcome";
 import MobileTransfer from "./pages/mobile/Transfer";
 import MobileBills from "./pages/mobile/Bills";
 import MobileAirtimeSwap from "./pages/mobile/AirtimeSwap";
@@ -52,6 +57,10 @@ import MobileHotelBooking from "./pages/mobile/HotelBooking";
 import MobileChauffeurService from "./pages/mobile/ChauffeurService";
 import MobileTransactions from "./pages/mobile/Transactions";
 import MobileTransactionDetails from "./pages/mobile/TransactionDetails";
+import MobileFlightBookPrivateJet from "./pages/mobile/FlightBookPrivateJet";
+import MobileBuyTickets from "./pages/mobile/BuyTickets";
+import MobileConvertAsset from "./pages/mobile/ConvertAsset";
+import MobileBookRide from "./pages/mobile/BookRide";
 
 const queryClient = new QueryClient();
 
@@ -81,7 +90,7 @@ const AppRouter = () => {
     return (
       <Routes>
         <Route path="/" element={<Splash />} />
-        <Route path="/welcome" element={<Welcome />} />
+        <Route path="/welcome" element={<MobileWelcome />} />
         <Route path="/login" element={<MobileLogin />} />
         <Route path="/signup" element={<MobileSignup />} />
         <Route path="/forgot-password" element={<MobileForgotPassword />} />
@@ -102,6 +111,10 @@ const AppRouter = () => {
         <Route path="/profile" element={<MobileProfile />} />
         <Route path="/transactions" element={<MobileTransactions />} />
         <Route path="/transactions/:id" element={<MobileTransactionDetails />} />
+        <Route path="/flight-book-private-jet" element={<MobileFlightBookPrivateJet />} />
+        <Route path="/buy-tickets" element={<MobileBuyTickets />} />
+        <Route path="/convert-asset" element={<MobileConvertAsset />} />
+        <Route path="/book-ride" element={<MobileBookRide />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     );
@@ -132,6 +145,10 @@ const AppRouter = () => {
       <Route path="/chauffeur-service" element={<ChauffeurService />} />
       <Route path="/transactions" element={<Transactions />} />
       <Route path="/transactions/:id" element={<TransactionDetails />} />
+      <Route path="/flight-book-private-jet" element={<FlightBookPrivateJet />} />
+      <Route path="/buy-tickets" element={<BuyTickets />} />
+      <Route path="/convert-asset" element={<ConvertAsset />} />
+      <Route path="/book-ride" element={<BookRide />} />
       <Route path="*" element={<NotFound />} />
     </Routes>
   );

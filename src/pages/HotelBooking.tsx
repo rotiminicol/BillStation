@@ -111,12 +111,13 @@ const HotelBooking = () => {
     }
 
     setIsProcessing(true);
+    
     try {
       // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 2000));
       
       toast({
-        title: "Booking Confirmed!",
+        title: "Booking Successful!",
         description: `Your ${bookingType} booking in ${destination} has been confirmed`,
       });
       
@@ -126,10 +127,11 @@ const HotelBooking = () => {
       setCheckIn("");
       setCheckOut("");
       setGuests("");
+      
     } catch (error) {
       toast({
-        title: "Booking Failed",
-        description: "Failed to confirm booking. Please try again.",
+        title: "Error",
+        description: "Failed to process booking",
         variant: "destructive"
       });
     } finally {
@@ -157,209 +159,214 @@ const HotelBooking = () => {
     }
   };
 
-  return (
-    <DesktopLayout>
-      <div className="flex-1 space-y-6 p-6">
-        {/* Header */}
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900">Hotel Booking</h1>
-            <p className="text-gray-600 mt-2">Book hotels and shortlets across Nigeria</p>
-          </div>
-          <ViewAllButton category="hotel" />
+  const HotelBookingContent = () => (
+    <div className="space-y-8">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">Hotel Booking</h1>
+          <p className="text-gray-600 mt-1">Book hotels and shortlets for your stay</p>
         </div>
+      </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Main Content */}
-          <div className="lg:col-span-2 space-y-6">
-            {/* Booking Type Selection */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Building2 className="h-5 w-5 text-blue-600" />
-                  Booking Type
-                </CardTitle>
-                <CardDescription>Choose your accommodation type</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {bookingTypes.map((type) => (
-                    <div
-                      key={type.value}
-                      onClick={() => setBookingType(type.value)}
-                      className={`relative cursor-pointer rounded-xl p-4 border-2 transition-all duration-200 hover:scale-105 ${
+      <div className="lg:grid lg:grid-cols-3 lg:gap-8">
+        {/* Main Content */}
+        <div className="lg:col-span-2 space-y-8">
+          {/* Booking Type Selection */}
+          <Card className="border-0 shadow-lg bg-white">
+            <CardHeader>
+              <CardTitle className="text-xl font-bold text-gray-900 flex items-center gap-2">
+                <Building2 className="h-5 w-5 text-blue-600" />
+                Select Booking Type
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-2 gap-4">
+                {bookingTypes.map((type) => (
+                  <Card
+                    key={type.value}
+                    className={`cursor-pointer transition-all duration-200 hover:shadow-lg ${
+                      bookingType === type.value
+                        ? "border-blue-500 bg-blue-50"
+                        : "border-gray-200 hover:border-blue-300"
+                    }`}
+                    onClick={() => setBookingType(type.value)}
+                  >
+                    <CardContent className="p-4 text-center">
+                      <div className={`w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3 ${
                         bookingType === type.value
-                          ? 'border-blue-500 bg-blue-50'
-                          : 'border-gray-200 hover:border-blue-300'
-                      }`}
-                    >
-                      <div className={`w-12 h-12 rounded-full bg-blue-50 flex items-center justify-center mb-3`}>
-                        <type.icon className="h-6 w-6 text-blue-600" />
+                          ? "bg-blue-600 text-white"
+                          : "bg-gray-100 text-gray-600"
+                      }`}>
+                        <type.icon className="h-6 w-6" />
                       </div>
-                      <h3 className="font-semibold text-gray-900">{type.label}</h3>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
+                      <h4 className="font-semibold text-gray-900">{type.label}</h4>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
 
-            {/* Popular Destinations */}
-            <Card>
+          {/* Booking Form */}
+          {bookingType && (
+            <Card className="border-0 shadow-lg bg-white">
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <MapPin className="h-5 w-5 text-green-600" />
-                  Popular Destinations
+                <CardTitle className="text-xl font-bold text-gray-900">
+                  Book {bookingTypes.find(t => t.value === bookingType)?.label}
                 </CardTitle>
-                <CardDescription>Quick select popular cities</CardDescription>
               </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  {popularDestinations.map((dest) => (
-                    <div
-                      key={dest.value}
-                      onClick={() => setDestination(dest.value)}
-                      className={`relative cursor-pointer rounded-xl p-4 border-2 transition-all duration-200 hover:scale-105 ${
-                        destination === dest.value
-                          ? 'border-green-500 bg-green-50'
-                          : 'border-gray-200 hover:border-green-300'
-                      }`}
-                    >
-                      <div className={`w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center mb-2`}>
-                        <dest.icon className="h-5 w-5 text-blue-600" />
-                      </div>
-                      <h3 className="font-semibold text-gray-900 text-sm">{dest.label}</h3>
-                    </div>
-                  ))}
+              <CardContent className="space-y-6">
+                <div className="space-y-2">
+                  <Label htmlFor="destination">Destination</Label>
+                  <Select value={destination} onValueChange={setDestination}>
+                    <SelectTrigger className="h-12">
+                      <SelectValue placeholder="Select destination" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {popularDestinations.map((dest) => (
+                        <SelectItem key={dest.value} value={dest.value}>
+                          {dest.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
-              </CardContent>
-            </Card>
 
-            {/* Booking Form */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Booking Details</CardTitle>
-                <CardDescription>Enter your booking information</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
+                  <div className="space-y-2">
                     <Label htmlFor="checkIn">Check-in Date</Label>
                     <Input
                       id="checkIn"
                       type="date"
                       value={checkIn}
                       onChange={(e) => setCheckIn(e.target.value)}
+                      className="h-12"
                     />
                   </div>
-                  <div>
+                  <div className="space-y-2">
                     <Label htmlFor="checkOut">Check-out Date</Label>
                     <Input
                       id="checkOut"
                       type="date"
                       value={checkOut}
                       onChange={(e) => setCheckOut(e.target.value)}
+                      className="h-12"
                     />
                   </div>
                 </div>
-                <div>
+
+                <div className="space-y-2">
                   <Label htmlFor="guests">Number of Guests</Label>
                   <Select value={guests} onValueChange={setGuests}>
-                    <SelectTrigger>
+                    <SelectTrigger className="h-12">
                       <SelectValue placeholder="Select number of guests" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="1">1 Guest</SelectItem>
-                      <SelectItem value="2">2 Guests</SelectItem>
-                      <SelectItem value="3">3 Guests</SelectItem>
-                      <SelectItem value="4">4 Guests</SelectItem>
-                      <SelectItem value="5">5+ Guests</SelectItem>
+                      {[1, 2, 3, 4, 5, 6, 7, 8].map((num) => (
+                        <SelectItem key={num} value={num.toString()}>
+                          {num} {num === 1 ? 'Guest' : 'Guests'}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </div>
+
                 <Button
                   onClick={handleBooking}
-                  disabled={isProcessing || !bookingType || !destination || !checkIn || !checkOut || !guests}
-                  className="w-full"
+                  disabled={isProcessing || !destination || !checkIn || !checkOut || !guests}
+                  className="w-full h-12 bg-blue-600 hover:bg-blue-700 text-lg font-semibold"
                 >
                   {isProcessing ? (
-                    <>
-                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                    <div className="flex items-center gap-2">
+                      <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
                       Processing...
-                    </>
+                    </div>
                   ) : (
-                    <>
-                      <Building2 className="h-4 w-4 mr-2" />
+                    <div className="flex items-center gap-2">
+                      <CheckCircle className="h-5 w-5" />
                       Book Now
-                    </>
+                    </div>
                   )}
                 </Button>
               </CardContent>
             </Card>
-          </div>
+          )}
+        </div>
 
-          {/* Sidebar */}
-          <div className="space-y-6">
-            {/* Recent Bookings */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Activity className="h-5 w-5 text-blue-600" />
-                  Recent Bookings
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {recentBookings.map((booking) => (
-                    <div key={booking.id} className="flex items-center gap-3 p-3 rounded-lg border">
-                      <Avatar className="h-10 w-10">
-                        <AvatarFallback className="bg-blue-100 text-blue-600">
-                          {booking.type[0]}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div className="flex-1">
-                        <p className="font-medium text-gray-900">{booking.type}</p>
-                        <p className="text-sm text-gray-500">{booking.destination}</p>
-                        <p className="text-sm font-semibold text-gray-900">
-                          {formatCurrency(booking.amount)}
-                        </p>
+        {/* Sidebar */}
+        <div className="space-y-6">
+          {/* Recent Bookings */}
+          <Card className="border-0 shadow-lg bg-white">
+            <CardHeader>
+              <CardTitle className="text-lg font-bold text-gray-900">Recent Bookings</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {recentBookings.length === 0 ? (
+                  <div className="text-center py-8">
+                    <Building2 className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                    <p className="text-gray-500">No recent bookings</p>
+                  </div>
+                ) : (
+                  recentBookings.map((booking) => (
+                    <div key={booking.id} className="flex items-center justify-between p-3 border border-gray-200 rounded-lg">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                          <Building2 className="h-5 w-5 text-blue-600" />
+                        </div>
+                        <div>
+                          <p className="font-medium text-gray-900 text-sm">{booking.type}</p>
+                          <p className="text-xs text-gray-500">{booking.destination}</p>
+                        </div>
                       </div>
-                      <Badge className={getStatusColor(booking.status)}>
-                        {booking.status}
-                      </Badge>
+                      <div className="text-right">
+                        <p className="font-bold text-gray-900 text-sm">{formatCurrency(booking.amount)}</p>
+                        <Badge className={`mt-1 ${getStatusColor(booking.status)}`}>
+                          {booking.status}
+                        </Badge>
+                      </div>
                     </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
+                  ))
+                )}
+              </div>
+            </CardContent>
+          </Card>
 
-            {/* Quick Stats */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <TrendingUp className="h-5 w-5 text-green-600" />
-                  This Month
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <span className="text-gray-600">Total Spent</span>
-                    <span className="font-semibold text-gray-900">₦58,000</span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-gray-600">Bookings</span>
-                    <span className="font-semibold text-gray-900">3</span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-gray-600">Nights</span>
-                    <span className="font-semibold text-gray-900">7</span>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
+          {/* Quick Actions */}
+          <Card className="border-0 shadow-lg bg-white">
+            <CardHeader>
+              <CardTitle className="text-lg font-bold text-gray-900">Quick Actions</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <Button variant="outline" size="sm" asChild className="w-full justify-start">
+                <Link to="/flight-booking" className="flex items-center gap-2">
+                  <Search className="h-4 w-4" />
+                  Book Flight
+                </Link>
+              </Button>
+              <Button variant="outline" size="sm" asChild className="w-full justify-start">
+                <Link to="/transactions" className="flex items-center gap-2">
+                  <Activity className="h-4 w-4" />
+                  View History
+                </Link>
+              </Button>
+              <Button variant="outline" size="sm" asChild className="w-full justify-start">
+                <Link to="/chauffeur-service" className="flex items-center gap-2">
+                  <ArrowRight className="h-4 w-4" />
+                  Chauffeur Service
+                </Link>
+              </Button>
+            </CardContent>
+          </Card>
         </div>
       </div>
+    </div>
+  );
+
+  return (
+    <DesktopLayout>
+      <HotelBookingContent />
     </DesktopLayout>
   );
 };

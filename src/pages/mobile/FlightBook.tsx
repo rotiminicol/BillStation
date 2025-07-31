@@ -214,8 +214,8 @@ const FlightBook = () => {
                   : 'bg-white border border-gray-200 hover:bg-gray-50'
               }`}
             >
-              <div className="w-12 h-12 rounded-full bg-blue-50 flex items-center justify-center mb-3">
-                <type.icon className="h-5 w-5 text-blue-600" />
+              <div className="w-12 h-12 rounded-full bg-[#0B63BC]/10 flex items-center justify-center mb-3">
+                <type.icon className="h-5 w-5 text-[#0B63BC]" />
               </div>
               <span className="text-xs font-medium text-gray-700 text-center leading-tight">{type.label}</span>
             </button>
@@ -234,8 +234,8 @@ const FlightBook = () => {
                   : 'bg-white border border-gray-200 hover:bg-gray-50'
               }`}
             >
-              <div className="w-12 h-12 rounded-full bg-blue-50 flex items-center justify-center mb-3">
-                <destination.icon className="h-5 w-5 text-blue-600" />
+              <div className="w-12 h-12 rounded-full bg-[#0B63BC]/10 flex items-center justify-center mb-3">
+                <destination.icon className="h-5 w-5 text-[#0B63BC]" />
               </div>
               <span className="text-xs font-medium text-gray-700 text-center leading-tight">{destination.label}</span>
             </button>
@@ -340,8 +340,8 @@ const FlightBook = () => {
               recentBookings.map((booking) => (
                 <div key={booking.id} className="flex items-center justify-between py-3 border-b border-gray-100 last:border-b-0">
                   <div className="flex items-center">
-                    <div className="w-10 h-10 bg-blue-50 rounded-full flex items-center justify-center mr-3">
-                      <Plane className="h-5 w-5 text-blue-600" />
+                    <div className="w-10 h-10 bg-[#0B63BC]/10 rounded-full flex items-center justify-center mr-3">
+                                              <Plane className="h-5 w-5 text-[#0B63BC]" />
                     </div>
                     <div>
                       <p className="text-sm font-medium text-gray-900">

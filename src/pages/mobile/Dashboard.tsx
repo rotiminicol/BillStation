@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { Eye, EyeOff, Send, Plus, RefreshCw, Plane, Bitcoin, Gift, ArrowRight, CreditCard } from "lucide-react";
+import { Eye, EyeOff, Send, Plus, RefreshCw, Plane, Bitcoin, Gift, ArrowRight, CreditCard, Car, DollarSign, Ticket } from "lucide-react";
 import MobileLayout from "@/components/MobileLayout";
 import MobileHeader from "@/components/MobileHeader";
 import { MobileCard } from "@/components/ui/mobile-card";
@@ -59,9 +59,13 @@ const Dashboard = () => {
     { icon: Send, label: "Send Money", path: "/transfer" },
     { icon: RefreshCw, label: "Airtime Swap", path: "/airtime-swap" },
     { icon: Plane, label: "Flight Booking", path: "/flight-book" },
+    { icon: Plane, label: "Book Private Jet", path: "/flight-book-private-jet" },
     { icon: Bitcoin, label: "Crypto Trading", path: "/bitcoin-trading" },
+    { icon: DollarSign, label: "Convert Asset", path: "/convert-asset" },
     { icon: Gift, label: "Gift Cards", path: "/gift-card" },
+    { icon: Ticket, label: "Buy Tickets", path: "/buy-tickets" },
     { icon: CreditCard, label: "Virtual Card", path: "/virtual-card" },
+    { icon: Car, label: "Book Ride", path: "/book-ride" },
   ];
 
   const formatCurrency = (amount: number) => {
@@ -109,9 +113,9 @@ const Dashboard = () => {
           </div>
 
           {/* Balance Card */}
-          <MobileCard className="bg-gradient-to-r from-blue-600 to-blue-800 text-white p-6">
+                      <MobileCard className="bg-gradient-to-r from-[#0B63BC] to-[#0B63BC]/80 text-white p-6">
             <div className="text-center mb-6">
-              <p className="text-sm text-blue-100 mb-2">Available Balance</p>
+                              <p className="text-sm text-[#0B63BC]/80 mb-2">Available Balance</p>
               <div className="flex items-center justify-center">
                 <h2 className="text-3xl font-bold">
                   {showBalance ? formatCurrency(balance) : '••••••'}
@@ -132,11 +136,11 @@ const Dashboard = () => {
             {/* Account Info */}
             <div className="flex justify-between items-center pt-4 border-t border-white/20">
               <div>
-                <p className="text-xs text-blue-200">Account Number</p>
+                <p className="text-xs text-[#0B63BC]/60">Account Number</p>
                 <p className="text-sm font-medium">•••• 1234</p>
               </div>
               <div className="text-right">
-                <p className="text-xs text-blue-200">Account Type</p>
+                <p className="text-xs text-[#0B63BC]/60">Account Type</p>
                 <p className="text-sm font-medium">Savings</p>
               </div>
             </div>
@@ -175,8 +179,8 @@ const Dashboard = () => {
               to={action.path}
               className="flex flex-col items-center justify-center p-4 bg-white rounded-xl shadow-sm hover:bg-gray-50 transition-colors border border-gray-100"
             >
-              <div className="w-12 h-12 rounded-full bg-blue-50 flex items-center justify-center mb-3">
-                <action.icon className="h-5 w-5 text-blue-600" />
+                              <div className="w-12 h-12 rounded-full bg-[#0B63BC]/10 flex items-center justify-center mb-3">
+                                  <action.icon className="h-5 w-5 text-[#0B63BC]" />
               </div>
               <span className="text-xs font-medium text-gray-700 text-center leading-tight">{action.label}</span>
             </Link>

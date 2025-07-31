@@ -19,7 +19,8 @@ import {
   Settings,
   HelpCircle,
   LogOut,
-  Users
+  Users,
+  Ticket
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
@@ -49,11 +50,15 @@ const Navigation = () => {
   const serviceItems = [
     { icon: RefreshCw, label: "Airtime Swap", href: "/airtime-swap", color: "from-teal-500 to-teal-600" },
     { icon: Plane, label: "Flight Booking", href: "/flight-booking", color: "from-purple-500 to-purple-600" },
+    { icon: Plane, label: "Book Private Jet", href: "/flight-book-private-jet", color: "from-purple-500 to-purple-600" },
     { icon: Bitcoin, label: "Bitcoin Trading", href: "/bitcoin-trading", color: "from-orange-500 to-orange-600" },
+    { icon: DollarSign, label: "Convert Asset", href: "/convert-asset", color: "from-orange-500 to-orange-600" },
     { icon: DollarSign, label: "Virtual Card", href: "/virtual-card", color: "from-indigo-500 to-indigo-600" },
     { icon: Gift, label: "Gift Cards", href: "/gift-card", color: "from-pink-500 to-pink-600" },
+    { icon: Ticket, label: "Buy Tickets", href: "/buy-tickets", color: "from-pink-500 to-pink-600" },
     { icon: Building2, label: "Hotel Booking", href: "/hotel-booking", color: "from-blue-500 to-blue-600" },
     { icon: Car, label: "Chauffeur Service", href: "/chauffeur-service", color: "from-green-500 to-green-600" },
+    { icon: Car, label: "Book Ride", href: "/book-ride", color: "from-green-500 to-green-600" },
   ];
 
   const accountItems = [

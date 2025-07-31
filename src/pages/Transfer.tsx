@@ -5,9 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Send, Clock, CheckCircle, Sparkles, Activity, DollarSign, ArrowRight, Shield, TrendingUp, Users, Globe, Zap, AlertCircle } from "lucide-react";
+import { Send, Clock, CheckCircle, Activity, DollarSign, ArrowRight, Shield, Users, Globe, Zap, AlertCircle, CreditCard } from "lucide-react";
 import { Link } from "react-router-dom";
-import { motion, AnimatePresence } from "framer-motion";
 import Navigation from "@/components/Navigation";
 import DesktopLayout from "@/components/DesktopLayout";
 
@@ -16,6 +15,7 @@ import { paystackService, Bank } from "@/services/paystack";
 import { transactionAPI, authAPI } from "@/services/api";
 import { getBankLogo } from "@/lib/bankLogos";
 import { User, Transaction } from "@/types";
+import ViewAllButton from "@/components/ui/view-all-button";
 
 const Transfer = () => {
   const [transferType, setTransferType] = useState("billstation");
@@ -29,7 +29,6 @@ const Transfer = () => {
   const [verifyingAccount, setVerifyingAccount] = useState(false);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [userData, setUserData] = useState<User | null>(null);
-  const [animateCards, setAnimateCards] = useState(false);
   const { toast } = useToast();
 
   // Fetch banks and user data on component mount
@@ -53,9 +52,6 @@ const Transfer = () => {
           description: "Failed to load transfer data",
           variant: "destructive"
         });
-      } finally {
-        // Trigger animations after data loads
-        setTimeout(() => setAnimateCards(true), 100);
       }
     };
 
@@ -141,27 +137,22 @@ const Transfer = () => {
       // Update user balance
       const newBalance = userData.balance - transferAmount;
       await authAPI.updateBalance(newBalance);
-
+      
+      // Update local state
+      setUserData(prev => prev ? { ...prev, balance: newBalance } : null);
+      
       toast({
-        title: "Transfer Successful!",
-        description: `₦${transferAmount.toLocaleString()} sent successfully.`,
+        title: "Transfer Successful",
+        description: `₦${transferAmount.toLocaleString()} transferred successfully`,
       });
-
+      
       // Reset form
       setAmount("");
       setRecipient("");
       setDescription("");
       setAccountName("");
       setSelectedBank("");
-
-      // Refresh transactions and user data
-      const [updatedTransactions, updatedUser] = await Promise.all([
-        transactionAPI.getAll(),
-        authAPI.getMe()
-      ]);
-      setTransactions(updatedTransactions);
-      setUserData(updatedUser);
-
+      
     } catch (error) {
       console.error('Transfer failed:', error);
       toast({
@@ -176,360 +167,241 @@ const Transfer = () => {
 
   const TransferContent = () => (
     <div className="space-y-8">
-      {/* Enhanced Header with Animation */}
-      <motion.div 
-        className="flex items-center mb-8"
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6 }}
-      >
+      {/* Header */}
+      <div className="flex items-center mb-8">
         <div className="flex items-center gap-3">
-          <h1 className="text-3xl font-bold text-gray-900 bg-gradient-to-r from-gray-900 via-blue-900 to-gray-900 bg-clip-text text-transparent">
+          <h1 className="text-3xl font-bold text-gray-900">
             Send Money
           </h1>
-          <motion.div
-            animate={{ rotate: 360 }}
-            transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-          >
-            <Sparkles className="h-6 w-6 text-blue-500" />
-          </motion.div>
         </div>
-      </motion.div>
+      </div>
 
       <div className="lg:grid lg:grid-cols-3 lg:gap-8">
         {/* Main Content */}
         <div className="lg:col-span-2 space-y-8">
-          {/* Enhanced Balance Display with Premium Design */}
+          {/* Balance Display */}
           {userData && (
-            <motion.div 
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.2 }}
-            >
-              <Card className="border-0 shadow-2xl bg-gradient-to-br from-green-600 via-green-700 to-green-800 text-white overflow-hidden relative group">
-                {/* Enhanced Animated Background Elements */}
-                <div className="absolute inset-0 bg-gradient-to-r from-green-600/50 via-green-700/50 to-green-800/50"></div>
-                <motion.div 
-                  className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-16 translate-x-16"
-                  animate={{ scale: [1, 1.2, 1] }}
-                  transition={{ duration: 3, repeat: Infinity }}
-                ></motion.div>
-                <motion.div 
-                  className="absolute bottom-0 left-0 w-24 h-24 bg-white/10 rounded-full translate-y-12 -translate-x-12"
-                  animate={{ scale: [1, 1.3, 1] }}
-                  transition={{ duration: 4, repeat: Infinity, delay: 1 }}
-                ></motion.div>
-                <div className="absolute top-1/2 left-1/2 w-64 h-64 bg-gradient-to-r from-white/5 to-white/10 rounded-full -translate-x-1/2 -translate-y-1/2 blur-3xl group-hover:blur-2xl transition-all duration-1000"></div>
-                
-                <CardContent className="p-8 relative z-10">
-                  <div className="text-center">
-                    <motion.div 
-                      className="flex items-center justify-center gap-2 mb-2"
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.6, delay: 0.4 }}
-                    >
-                      <DollarSign className="h-6 w-6 text-green-100" />
-                      <p className="text-green-100 text-lg font-medium">Available Balance</p>
-                    </motion.div>
-                    <motion.p 
-                      className="text-4xl font-bold tracking-tight"
-                      initial={{ opacity: 0, scale: 0.9 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      transition={{ duration: 0.6, delay: 0.6 }}
-                    >
-                      ₦{userData.balance?.toLocaleString() || '0'}
-                    </motion.p>
+            <Card className="border-0 shadow-lg bg-gradient-to-br from-green-600 to-green-700 text-white">
+              <CardContent className="p-6">
+                <div className="text-center">
+                  <div className="flex items-center justify-center gap-2 mb-2">
+                    <DollarSign className="h-6 w-6 text-green-100" />
+                    <p className="text-green-100 text-lg font-medium">Available Balance</p>
                   </div>
-                </CardContent>
-              </Card>
-            </motion.div>
-          )}
-
-          {/* Enhanced Transfer Type Selector */}
-          <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.4 }}
-          >
-            <Card className="border-0 shadow-lg bg-gradient-to-br from-white to-gray-50 overflow-hidden">
-              <div className="absolute inset-0 bg-gradient-to-r from-blue-50/50 to-purple-50/50 opacity-50"></div>
-              <CardContent className="p-8 relative z-10">
-                <div className="grid grid-cols-2 gap-4">
-                  <motion.div
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                  >
-                    <Button
-                      variant={transferType === "billstation" ? "default" : "outline"}
-                      size="lg"
-                      onClick={() => setTransferType("billstation")}
-                      className={`h-16 text-lg font-semibold transition-all duration-300 ${
-                        transferType === "billstation" 
-                          ? "bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 shadow-lg" 
-                          : "border-2 hover:border-blue-500 hover:bg-blue-50"
-                      }`}
-                    >
-                      <Shield className="h-5 w-5 mr-2" />
-                      Bill Station
-                    </Button>
-                  </motion.div>
-                  <motion.div
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                  >
-                    <Button
-                      variant={transferType === "bank" ? "default" : "outline"}
-                      size="lg"
-                      onClick={() => setTransferType("bank")}
-                      className={`h-16 text-lg font-semibold transition-all duration-300 ${
-                        transferType === "bank" 
-                          ? "bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 shadow-lg" 
-                          : "border-2 hover:border-blue-500 hover:bg-blue-50"
-                      }`}
-                    >
-                      <TrendingUp className="h-5 w-5 mr-2" />
-                      Other Banks
-                    </Button>
-                  </motion.div>
+                  <p className="text-4xl font-bold tracking-tight">
+                    ₦{userData.balance?.toLocaleString() || '0'}
+                  </p>
                 </div>
               </CardContent>
             </Card>
-          </motion.div>
+          )}
 
-          {/* Enhanced Transfer Form */}
-          <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.6 }}
-          >
-            <Card className="border-0 shadow-2xl bg-gradient-to-br from-white to-gray-50 overflow-hidden">
-              <div className="absolute inset-0 bg-gradient-to-r from-blue-50/30 to-indigo-50/30 opacity-50"></div>
-              <CardHeader className="pb-6 relative z-10">
-                <CardTitle className="text-2xl flex items-center gap-3">
-                  <motion.div 
-                    className="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center shadow-lg"
-                    whileHover={{ scale: 1.1, rotate: 5 }}
-                    transition={{ duration: 0.2 }}
-                  >
-                    <Send className="h-6 w-6 text-white" />
-                  </motion.div>
-                  Send Money
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-6 relative z-10">
-                <motion.div 
-                  className="space-y-2"
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ duration: 0.6, delay: 0.7 }}
+          {/* Transfer Type Selector */}
+          <Card className="border-0 shadow-lg bg-white">
+            <CardContent className="p-6">
+              <div className="grid grid-cols-2 gap-4">
+                <Button
+                  variant={transferType === "billstation" ? "default" : "outline"}
+                  size="lg"
+                  onClick={() => setTransferType("billstation")}
+                  className={`h-16 text-lg font-semibold ${
+                    transferType === "billstation" 
+                      ? "bg-[#0B63BC] hover:bg-[#0B63BC]/90" 
+                      : "border-2 hover:border-[#0B63BC] hover:bg-[#0B63BC]/10"
+                  }`}
                 >
-                  <Label htmlFor="recipient" className="text-base font-semibold">
-                    {transferType === "billstation" ? "Phone Number or Email" : "Account Number"}
-                  </Label>
-                  <Input
-                    id="recipient"
-                    placeholder={transferType === "billstation" ? "080XXXXXXXX or email" : "Enter account number"}
-                    value={recipient}
-                    onChange={(e) => setRecipient(e.target.value)}
-                    className="h-14 border-2 border-gray-200 focus:border-blue-500 transition-colors duration-300 text-base"
-                  />
-                </motion.div>
-
-                {transferType !== "billstation" && (
-                  <motion.div 
-                    className="space-y-2"
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ duration: 0.6, delay: 0.8 }}
-                  >
-                    <Label htmlFor="bank" className="text-base font-semibold">Bank</Label>
-                    <Select value={selectedBank} onValueChange={setSelectedBank}>
-                      <SelectTrigger className="h-14 border-2 border-gray-200 focus:border-blue-500 transition-colors duration-300">
-                        <SelectValue placeholder="Select bank" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {banks.map((bank) => (
-                          <SelectItem key={bank.code} value={bank.code}>
-                            {bank.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </motion.div>
-                )}
-
-                <AnimatePresence>
-                  {accountName && (
-                    <motion.div 
-                      className="p-4 bg-gradient-to-r from-green-50 to-green-100 border border-green-200 rounded-xl"
-                      initial={{ opacity: 0, scale: 0.9 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      exit={{ opacity: 0, scale: 0.9 }}
-                      transition={{ duration: 0.3 }}
-                    >
-                      <div className="flex items-center gap-3">
-                        <CheckCircle className="h-5 w-5 text-green-600" />
-                        <span className="text-base font-semibold text-green-800">{accountName}</span>
-                      </div>
-                    </motion.div>
-                  )}
-
-                  {verifyingAccount && (
-                    <motion.div 
-                      className="p-4 bg-gradient-to-r from-blue-50 to-blue-100 border border-blue-200 rounded-xl"
-                      initial={{ opacity: 0, scale: 0.9 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      exit={{ opacity: 0, scale: 0.9 }}
-                      transition={{ duration: 0.3 }}
-                    >
-                      <div className="flex items-center gap-3">
-                        <div className="w-5 h-5 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
-                        <span className="text-base text-blue-800">Verifying account...</span>
-                      </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-
-                <motion.div 
-                  className="space-y-2"
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ duration: 0.6, delay: 0.9 }}
+                  <Shield className="h-5 w-5 mr-2" />
+                  Bill Station
+                </Button>
+                <Button
+                  variant={transferType === "bank" ? "default" : "outline"}
+                  size="lg"
+                  onClick={() => setTransferType("bank")}
+                  className={`h-16 text-lg font-semibold ${
+                    transferType === "bank" 
+                      ? "bg-[#0B63BC] hover:bg-[#0B63BC]/90" 
+                      : "border-2 hover:border-[#0B63BC] hover:bg-[#0B63BC]/10"
+                  }`}
                 >
-                  <Label htmlFor="amount" className="text-base font-semibold">Amount</Label>
-                  <Input
-                    id="amount"
-                    type="number"
-                    placeholder="Enter amount"
-                    value={amount}
-                    onChange={(e) => setAmount(e.target.value)}
-                    className="h-14 border-2 border-gray-200 focus:border-blue-500 transition-colors duration-300 text-base"
-                  />
-                </motion.div>
+                  <Globe className="h-5 w-5 mr-2" />
+                  Bank Transfer
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
 
-                <motion.div 
-                  className="space-y-2"
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ duration: 0.6, delay: 1.0 }}
-                >
-                  <Label htmlFor="description" className="text-base font-semibold">Description (Optional)</Label>
-                  <Input
-                    id="description"
-                    placeholder="What's this for?"
-                    value={description}
-                    onChange={(e) => setDescription(e.target.value)}
-                    className="h-14 border-2 border-gray-200 focus:border-blue-500 transition-colors duration-300 text-base"
-                  />
-                </motion.div>
+          {/* Transfer Form */}
+          <Card className="border-0 shadow-lg bg-white">
+            <CardHeader>
+              <CardTitle className="text-xl font-bold text-gray-900">
+                Transfer Details
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              {/* Amount */}
+              <div className="space-y-2">
+                <Label htmlFor="amount">Amount (₦)</Label>
+                <Input
+                  id="amount"
+                  type="number"
+                  placeholder="Enter amount"
+                  value={amount}
+                  onChange={(e) => setAmount(e.target.value)}
+                  className="h-12 text-lg"
+                />
+              </div>
 
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.6, delay: 1.1 }}
-                >
-                  <Button
-                    onClick={handleTransfer}
-                    className="w-full h-14 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
-                    disabled={loading || verifyingAccount}
-                  >
-                    {loading ? (
-                      <div className="flex items-center gap-2">
-                        <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                        Processing...
-                      </div>
-                    ) : (
-                      <div className="flex items-center gap-2">
-                        <Send className="h-5 w-5" />
-                        Send ₦{amount || "0"}
-                      </div>
-                    )}
-                  </Button>
-                </motion.div>
-              </CardContent>
-            </Card>
-          </motion.div>
-        </div>
+              {/* Recipient */}
+              <div className="space-y-2">
+                <Label htmlFor="recipient">
+                  {transferType === "billstation" ? "Phone Number" : "Account Number"}
+                </Label>
+                <Input
+                  id="recipient"
+                  type="text"
+                  placeholder={transferType === "billstation" ? "Enter phone number" : "Enter account number"}
+                  value={recipient}
+                  onChange={(e) => setRecipient(e.target.value)}
+                  className="h-12"
+                />
+              </div>
 
-        {/* Enhanced Sidebar */}
-        <div className="lg:col-span-1">
-          <motion.div 
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.6, delay: 0.8 }}
-          >
-            {/* Enhanced Transaction History */}
-            <Card className="lg:sticky lg:top-8 border-0 shadow-2xl bg-gradient-to-br from-white to-gray-50 overflow-hidden">
-              <div className="absolute inset-0 bg-gradient-to-r from-blue-50/30 to-purple-50/30 opacity-50"></div>
-              <CardHeader className="pb-6 relative z-10">
-                <CardTitle className="text-xl flex items-center gap-3">
-                  <motion.div 
-                    className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center shadow-lg"
-                    whileHover={{ scale: 1.1 }}
-                    transition={{ duration: 0.2 }}
-                  >
-                    <Clock className="h-5 w-5 text-white" />
-                  </motion.div>
-                  Recent Transactions
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="p-0 relative z-10">
-                {transactions.length === 0 ? (
-                  <motion.div 
-                    className="text-center py-12"
-                    initial={{ opacity: 0, scale: 0.9 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ duration: 0.6, delay: 1.0 }}
-                  >
-                    <div className="w-20 h-20 bg-gradient-to-br from-gray-100 to-gray-200 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg">
-                      <Send className="h-10 w-10 text-gray-400" />
-                    </div>
-                    <h3 className="text-xl font-semibold text-gray-900 mb-3">No transactions yet</h3>
-                    <p className="text-gray-500 text-base mb-8">Your transfer history will appear here</p>
-                    <Button asChild size="lg" className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 shadow-lg">
-                      <Link to="/transfer">Send Money</Link>
-                    </Button>
-                  </motion.div>
-                ) : (
-                  <div className="space-y-1">
-                    <AnimatePresence>
-                      {transactions.slice(0, 5).map((transaction, index) => (
-                        <motion.div 
-                          key={transaction.id} 
-                          className={`flex items-center justify-between p-6 hover:bg-gray-50 transition-all duration-300 hover:shadow-sm ${index === transactions.length - 1 ? 'rounded-b-lg' : 'border-b border-gray-100'}`}
-                          initial={{ opacity: 0, x: -20 }}
-                          animate={{ opacity: 1, x: 0 }}
-                          transition={{ duration: 0.6, delay: 1.1 + index * 0.1 }}
-                          whileHover={{ x: 5 }}
-                        >
-                          <div className="flex items-center gap-4">
-                            <div className="w-12 h-12 rounded-full bg-white flex items-center justify-center shadow-lg overflow-hidden">
-                              <img
-                                src={getBankLogo({ code: transaction.bankCode, name: transaction.bankName || transaction.description })}
-                                alt={transaction.bankName || transaction.description || 'Bank'}
-                                className="w-10 h-10 object-contain"
-                                onError={e => { e.currentTarget.src = '/placeholder.svg'; }}
-                              />
-                            </div>
-                            <div>
-                              <p className="font-semibold text-gray-900 text-base">{transaction.description}</p>
-                              <p className="text-sm text-gray-500">
-                                {transaction.created_at ? new Date(transaction.created_at).toLocaleDateString() : 'Recently'}
-                              </p>
-                            </div>
-                          </div>
-                          <p className={`font-bold text-base ${transaction.type === "credit" ? "text-green-600" : "text-red-600"}`}>
-                            {transaction.type === "credit" ? "+" : "-"}₦{(transaction.amount || 0).toLocaleString()}
-                          </p>
-                        </motion.div>
+              {/* Bank Selection (for bank transfers) */}
+              {transferType === "bank" && (
+                <div className="space-y-2">
+                  <Label htmlFor="bank">Select Bank</Label>
+                  <Select value={selectedBank} onValueChange={setSelectedBank}>
+                    <SelectTrigger className="h-12">
+                      <SelectValue placeholder="Choose a bank" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {banks.map((bank) => (
+                        <SelectItem key={bank.code} value={bank.code}>
+                          {bank.name}
+                        </SelectItem>
                       ))}
-                    </AnimatePresence>
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
+
+              {/* Account Name Display */}
+              {accountName && (
+                <div className="p-3 bg-green-50 border border-green-200 rounded-lg">
+                  <p className="text-green-800 font-medium">Account Name: {accountName}</p>
+                </div>
+              )}
+
+              {/* Description */}
+              <div className="space-y-2">
+                <Label htmlFor="description">Description (Optional)</Label>
+                <Input
+                  id="description"
+                  type="text"
+                  placeholder="Enter description"
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  className="h-12"
+                />
+              </div>
+
+              {/* Transfer Button */}
+              <Button
+                onClick={handleTransfer}
+                disabled={loading || verifyingAccount}
+                className="w-full h-12 bg-[#0B63BC] hover:bg-[#0B63BC]/90 text-lg font-semibold"
+              >
+                {loading ? (
+                  <div className="flex items-center gap-2">
+                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                    Processing...
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-2">
+                    <Send className="h-5 w-5" />
+                    Send Money
                   </div>
                 )}
-              </CardContent>
-            </Card>
-          </motion.div>
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Sidebar */}
+        <div className="space-y-6">
+          {/* Recent Transactions */}
+          <Card className="border-0 shadow-lg bg-white">
+            <CardHeader>
+              <CardTitle className="text-lg font-bold text-gray-900 flex items-center gap-2">
+                <Activity className="h-5 w-5 text-[#0B63BC]" />
+                Recent Transactions
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {transactions.length === 0 ? (
+                  <div className="text-center py-8">
+                    <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                      <CreditCard className="h-6 w-6 text-gray-400" />
+                    </div>
+                    <p className="text-gray-500 text-sm">No transactions yet</p>
+                  </div>
+                ) : (
+                  transactions.slice(0, 5).map((transaction) => (
+                    <div key={transaction.id} className="flex items-center justify-between p-3 hover:bg-gray-50 rounded-lg transition-colors">
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center shadow-sm">
+                          <img
+                            src={getBankLogo({ code: transaction.bankCode, name: transaction.bankName || transaction.description })}
+                            alt="Bank"
+                            className="w-6 h-6 object-contain"
+                            onError={e => { e.currentTarget.src = '/placeholder.svg'; }}
+                          />
+                        </div>
+                        <div>
+                          <p className="font-medium text-gray-900 text-sm">{transaction.description}</p>
+                          <p className="text-xs text-gray-500">{transaction.created_at ? new Date(transaction.created_at).toLocaleDateString() : 'Recently'}</p>
+                        </div>
+                      </div>
+                      <p className={`font-bold text-sm ${transaction.type === 'credit' ? 'text-green-600' : 'text-red-600'}`}>
+                        {transaction.type === 'credit' ? '+' : '-'}₦{(transaction.amount || 0).toLocaleString()}
+                      </p>
+                    </div>
+                  ))
+                )}
+              </div>
+              <div className="mt-4">
+                <ViewAllButton className="w-full" />
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Quick Actions */}
+          <Card className="border-0 shadow-lg bg-white">
+            <CardHeader>
+              <CardTitle className="text-lg font-bold text-gray-900">Quick Actions</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <Button variant="outline" size="sm" asChild className="w-full justify-start">
+                <Link to="/bills" className="flex items-center gap-2">
+                  <Zap className="h-4 w-4" />
+                  Pay Bills
+                </Link>
+              </Button>
+              <Button variant="outline" size="sm" asChild className="w-full justify-start">
+                <Link to="/cards" className="flex items-center gap-2">
+                  <Shield className="h-4 w-4" />
+                  Manage Cards
+                </Link>
+              </Button>
+              <Button variant="outline" size="sm" asChild className="w-full justify-start">
+                <Link to="/transactions" className="flex items-center gap-2">
+                  <Activity className="h-4 w-4" />
+                  View History
+                </Link>
+              </Button>
+            </CardContent>
+          </Card>
         </div>
       </div>
     </div>

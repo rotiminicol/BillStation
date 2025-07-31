@@ -213,8 +213,8 @@ const VirtualCard = () => {
                   : 'bg-white border border-gray-200 hover:bg-gray-50'
               }`}
             >
-              <div className="w-12 h-12 rounded-full bg-blue-50 flex items-center justify-center mb-3">
-                <type.icon className="h-5 w-5 text-blue-600" />
+                              <div className="w-12 h-12 rounded-full bg-[#0B63BC]/10 flex items-center justify-center mb-3">
+                                  <type.icon className="h-5 w-5 text-[#0B63BC]" />
               </div>
               <span className="text-xs font-medium text-gray-700 text-center leading-tight">{type.label}</span>
             </button>
@@ -273,7 +273,7 @@ const VirtualCard = () => {
                                         {/* Card Network Logo */}
                     <div className="absolute top-4 left-4">
                       {card.type === 'visa' ? (
-                        <div className="w-12 h-8 bg-blue-600 rounded flex items-center justify-center">
+                        <div className="w-12 h-8 bg-[#0B63BC] rounded flex items-center justify-center">
                           <div className="text-white font-bold text-xs">VISA</div>
                         </div>
                       ) : (

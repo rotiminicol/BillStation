@@ -16,7 +16,7 @@ const ViewAllButton = ({ category, className = "" }: ViewAllButtonProps) => {
   return (
     <Link 
       to={getTransactionUrl()}
-      className={`group relative inline-flex items-center px-3 py-1.5 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-medium text-xs rounded-lg shadow-sm hover:shadow-md transition-all duration-300 transform hover:scale-105 border border-white/20 ${className}`}
+      className={`group relative inline-flex items-center px-3 py-1.5 bg-gradient-to-r from-[#0B63BC] to-[#0B63BC]/90 hover:from-[#0B63BC]/90 hover:to-[#0B63BC] text-white font-medium text-xs rounded-lg shadow-sm hover:shadow-md transition-all duration-300 transform hover:scale-105 border border-white/20 ${className}`}
     >
       <span className="relative z-10">View All</span>
       <div className="absolute inset-0 bg-gradient-to-r from-white/10 to-transparent rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>

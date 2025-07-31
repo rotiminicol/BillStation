@@ -55,7 +55,7 @@ const ForgotPassword = () => {
     return (
       <div className="min-h-screen flex flex-col bg-white">
         {/* Top Section - Blue Background with Logo (40% of screen) */}
-        <div className="h-[40vh] bg-blue-600 flex items-center justify-center">
+        <div className="h-[40vh] bg-[#0B63BC] flex items-center justify-center">
           <div className="text-center px-6">
             {/* Logo */}
             <div className="mb-8">
@@ -100,7 +100,7 @@ const ForgotPassword = () => {
               <div className="space-y-4">
                 <Button 
                   onClick={() => setEmailSent(false)}
-                  className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg font-medium"
+                  className="w-full bg-[#0B63BC] hover:bg-[#0B63BC]/90 text-white py-3 rounded-lg font-medium"
                 >
                   Resend Email
                 </Button>
@@ -118,7 +118,7 @@ const ForgotPassword = () => {
                 Didn't receive the email? Check your spam folder or{" "}
                 <button 
                   onClick={() => setEmailSent(false)}
-                  className="text-blue-600 hover:text-blue-700 hover:underline font-medium"
+                  className="text-[#0B63BC] hover:text-[#0B63BC]/80 hover:underline font-medium"
                 >
                   try another email address
                 </button>.
@@ -133,7 +133,7 @@ const ForgotPassword = () => {
   return (
     <div className="min-h-screen flex flex-col bg-white">
       {/* Top Section - Blue Background with Logo (40% of screen) */}
-      <div className="h-[40vh] bg-blue-600 flex items-center justify-center">
+      <div className="h-[40vh] bg-[#0B63BC] flex items-center justify-center">
         <div className="text-center px-6">
           {/* Logo */}
           <div className="mb-8">
@@ -182,7 +182,7 @@ const ForgotPassword = () => {
                     id="email"
                     type="email"
                     placeholder="Enter your email address"
-                    className="pl-10 pr-4 py-3 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                    className="pl-10 pr-4 py-3 border-gray-300 rounded-lg focus:border-[#0B63BC] focus:ring-1 focus:ring-[#0B63BC]"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
@@ -193,7 +193,7 @@ const ForgotPassword = () => {
               {/* Send Reset Link Button */}
               <Button 
                 type="submit" 
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg font-medium"
+                className="w-full bg-[#0B63BC] hover:bg-[#0B63BC]/90 text-white py-3 rounded-lg font-medium"
                 disabled={isLoading}
               >
                 {isLoading ? (
@@ -219,7 +219,7 @@ const ForgotPassword = () => {
                 <div className="mt-4">
                   <Link 
                     to="/login" 
-                    className="text-blue-600 hover:text-blue-700 font-medium"
+                    className="text-[#0B63BC] hover:text-[#0B63BC]/80 font-medium"
                   >
                     Sign in to your account
                   </Link>

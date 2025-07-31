@@ -12,6 +12,7 @@ import { authAPI, transactionAPI } from "@/services/api";
 import { useToast } from "@/hooks/use-toast";
 import { getBankLogo } from "@/lib/bankLogos";
 import { User, Transaction } from "@/types";
+import ViewAllButton from "@/components/ui/view-all-button";
 
 const Dashboard = () => {
   const [showBalance, setShowBalance] = useState(true);
@@ -79,22 +80,30 @@ const Dashboard = () => {
         {/* Top Section: User Greeting and Actions */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center">
+            <div className="w-10 h-10 bg-[#0B63BC] rounded-full flex items-center justify-center">
               <span className="text-white font-semibold text-sm">
                 {(userData?.firstName?.[0] || 'A') + (userData?.lastName?.[0] || '')}
               </span>
             </div>
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">Hello {userData?.firstName || 'Azeeza'}</h1>
+              <h1 className="text-2xl font-bold text-gray-900">Hello {userName}</h1>
               <p className="text-gray-600 text-sm">Send save and receive funds in various currencies.</p>
             </div>
           </div>
           <div className="flex items-center gap-4">
-            <Button variant="ghost" size="sm" className="text-blue-600 hover:bg-blue-50">
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="text-[#0B63BC] hover:bg-[#0B63BC]/10 border-[#0B63BC]/30 hover:border-[#0B63BC]/50 shadow-sm hover:shadow-md transition-all duration-200 px-4 py-2"
+            >
               <ArrowRight className="h-4 w-4 mr-2" />
               See our rates
             </Button>
-            <Button variant="outline" size="sm" className="flex items-center gap-2">
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="flex items-center gap-2 border-gray-200 hover:border-gray-300 shadow-sm hover:shadow-md transition-all duration-200 px-4 py-2"
+            >
               English (US)
               <ChevronDown className="h-4 w-4" />
             </Button>
@@ -102,10 +111,14 @@ const Dashboard = () => {
         </div>
 
         {/* Wallet Balance Card */}
-        <div className="bg-blue-600 rounded-2xl p-6 text-white relative overflow-hidden">
+        <div className="bg-gradient-to-br from-[#0B63BC] via-[#0B63BC]/90 to-[#0B63BC]/80 rounded-2xl p-8 text-white relative overflow-hidden min-h-[280px]">
           {/* Background decorative elements */}
           <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-2xl"></div>
           <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/5 rounded-full blur-xl"></div>
+          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-40 h-40 bg-white/5 rounded-full blur-3xl"></div>
+          <div className="absolute top-4 right-4 w-2 h-2 bg-white/20 rounded-full"></div>
+          <div className="absolute top-12 right-8 w-1 h-1 bg-white/30 rounded-full"></div>
+          <div className="absolute bottom-8 left-6 w-3 h-3 bg-white/15 rounded-full"></div>
           
           <div className="relative z-10">
             <div className="flex items-center justify-between mb-4">
@@ -136,9 +149,9 @@ const Dashboard = () => {
 
             <div className="flex items-center justify-center gap-8">
               <Button 
-                variant="ghost" 
+                variant="outline" 
                 size="sm" 
-                className="text-white hover:bg-white/20 rounded-full p-3"
+                className="bg-white text-[#0B63BC] border-white hover:bg-gray-50 hover:border-gray-200 rounded-full p-4 shadow-lg hover:shadow-xl transition-all duration-200"
                 asChild
               >
                 <Link to="/transfer">
@@ -146,9 +159,9 @@ const Dashboard = () => {
                 </Link>
               </Button>
               <Button 
-                variant="ghost" 
+                variant="outline" 
                 size="sm" 
-                className="text-white hover:bg-white/20 rounded-full p-3"
+                className="bg-white text-[#0B63BC] border-white hover:bg-gray-50 hover:border-gray-200 rounded-full p-4 shadow-lg hover:shadow-xl transition-all duration-200"
                 asChild
               >
                 <Link to="/transfer">
@@ -156,9 +169,9 @@ const Dashboard = () => {
                 </Link>
               </Button>
               <Button 
-                variant="ghost" 
+                variant="outline" 
                 size="sm" 
-                className="text-white hover:bg-white/20 rounded-full p-3"
+                className="bg-white text-[#0B63BC] border-white hover:bg-gray-50 hover:border-gray-200 rounded-full p-4 shadow-lg hover:shadow-xl transition-all duration-200"
                 asChild
               >
                 <Link to="/cards">
@@ -170,18 +183,30 @@ const Dashboard = () => {
         </div>
 
         {/* Promotional Section */}
-        <div className="bg-blue-600 rounded-2xl p-6 text-white relative overflow-hidden">
-          <div className="flex items-center justify-between">
-            <div>
-              <h3 className="text-xl font-bold mb-2">Introducing bill station physical card</h3>
+        <div className="bg-gradient-to-r from-[#0B63BC] via-[#0B63BC]/90 to-[#0B63BC]/80 rounded-2xl p-8 text-white relative overflow-hidden shadow-xl">
+          {/* Background decorative elements */}
+          <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-2xl"></div>
+          <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/5 rounded-full blur-xl"></div>
+          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-40 h-40 bg-white/5 rounded-full blur-3xl"></div>
+          
+          <div className="relative z-10 flex items-center justify-between">
+            <div className="flex-1">
+              <h3 className="text-2xl font-bold mb-3">Introducing bill station physical card</h3>
+              <p className="text-white/80 text-sm mb-4">Get your personalized physical card for seamless transactions worldwide</p>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="bg-white text-gray-900 border-white hover:bg-gray-50 hover:border-gray-200 transition-all duration-200"
+              >
+                Learn More
+              </Button>
             </div>
-            <div className="relative">
-              <div className="w-16 h-12 bg-white rounded-lg shadow-lg flex items-center justify-center">
-                <span className="text-blue-600 font-bold text-xs">1234 5678 9105 8745</span>
-              </div>
-              <div className="w-16 h-12 bg-blue-400 rounded-lg shadow-lg flex items-center justify-center absolute -top-2 -right-2">
-                <DollarSign className="h-6 w-6 text-white" />
-              </div>
+            <div className="relative flex-shrink-0">
+              <img 
+                src="/image14.png" 
+                alt="Physical Card" 
+                className="w-48 h-auto object-contain drop-shadow-2xl transform -rotate-6 hover:rotate-0 transition-transform duration-300"
+              />
             </div>
           </div>
         </div>
@@ -199,8 +224,8 @@ const Dashboard = () => {
               >
                 <Link to={action.href}>
                   <div className="text-center group">
-                    <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3 group-hover:bg-blue-50 transition-colors duration-200">
-                      <action.icon className="h-7 w-7 text-blue-600" />
+                    <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3 group-hover:bg-[#0B63BC]/10 transition-colors duration-200">
+                      <action.icon className="h-7 w-7 text-[#0B63BC]" />
                     </div>
                     <span className="text-sm font-medium text-gray-700">{action.label}</span>
                   </div>
@@ -210,18 +235,14 @@ const Dashboard = () => {
           </div>
         </div>
 
-        {/* Mobile-only: Recent Transactions */}
-        {isMobile && (
+        {/* Desktop: Recent Transactions */}
+        {!isMobile && (
           <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
             <div className="flex items-center justify-between px-6 pt-6 pb-2">
-              <span className="text-lg font-bold text-gray-900 flex items-center gap-2">
-                <Activity className="h-5 w-5 text-blue-600" /> Recent Transactions
+              <span className="text-lg font-bold text-gray-900">
+                Recent Transactions
               </span>
-              <Button variant="ghost" size="sm" asChild className="hover:bg-blue-50 transition-colors duration-200">
-                <Link to="/transactions" className="flex items-center gap-2 text-blue-600">
-                  View All <ArrowRight className="h-4 w-4" />
-                </Link>
-              </Button>
+              <ViewAllButton />
             </div>
             <div className="divide-y divide-gray-100">
               {transactions.length === 0 ? (
@@ -236,39 +257,103 @@ const Dashboard = () => {
                   </div>
                   <h3 className="text-base font-semibold text-gray-900 mb-2">No transactions yet</h3>
                   <p className="text-gray-500 mb-4 max-w-xs mx-auto text-xs">Start by making your first payment or transfer to see your transaction history here</p>
-                  <Button asChild size="sm" className="bg-blue-600 hover:bg-blue-700 shadow-lg rounded-full px-6 transition-all duration-200">
+                  <Button asChild size="sm" className="bg-[#0B63BC] hover:bg-[#0B63BC]/90 shadow-lg rounded-full px-6 transition-all duration-200">
+                    <Link to="/transfer">Send Money</Link>
+                  </Button>
+                </motion.div>
+              ) : (
+                <AnimatePresence>
+                  {transactions.slice(0, 5).map((transaction, index) => (
+                    <Link key={transaction.id} to={`/transactions/${transaction.id}`}>
+                      <motion.div 
+                        className={`flex items-center justify-between px-6 py-4 ${index === Math.min(transactions.length - 1, 4) ? '' : 'border-b border-gray-100'} hover:bg-gray-50 transition-colors duration-200 cursor-pointer`}
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ duration: 0.6, delay: 0.5 + index * 0.1 }}
+                        whileHover={{ x: 5 }}
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center shadow-md overflow-hidden">
+                            <img
+                              src={getBankLogo({ code: transaction.bankCode, name: transaction.bankName || transaction.description })}
+                              alt={transaction.bankName || transaction.description || 'Bank'}
+                              className="w-8 h-8 object-contain"
+                              onError={e => { e.currentTarget.src = '/placeholder.svg'; }}
+                            />
+                          </div>
+                          <div>
+                            <p className="font-semibold text-gray-900 text-sm">{transaction.description || 'Transaction'}</p>
+                            <p className="text-xs text-gray-500">{transaction.created_at ? new Date(transaction.created_at).toLocaleDateString() : 'Recently'}</p>
+                          </div>
+                        </div>
+                        <p className={`font-bold text-base ${transaction.type === 'credit' ? 'text-green-600' : 'text-red-600'}`}>
+                          {transaction.type === 'credit' ? '+' : '-'}₦{(transaction.amount || 0).toLocaleString()}
+                        </p>
+                      </motion.div>
+                    </Link>
+                  ))}
+                </AnimatePresence>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Mobile-only: Recent Transactions */}
+        {isMobile && (
+          <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
+            <div className="flex items-center justify-between px-6 pt-6 pb-2">
+              <span className="text-lg font-bold text-gray-900">
+                Recent Transactions
+              </span>
+              <ViewAllButton />
+            </div>
+            <div className="divide-y divide-gray-100">
+              {transactions.length === 0 ? (
+                <motion.div 
+                  className="text-center py-12"
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ duration: 0.6, delay: 0.5 }}
+                >
+                  <div className="w-16 h-16 bg-gradient-to-br from-gray-100 to-gray-200 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
+                    <CreditCard className="h-8 w-8 text-gray-400" />
+                  </div>
+                  <h3 className="text-base font-semibold text-gray-900 mb-2">No transactions yet</h3>
+                  <p className="text-gray-500 mb-4 max-w-xs mx-auto text-xs">Start by making your first payment or transfer to see your transaction history here</p>
+                  <Button asChild size="sm" className="bg-[#0B63BC] hover:bg-[#0B63BC]/90 shadow-lg rounded-full px-6 transition-all duration-200">
                     <Link to="/transfer">Send Money</Link>
                   </Button>
                 </motion.div>
               ) : (
                 <AnimatePresence>
                   {transactions.map((transaction, index) => (
-                    <motion.div 
-                      key={transaction.id} 
-                      className={`flex items-center justify-between px-6 py-4 ${index === transactions.length - 1 ? '' : 'border-b border-gray-100'} hover:bg-gray-50 transition-colors duration-200`}
-                      initial={{ opacity: 0, x: -20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ duration: 0.6, delay: 0.5 + index * 0.1 }}
-                      whileHover={{ x: 5 }}
-                    >
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center shadow-md overflow-hidden">
-                          <img
-                            src={getBankLogo({ code: transaction.bankCode, name: transaction.bankName || transaction.description })}
-                            alt={transaction.bankName || transaction.description || 'Bank'}
-                            className="w-8 h-8 object-contain"
-                            onError={e => { e.currentTarget.src = '/placeholder.svg'; }}
-                          />
+                    <Link key={transaction.id} to={`/transactions/${transaction.id}`}>
+                      <motion.div 
+                        className={`flex items-center justify-between px-6 py-4 ${index === transactions.length - 1 ? '' : 'border-b border-gray-100'} hover:bg-gray-50 transition-colors duration-200 cursor-pointer`}
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ duration: 0.6, delay: 0.5 + index * 0.1 }}
+                        whileHover={{ x: 5 }}
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center shadow-md overflow-hidden">
+                            <img
+                              src={getBankLogo({ code: transaction.bankCode, name: transaction.bankName || transaction.description })}
+                              alt={transaction.bankName || transaction.description || 'Bank'}
+                              className="w-8 h-8 object-contain"
+                              onError={e => { e.currentTarget.src = '/placeholder.svg'; }}
+                            />
+                          </div>
+                          <div>
+                            <p className="font-semibold text-gray-900 text-sm">{transaction.description || 'Transaction'}</p>
+                            <p className="text-xs text-gray-500">{transaction.created_at ? new Date(transaction.created_at).toLocaleDateString() : 'Recently'}</p>
+                          </div>
                         </div>
-                        <div>
-                          <p className="font-semibold text-gray-900 text-sm">{transaction.description || 'Transaction'}</p>
-                          <p className="text-xs text-gray-500">{transaction.created_at ? new Date(transaction.created_at).toLocaleDateString() : 'Recently'}</p>
-                        </div>
-                      </div>
-                      <p className={`font-bold text-base ${transaction.type === 'credit' ? 'text-green-600' : 'text-red-600'}`}>
-                        {transaction.type === 'credit' ? '+' : '-'}₦{(transaction.amount || 0).toLocaleString()}
-                      </p>
-                    </motion.div>
+                        <p className={`font-bold text-base ${transaction.type === 'credit' ? 'text-green-600' : 'text-red-600'}`}>
+                          {transaction.type === 'credit' ? '+' : '-'}₦{(transaction.amount || 0).toLocaleString()}
+                        </p>
+                      </motion.div>
+                    </Link>
                   ))}
                 </AnimatePresence>
               )}

@@ -171,7 +171,7 @@ const Cards = () => {
           </div>
           <Button
             onClick={handleAddCard}
-            className="bg-blue-600 hover:bg-blue-700 text-white"
+                            className="bg-[#0B63BC] hover:bg-[#0B63BC]/90 text-white"
           >
             <Plus className="h-4 w-4 mr-2" />
             Add Card
@@ -186,7 +186,7 @@ const Cards = () => {
                 {/* Card Network Logo */}
                 <div className="absolute top-4 left-4">
                   {card.brand === 'visa' ? (
-                    <div className="w-12 h-8 bg-blue-600 rounded flex items-center justify-center">
+                    <div className="w-12 h-8 bg-[#0B63BC] rounded flex items-center justify-center">
                       <div className="text-white font-bold text-xs">VISA</div>
                     </div>
                   ) : card.brand === 'mastercard' ? (
@@ -310,7 +310,7 @@ const Cards = () => {
             <p className="text-gray-600 mb-6">
               Add your first card to start making payments
             </p>
-            <Button onClick={handleAddCard} className="bg-blue-600 hover:bg-blue-700">
+            <Button onClick={handleAddCard} className="bg-[#0B63BC] hover:bg-[#0B63BC]/90">
               <Plus className="h-4 w-4 mr-2" />
               Add Your First Card
             </Button>

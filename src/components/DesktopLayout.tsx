@@ -1,12 +1,11 @@
 import { ReactNode } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { 
   Home, 
   Building2, 
   CreditCard, 
   ArrowUpDown, 
   FileText,
-  Users,
   ChevronDown,
   ArrowRight,
   Send,
@@ -18,9 +17,8 @@ import {
   Gift,
   Car,
   User,
-  Settings,
-  HelpCircle,
-  LogOut
+  LogOut,
+  Ticket
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState, useEffect } from "react";
@@ -33,6 +31,7 @@ interface DesktopLayoutProps {
 
 const DesktopLayout = ({ children }: DesktopLayoutProps) => {
   const location = useLocation();
+  const navigate = useNavigate();
   const [animateSidebar, setAnimateSidebar] = useState(false);
   const [expandedSections, setExpandedSections] = useState({
     main: true,
@@ -53,6 +52,16 @@ const DesktopLayout = ({ children }: DesktopLayoutProps) => {
     }));
   };
 
+  const handleLogout = () => {
+    // Clear any stored authentication data
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    sessionStorage.clear();
+    
+    // Navigate to login page
+    navigate('/login');
+  };
+
   const mainNavItems = [
     { icon: Home, label: "Dashboard", href: "/dashboard" },
     { icon: Send, label: "Transfer", href: "/transfer" },
@@ -64,38 +73,22 @@ const DesktopLayout = ({ children }: DesktopLayoutProps) => {
   const serviceItems = [
     { icon: RefreshCw, label: "Airtime Swap", href: "/airtime-swap" },
     { icon: Plane, label: "Flight Booking", href: "/flight-booking" },
+    { icon: Plane, label: "Book Private Jet", href: "/flight-book-private-jet" },
     { icon: Bitcoin, label: "Bitcoin Trading", href: "/bitcoin-trading" },
+    { icon: DollarSign, label: "Convert Asset", href: "/convert-asset" },
     { icon: DollarSign, label: "Virtual Card", href: "/virtual-card" },
     { icon: Gift, label: "Gift Cards", href: "/gift-card" },
+    { icon: Ticket, label: "Buy Tickets", href: "/buy-tickets" },
     { icon: Building2, label: "Hotel Booking", href: "/hotel-booking" },
     { icon: Car, label: "Chauffeur Service", href: "/chauffeur-service" },
+    { icon: Car, label: "Book Ride", href: "/book-ride" },
   ];
 
   const accountItems = [
     { icon: User, label: "Profile", href: "/profile" },
-    { icon: Settings, label: "Settings", href: "/settings" },
-    { icon: HelpCircle, label: "Help & Support", href: "/help" },
   ];
 
-  const renderNavItems = (items: typeof mainNavItems) => {
-    return items.map((item) => {
-      const isActive = location.pathname === item.href;
-      return (
-        <Link
-          key={item.href}
-          to={item.href}
-          className={`flex items-center px-4 py-3 rounded-lg transition-all duration-200 ${
-            isActive
-              ? "bg-blue-50 text-blue-600 border-r-2 border-blue-600"
-              : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
-          }`}
-        >
-          <item.icon className="h-5 w-5 mr-3" />
-          <span className="font-medium">{item.label}</span>
-        </Link>
-      );
-    });
-  };
+
 
   return (
     <div className="min-h-screen bg-white">
@@ -134,8 +127,30 @@ const DesktopLayout = ({ children }: DesktopLayoutProps) => {
                     </button>
                   </div>
                   {expandedSections.main && (
-                    <div className="space-y-1">
-                      {renderNavItems(mainNavItems)}
+                    <div className="space-y-2">
+                      {mainNavItems.map((item) => {
+                        const isActive = location.pathname === item.href;
+                        return (
+                          <Link
+                            key={item.href}
+                            to={item.href}
+                            className={`flex items-center px-4 py-3 rounded-xl transition-all duration-200 ${
+                              isActive
+                                ? "bg-gradient-to-r from-[#0B63BC]/10 to-[#0B63BC]/20 text-[#0B63BC] border border-[#0B63BC]/30 shadow-sm"
+                                : "text-gray-700 hover:bg-gradient-to-r hover:from-gray-50 hover:to-[#0B63BC]/10 hover:text-[#0B63BC] hover:border hover:border-[#0B63BC]/20"
+                            }`}
+                          >
+                            <div className={`p-2 rounded-lg mr-3 ${
+                              isActive 
+                                ? "bg-[#0B63BC] text-white" 
+                                : "bg-[#0B63BC]/10 text-[#0B63BC]"
+                            }`}>
+                              <item.icon className="h-4 w-4" />
+                            </div>
+                            <span className="font-medium">{item.label}</span>
+                          </Link>
+                        );
+                      })}
                     </div>
                   )}
                 </div>
@@ -152,8 +167,30 @@ const DesktopLayout = ({ children }: DesktopLayoutProps) => {
                     </button>
                   </div>
                   {expandedSections.services && (
-                    <div className="space-y-1">
-                      {renderNavItems(serviceItems)}
+                    <div className="space-y-2">
+                      {serviceItems.map((item) => {
+                        const isActive = location.pathname === item.href;
+                        return (
+                          <Link
+                            key={item.href}
+                            to={item.href}
+                            className={`flex items-center px-4 py-3 rounded-xl transition-all duration-200 ${
+                              isActive
+                                ? "bg-gradient-to-r from-[#0B63BC]/10 to-[#0B63BC]/20 text-[#0B63BC] border border-[#0B63BC]/30 shadow-sm"
+                                : "text-gray-700 hover:bg-gradient-to-r hover:from-gray-50 hover:to-[#0B63BC]/10 hover:text-[#0B63BC] hover:border hover:border-[#0B63BC]/20"
+                            }`}
+                          >
+                            <div className={`p-2 rounded-lg mr-3 ${
+                              isActive 
+                                ? "bg-[#0B63BC] text-white" 
+                                : "bg-[#0B63BC]/10 text-[#0B63BC]"
+                            }`}>
+                              <item.icon className="h-4 w-4" />
+                            </div>
+                            <span className="font-medium">{item.label}</span>
+                          </Link>
+                        );
+                      })}
                     </div>
                   )}
                 </div>
@@ -170,8 +207,30 @@ const DesktopLayout = ({ children }: DesktopLayoutProps) => {
                     </button>
                   </div>
                   {expandedSections.account && (
-                    <div className="space-y-1">
-                      {renderNavItems(accountItems)}
+                    <div className="space-y-2">
+                      {accountItems.map((item) => {
+                        const isActive = location.pathname === item.href;
+                        return (
+                          <Link
+                            key={item.href}
+                            to={item.href}
+                            className={`flex items-center px-4 py-3 rounded-xl transition-all duration-200 ${
+                              isActive
+                                ? "bg-gradient-to-r from-[#0B63BC]/10 to-[#0B63BC]/20 text-[#0B63BC] border border-[#0B63BC]/30 shadow-sm"
+                                : "text-gray-700 hover:bg-gradient-to-r hover:from-gray-50 hover:to-[#0B63BC]/10 hover:text-[#0B63BC] hover:border hover:border-[#0B63BC]/20"
+                            }`}
+                          >
+                            <div className={`p-2 rounded-lg mr-3 ${
+                              isActive 
+                                ? "bg-[#0B63BC] text-white" 
+                                : "bg-[#0B63BC]/10 text-[#0B63BC]"
+                            }`}>
+                              <item.icon className="h-4 w-4" />
+                            </div>
+                            <span className="font-medium">{item.label}</span>
+                          </Link>
+                        );
+                      })}
                     </div>
                   )}
                 </div>
@@ -180,17 +239,13 @@ const DesktopLayout = ({ children }: DesktopLayoutProps) => {
               {/* Bottom Section */}
               <div className="pt-6 border-t border-gray-100">
                 <div className="space-y-2">
-                  <Link
-                    to="/onboarding"
-                    className="flex items-center px-4 py-3 rounded-lg text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-all duration-200"
-                  >
-                    <Users className="h-5 w-5 mr-3" />
-                    <span className="font-medium">Onboarding</span>
-                  </Link>
                   <button
-                    className="flex items-center w-full px-4 py-3 rounded-lg text-red-600 hover:bg-red-50 transition-all duration-200"
+                    onClick={handleLogout}
+                    className="flex items-center w-full px-4 py-3 rounded-xl text-red-600 hover:bg-gradient-to-r hover:from-red-50 hover:to-red-100 hover:border hover:border-red-200 transition-all duration-200"
                   >
-                    <LogOut className="h-5 w-5 mr-3" />
+                    <div className="p-2 rounded-lg mr-3 bg-red-100 text-red-600">
+                      <LogOut className="h-4 w-4" />
+                    </div>
                     <span className="font-medium">Logout</span>
                   </button>
                 </div>
