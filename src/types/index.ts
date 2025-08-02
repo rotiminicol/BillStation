@@ -6,6 +6,9 @@ export interface User {
   phone: string;
   balance: number;
   accountNumber: string;
+  profilePicture?: string;
+  tier: 'tier1' | 'tier2' | 'tier3';
+  tierLimit: number;
   created_at?: string;
   address?: string;
   // Note: Removed optional 'name' field to enforce consistent use of firstName/lastName

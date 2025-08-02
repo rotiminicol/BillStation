@@ -2,8 +2,9 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Link } from "react-router-dom";
-import { Eye, EyeOff, Plus, Send, CreditCard, Smartphone, Zap, Gift, TrendingUp, ArrowRight, Sparkles, Activity, DollarSign, RefreshCw, Plane, Bitcoin, Users, Shield, Globe, Clock, CheckCircle, AlertCircle, Building2, ChevronDown, ArrowUpDown, Phone, Tv, Zap as Electricity, Gift as GiftCard, MoreHorizontal } from "lucide-react";
+import { Eye, EyeOff, Plus, Send, CreditCard, Smartphone, Zap, Gift, TrendingUp, ArrowRight, Sparkles, Activity, DollarSign, RefreshCw, Plane, Bitcoin, Users, Shield, Globe, Clock, CheckCircle, AlertCircle, Building2, ChevronDown, ArrowUpDown, Phone, Tv, Zap as Electricity, Gift as GiftCard, MoreHorizontal, Crown } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import Navigation from "@/components/Navigation";
 import DesktopLayout from "@/components/DesktopLayout";
@@ -62,16 +63,19 @@ const Dashboard = () => {
       if (!target.closest('.language-dropdown')) {
         setShowLanguageDropdown(false);
       }
+      if (!target.closest('.currency-dropdown')) {
+        setShowCurrencyDropdown(false);
+      }
     };
 
-    if (showLanguageDropdown) {
+    if (showLanguageDropdown || showCurrencyDropdown) {
       document.addEventListener('mousedown', handleClickOutside);
     }
 
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
-  }, [showLanguageDropdown]);
+  }, [showLanguageDropdown, showCurrencyDropdown]);
 
   // Updated easy actions with real project pages - limited to 8 items
   const easyActions = [
@@ -96,6 +100,15 @@ const Dashboard = () => {
   const userEmail = user?.email || userData?.email || "user@example.com";
   const userBalance = userData?.balance || 100000; // Default to 100k if no balance set
 
+  const copyToClipboard = (text: string, label: string) => {
+    navigator.clipboard.writeText(text);
+    toast({
+      title: "Copied!",
+      description: `${label} copied to clipboard`,
+      duration: 2000,
+    });
+  };
+
   const DashboardContent = () => {
     const isMobile = window.innerWidth < 1024;
     return (
@@ -103,23 +116,30 @@ const Dashboard = () => {
         {/* Top Section: User Greeting and Actions */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-[#0B63BC] rounded-full flex items-center justify-center">
-              <span className="text-white font-semibold text-sm">
-                {(userData?.firstName?.[0] || 'A') + (userData?.lastName?.[0] || '')}
-              </span>
-            </div>
+            <Avatar className="w-10 h-10">
+              <AvatarImage 
+                src={userData?.profilePicture} 
+                alt={`${userData?.firstName || 'User'} ${userData?.lastName || ''}`}
+              />
+              <AvatarFallback className="bg-[#0B63BC] text-white font-semibold text-sm">
+                {userData?.profilePicture ? 
+                  (userData?.firstName?.[0] || 'A') + (userData?.lastName?.[0] || '') :
+                  userEmail.charAt(0).toUpperCase()
+                }
+              </AvatarFallback>
+            </Avatar>
             <div>
               <h1 className="text-2xl font-bold text-gray-900">Hello {userEmail}</h1>
               <p className="text-gray-600 text-sm">Send save and receive funds in various currencies.</p>
             </div>
           </div>
           <div className="flex items-center gap-4">
-            {/* Currency Rates Dropdown */}
-            <div className="relative">
+                        {/* Currency Rates Dropdown */}
+            <div className="relative currency-dropdown">
               <Button 
                 variant="outline" 
                 size="sm" 
-                className="text-[#0B63BC] hover:bg-[#0B63BC]/10 border-[#0B63BC]/30 hover:border-[#0B63BC]/50 shadow-sm hover:shadow-md transition-all duration-200 px-4 py-2"
+                className="text-[#0B63BC] hover:bg-[#0B63BC]/10 border-[#0B63BC]/30 hover:border-[#0B63BC]/50 shadow-sm hover:shadow-md transition-all duration-300 px-4 py-2 hover:scale-105 hover:-translate-y-0.5"
                 onMouseEnter={() => setShowCurrencyDropdown(true)}
                 onMouseLeave={() => setShowCurrencyDropdown(false)}
               >
@@ -130,27 +150,24 @@ const Dashboard = () => {
               <AnimatePresence>
                 {showCurrencyDropdown && (
                   <motion.div
-                    initial={{ opacity: 0, y: -10, scale: 0.95 }}
+                    initial={{ opacity: 0, y: 8, scale: 0.98 }}
                     animate={{ opacity: 1, y: 0, scale: 1 }}
-                    exit={{ opacity: 0, y: -10, scale: 0.95 }}
-                    transition={{ duration: 0.2 }}
-                    className="absolute top-full left-0 mt-2 w-80 bg-white rounded-xl shadow-xl border border-gray-200 z-50 overflow-hidden"
+                    exit={{ opacity: 0, y: 8, scale: 0.98 }}
+                    transition={{ duration: 0.15, ease: "easeOut" }}
+                    className="absolute top-full right-0 mt-2 w-80 bg-white/95 backdrop-blur-md rounded-xl shadow-lg border border-gray-200/50 z-50 overflow-hidden"
                     onMouseEnter={() => setShowCurrencyDropdown(true)}
                     onMouseLeave={() => setShowCurrencyDropdown(false)}
                   >
-                    <div className="p-4">
-                      <h3 className="text-sm font-semibold text-gray-900 mb-3">Currency Exchange Rates</h3>
-                      <div className="space-y-2 max-h-64 overflow-y-auto">
-                        {Object.entries(currencyRates).map(([currency, rate]) => (
-                          <div key={currency} className="flex items-center justify-between py-2 px-3 rounded-lg hover:bg-gray-50 transition-colors">
-                            <div className="flex items-center gap-3">
-                              <span className="text-lg">{currencySymbols[currency as keyof typeof currencySymbols]}</span>
-                              <span className="font-medium text-gray-900">{currency}</span>
+                    <div className="p-3">
+                      <div className="text-xs font-medium text-gray-500 mb-2 px-1">Exchange Rates (NGN)</div>
+                      <div className="space-y-1 max-h-64 overflow-y-auto hide-scrollbar">
+                        {Object.entries(currencyRates).slice(0, 8).map(([currency, rate]) => (
+                          <div key={currency} className="flex items-center justify-between py-2 px-2 rounded-lg hover:bg-gray-50/80 transition-colors duration-150">
+                            <div className="flex items-center gap-2">
+                              <span className="text-sm font-medium text-gray-700">{currency}</span>
+                              <span className="text-xs text-gray-400">{currencySymbols[currency as keyof typeof currencySymbols]}</span>
                             </div>
-                            <div className="text-right">
-                              <div className="text-sm font-semibold text-gray-900">₦{rate.toLocaleString()}</div>
-                              <div className="text-xs text-gray-500">1 {currency} = ₦{rate}</div>
-                            </div>
+                            <span className="text-sm font-semibold text-[#0B63BC]">₦{rate.toLocaleString()}</span>
                           </div>
                         ))}
                       </div>
@@ -165,9 +182,10 @@ const Dashboard = () => {
               <Button 
                 variant="outline" 
                 size="sm" 
-                className="flex items-center gap-2 border-gray-200 hover:border-gray-300 shadow-sm hover:shadow-md transition-all duration-200 px-4 py-2"
+                className="flex items-center gap-2 border-gray-200 hover:border-gray-300 shadow-sm hover:shadow-md transition-all duration-300 px-4 py-2 hover:scale-105 hover:-translate-y-0.5"
                 onClick={() => setShowLanguageDropdown(!showLanguageDropdown)}
               >
+                <Globe className="h-4 w-4" />
                 English (US)
                 <ChevronDown className="h-4 w-4" />
               </Button>
@@ -176,24 +194,27 @@ const Dashboard = () => {
               <AnimatePresence>
                 {showLanguageDropdown && (
                   <motion.div
-                    initial={{ opacity: 0, y: -10, scale: 0.95 }}
+                    initial={{ opacity: 0, y: 8, scale: 0.98 }}
                     animate={{ opacity: 1, y: 0, scale: 1 }}
-                    exit={{ opacity: 0, y: -10, scale: 0.95 }}
-                    transition={{ duration: 0.2 }}
-                    className="absolute top-full right-0 mt-2 w-48 bg-white rounded-xl shadow-xl border border-gray-200 z-50"
+                    exit={{ opacity: 0, y: 8, scale: 0.98 }}
+                    transition={{ duration: 0.15, ease: "easeOut" }}
+                    className="absolute top-full right-0 mt-2 w-48 bg-white/95 backdrop-blur-md rounded-xl shadow-lg border border-gray-200/50 z-50 overflow-hidden"
                   >
                     <div className="p-2">
                       {languages.map((language) => (
                         <button
                           key={language.code}
-                          className="w-full flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-50 transition-colors text-left"
+                          className="w-full flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-50/80 transition-colors duration-150 text-left"
                           onClick={() => {
                             setShowLanguageDropdown(false);
                             // Handle language change here
                           }}
                         >
-                          <span className="text-lg">{language.flag}</span>
-                          <span className="text-sm font-medium text-gray-900">{language.name}</span>
+                          <span className="text-base">{language.flag}</span>
+                          <span className="text-sm font-medium text-gray-700 flex-1">{language.name}</span>
+                          {language.code === 'en' && (
+                            <div className="w-1.5 h-1.5 bg-[#0B63BC] rounded-full"></div>
+                          )}
                         </button>
                       ))}
                     </div>
@@ -238,6 +259,58 @@ const Dashboard = () => {
                 transition={{ duration: 0.3 }}
               >
                 {showBalance ? `₦ ${userBalance.toLocaleString()}.00` : "••••••••"}
+              </motion.div>
+              
+              {/* Account Details */}
+              <motion.div 
+                className="space-y-3"
+                key={showBalance ? 'details-visible' : 'details-hidden'}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3, delay: 0.1 }}
+              >
+                {/* Account Number */}
+                <div className="flex items-center justify-center gap-2">
+                  <span className="text-white/70 text-sm">Account:</span>
+                  <span className="text-white font-mono text-sm">
+                    {showBalance ? userData?.accountNumber || "1234567890" : "••••••••••"}
+                  </span>
+                  <button 
+                    className="text-white/60 hover:text-white/80 transition-colors"
+                    onClick={() => copyToClipboard(userData?.accountNumber || "1234567890", "Account Number")}
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                    </svg>
+                  </button>
+                </div>
+
+                {/* Wallet Address */}
+                <div className="flex items-center justify-center gap-2">
+                  <span className="text-white/70 text-sm">Wallet:</span>
+                  <span className="text-white font-mono text-xs max-w-32 truncate">
+                    {showBalance ? `0x${String(userData?.id || "1234567890abcdef").slice(0, 16)}...` : "••••••••••••••••"}
+                  </span>
+                  <button 
+                    className="text-white/60 hover:text-white/80 transition-colors"
+                    onClick={() => copyToClipboard(`0x${String(userData?.id || "1234567890abcdef")}`, "Wallet Address")}
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                    </svg>
+                  </button>
+                </div>
+
+                {/* Account Status */}
+                <div className="flex items-center justify-center gap-2">
+                  <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+                  <span className="text-white/70 text-sm">
+                    {showBalance ? "Active" : "••••"}
+                  </span>
+                  <span className="text-white/50 text-xs">
+                    {showBalance ? "• Verified" : "••••••"}
+                  </span>
+                </div>
               </motion.div>
             </div>
 
@@ -307,6 +380,37 @@ const Dashboard = () => {
             </div>
           </div>
         </div>
+
+        {/* Tier Upgrade Section */}
+        {(userData?.tier === 'tier1' || !userData?.tier) && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+            className="bg-gradient-to-r from-yellow-50 to-orange-50 border border-yellow-200 rounded-2xl p-6 mb-8"
+          >
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 bg-gradient-to-r from-yellow-400 to-orange-400 rounded-full flex items-center justify-center">
+                  <Crown className="h-6 w-6 text-white" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900">Upgrade Your Tier</h3>
+                  <p className="text-sm text-gray-600">Unlock higher transaction limits and premium features</p>
+                </div>
+              </div>
+              <Button 
+                className="bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-white"
+                asChild
+              >
+                <Link to="/upgrade-tier">
+                  Upgrade Now
+                  <ArrowRight className="h-4 w-4 ml-2" />
+                </Link>
+              </Button>
+            </div>
+          </motion.div>
+        )}
 
         {/* Easy Actions Section */}
         <div>

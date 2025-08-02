@@ -1,515 +1,340 @@
-import { useState, useEffect } from "react";
-import { Link, useSearchParams } from "react-router-dom";
-import { ArrowUpRight, ArrowDownLeft, CreditCard, Building2, Plane, Gift, RefreshCw, Filter, Search, ArrowRight, TrendingUp, Activity } from "lucide-react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { useToast } from "@/hooks/use-toast";
+import { useState } from "react";
+import { 
+  ArrowUpDown, 
+  Plane, 
+  Hotel, 
+  Car, 
+  CreditCard, 
+  Gift, 
+  Wifi, 
+  Zap, 
+  Tv, 
+  Ticket, 
+  Bitcoin, 
+  DollarSign,
+  TrendingUp,
+  Activity,
+  Calendar,
+  Filter,
+  Search
+} from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
 import DesktopLayout from "@/components/DesktopLayout";
-import Navigation from "@/components/Navigation";
-
-interface Transaction {
-  id: string;
-  type: 'credit' | 'debit';
-  category: 'transfer' | 'bills' | 'airtime' | 'crypto' | 'flight' | 'gift-card' | 'hotel' | 'chauffeur';
-  amount: number;
-  description: string;
-  recipient?: string;
-  sender?: string;
-  date: string;
-  time: string;
-  status: 'success' | 'pending' | 'failed';
-  reference: string;
-  fee?: number;
-  balance: number;
-}
 
 const Transactions = () => {
-  const [searchParams, setSearchParams] = useSearchParams();
-  const [transactions, setTransactions] = useState<Transaction[]>([]);
-  const [filteredTransactions, setFilteredTransactions] = useState<Transaction[]>([]);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [statusFilter, setStatusFilter] = useState(searchParams.get("status") || "all");
-  const [categoryFilter, setCategoryFilter] = useState(searchParams.get("category") || "all");
-  const [dateFilter, setDateFilter] = useState(searchParams.get("date") || "all");
-  const { toast } = useToast();
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const navigate = useNavigate();
 
-  const statusOptions = [
-    { value: "all", label: "All Status" },
-    { value: "success", label: "Successful" },
-    { value: "pending", label: "Pending" },
-    { value: "failed", label: "Failed" },
+  const transactionCategories = [
+    {
+      id: "all",
+      title: "All Transactions",
+      description: "View all your transactions across all services",
+      icon: Activity,
+      color: "from-blue-500 to-blue-600",
+      bgColor: "bg-blue-50",
+      iconColor: "text-blue-600",
+      href: "/transactions/all",
+      count: 156,
+      totalAmount: "₦2,450,000",
+      buttonText: "View All Transactions"
+    },
+    {
+      id: "transfer",
+      title: "Transfer Transactions",
+      description: "Money transfers and payments",
+      icon: ArrowUpDown,
+      color: "from-green-500 to-green-600",
+      bgColor: "bg-green-50",
+      iconColor: "text-green-600",
+      href: "/transactions/transfer",
+      count: 45,
+      totalAmount: "₦850,000",
+      buttonText: "View Transfer History"
+    },
+    {
+      id: "bills",
+      title: "Bills Transactions",
+      description: "Utility and bill payments",
+      icon: Zap,
+      color: "from-yellow-500 to-yellow-600",
+      bgColor: "bg-yellow-50",
+      iconColor: "text-yellow-600",
+      href: "/transactions/bills",
+      count: 23,
+      totalAmount: "₦125,000",
+      buttonText: "View Bills History"
+    },
+    {
+      id: "giftcard",
+      title: "Gift Card Transactions",
+      description: "Gift card purchases and sales",
+      icon: Gift,
+      color: "from-purple-500 to-purple-600",
+      bgColor: "bg-purple-50",
+      iconColor: "text-purple-600",
+      href: "/transactions/giftcard",
+      count: 18,
+      totalAmount: "₦320,000",
+      buttonText: "View Gift Card History"
+    },
+    {
+      id: "airtime",
+      title: "Airtime Transactions",
+      description: "Airtime purchases and swaps",
+      icon: Wifi,
+      color: "from-indigo-500 to-indigo-600",
+      bgColor: "bg-indigo-50",
+      iconColor: "text-indigo-600",
+      href: "/transactions/airtime",
+      count: 32,
+      totalAmount: "₦95,000",
+      buttonText: "View Airtime History"
+    },
+    {
+      id: "data",
+      title: "Data Transactions",
+      description: "Data bundle purchases",
+      icon: Wifi,
+      color: "from-cyan-500 to-cyan-600",
+      bgColor: "bg-cyan-50",
+      iconColor: "text-cyan-600",
+      href: "/transactions/data",
+      count: 28,
+      totalAmount: "₦180,000",
+      buttonText: "View Data History"
+    },
+    {
+      id: "electricity",
+      title: "Electricity Transactions",
+      description: "Electricity bill payments",
+      icon: Zap,
+      color: "from-orange-500 to-orange-600",
+      bgColor: "bg-orange-50",
+      iconColor: "text-orange-600",
+      href: "/transactions/electricity",
+      count: 15,
+      totalAmount: "₦75,000",
+      buttonText: "View Electricity History"
+    },
+    {
+      id: "cable-tv",
+      title: "Cable TV Transactions",
+      description: "Cable TV subscription payments",
+      icon: Tv,
+      color: "from-red-500 to-red-600",
+      bgColor: "bg-red-50",
+      iconColor: "text-red-600",
+      href: "/transactions/cable-tv",
+      count: 12,
+      totalAmount: "₦60,000",
+      buttonText: "View Cable TV History"
+    },
+    {
+      id: "buy-tickets",
+      title: "Buy Tickets Transactions",
+      description: "Event and entertainment tickets",
+      icon: Ticket,
+      color: "from-pink-500 to-pink-600",
+      bgColor: "bg-pink-50",
+      iconColor: "text-pink-600",
+      href: "/transactions/buy-tickets",
+      count: 8,
+      totalAmount: "₦45,000",
+      buttonText: "View Tickets History"
+    },
+    {
+      id: "flight-booking",
+      title: "Flight Booking Transactions",
+      description: "Flight and travel bookings",
+      icon: Plane,
+      color: "from-sky-500 to-sky-600",
+      bgColor: "bg-sky-50",
+      iconColor: "text-sky-600",
+      href: "/transactions/flight-booking",
+      count: 6,
+      totalAmount: "₦280,000",
+      buttonText: "View Flight History"
+    },
+    {
+      id: "hotel-booking",
+      title: "Hotel Booking Transactions",
+      description: "Hotel and accommodation bookings",
+      icon: Hotel,
+      color: "from-emerald-500 to-emerald-600",
+      bgColor: "bg-emerald-50",
+      iconColor: "text-emerald-600",
+      href: "/transactions/hotel-booking",
+      count: 4,
+      totalAmount: "₦120,000",
+      buttonText: "View Hotel History"
+    },
+    {
+      id: "chauffeur-service",
+      title: "Chauffeur Service Transactions",
+      description: "Chauffeur and transportation services",
+      icon: Car,
+      color: "from-violet-500 to-violet-600",
+      bgColor: "bg-violet-50",
+      iconColor: "text-violet-600",
+      href: "/transactions/chauffeur-service",
+      count: 3,
+      totalAmount: "₦85,000",
+      buttonText: "View Chauffeur History"
+    },
+    {
+      id: "book-ride",
+      title: "Book Ride Transactions",
+      description: "Ride booking and transportation",
+      icon: Car,
+      color: "from-teal-500 to-teal-600",
+      bgColor: "bg-teal-50",
+      iconColor: "text-teal-600",
+      href: "/transactions/book-ride",
+      count: 7,
+      totalAmount: "₦65,000",
+      buttonText: "View Ride History"
+    },
+    {
+      id: "crypto-trading",
+      title: "Crypto Trading Transactions",
+      description: "Cryptocurrency trading activities",
+      icon: Bitcoin,
+      color: "from-amber-500 to-amber-600",
+      bgColor: "bg-amber-50",
+      iconColor: "text-amber-600",
+      href: "/transactions/crypto-trading",
+      count: 25,
+      totalAmount: "₦450,000",
+      buttonText: "View Crypto History"
+    },
+    {
+      id: "convert-asset",
+      title: "Convert Asset Transactions",
+      description: "Asset conversion and exchange",
+      icon: TrendingUp,
+      color: "from-lime-500 to-lime-600",
+      bgColor: "bg-lime-50",
+      iconColor: "text-lime-600",
+      href: "/transactions/convert-asset",
+      count: 9,
+      totalAmount: "₦180,000",
+      buttonText: "View Convert History"
+    },
+    {
+      id: "virtual-card",
+      title: "Virtual Card Transactions",
+      description: "Virtual card usage and transactions",
+      icon: CreditCard,
+      color: "from-rose-500 to-rose-600",
+      bgColor: "bg-rose-50",
+      iconColor: "text-rose-600",
+      href: "/transactions/virtual-card",
+      count: 14,
+      totalAmount: "₦220,000",
+      buttonText: "View Virtual Card History"
+    }
   ];
-
-  const categoryOptions = [
-    { value: "all", label: "All Categories" },
-    { value: "transfer", label: "Transfer" },
-    { value: "bills", label: "Bills" },
-    { value: "airtime", label: "Airtime Swap" },
-    { value: "crypto", label: "Crypto Trading" },
-    { value: "flight", label: "Flight Booking" },
-    { value: "gift-card", label: "Gift Cards" },
-    { value: "hotel", label: "Hotel Booking" },
-    { value: "chauffeur", label: "Chauffeur Service" },
-  ];
-
-  const dateOptions = [
-    { value: "all", label: "All Time" },
-    { value: "today", label: "Today" },
-    { value: "week", label: "This Week" },
-    { value: "month", label: "This Month" },
-    { value: "year", label: "This Year" },
-  ];
-
-  useEffect(() => {
-    const fetchTransactions = async () => {
-      try {
-        // Simulate API call
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        
-        // Mock transactions data
-        const mockTransactions: Transaction[] = [
-          {
-            id: "1",
-            type: "debit",
-            category: "transfer",
-            amount: 250.00,
-            description: "Transfer to John Doe",
-            recipient: "john.doe@email.com",
-            date: "2024-01-15",
-            time: "14:30",
-            status: "success",
-            reference: "TXN-2024-001",
-            fee: 2.50,
-            balance: 1250.00
-          },
-          {
-            id: "2",
-            type: "credit",
-            category: "transfer",
-            amount: 500.00,
-            description: "Received from Jane Smith",
-            sender: "jane.smith@email.com",
-            date: "2024-01-14",
-            time: "09:15",
-            status: "success",
-            reference: "TXN-2024-002",
-            balance: 1500.00
-          },
-          {
-            id: "3",
-            type: "debit",
-            category: "bills",
-            amount: 100.00,
-            description: "Electricity Bill Payment",
-            date: "2024-01-13",
-            time: "16:45",
-            status: "success",
-            reference: "TXN-2024-003",
-            fee: 1.00,
-            balance: 1400.00
-          },
-          {
-            id: "4",
-            type: "debit",
-            category: "airtime",
-            amount: 50.00,
-            description: "Airtime Purchase - MTN",
-            date: "2024-01-12",
-            time: "11:20",
-            status: "success",
-            reference: "TXN-2024-004",
-            fee: 0.50,
-            balance: 1350.00
-          },
-          {
-            id: "5",
-            type: "credit",
-            category: "crypto",
-            amount: 750.00,
-            description: "Bitcoin Sale",
-            date: "2024-01-11",
-            time: "13:10",
-            status: "success",
-            reference: "TXN-2024-005",
-            balance: 1400.00
-          },
-          {
-            id: "6",
-            type: "debit",
-            category: "flight",
-            amount: 1200.00,
-            description: "Flight Booking - Lagos to Abuja",
-            date: "2024-01-10",
-            time: "08:30",
-            status: "success",
-            reference: "TXN-2024-006",
-            fee: 12.00,
-            balance: 200.00
-          },
-          {
-            id: "7",
-            type: "debit",
-            category: "gift-card",
-            amount: 200.00,
-            description: "Amazon Gift Card Purchase",
-            date: "2024-01-09",
-            time: "15:45",
-            status: "success",
-            reference: "TXN-2024-007",
-            fee: 2.00,
-            balance: 0.00
-          },
-          {
-            id: "8",
-            type: "debit",
-            category: "hotel",
-            amount: 800.00,
-            description: "Hotel Booking - Sheraton Lagos",
-            date: "2024-01-08",
-            time: "10:15",
-            status: "success",
-            reference: "TXN-2024-008",
-            fee: 8.00,
-            balance: -800.00
-          },
-          {
-            id: "9",
-            type: "debit",
-            category: "chauffeur",
-            amount: 150.00,
-            description: "Chauffeur Service - Airport Transfer",
-            date: "2024-01-07",
-            time: "07:00",
-            status: "success",
-            reference: "TXN-2024-009",
-            fee: 1.50,
-            balance: -950.00
-          },
-          {
-            id: "10",
-            type: "credit",
-            category: "transfer",
-            amount: 1000.00,
-            description: "Salary Credit",
-            sender: "company@email.com",
-            date: "2024-01-06",
-            time: "09:00",
-            status: "success",
-            reference: "TXN-2024-010",
-            balance: 50.00
-          }
-        ];
-        
-        setTransactions(mockTransactions);
-        setFilteredTransactions(mockTransactions);
-      } catch (error) {
-        console.error('Error fetching transactions:', error);
-        toast({
-          title: "Error",
-          description: "Failed to load transactions",
-          variant: "destructive"
-        });
-      }
-    };
-
-    fetchTransactions();
-  }, [toast]);
-
-  useEffect(() => {
-    let filtered = transactions;
-
-    // Filter by search term
-    if (searchTerm) {
-      filtered = filtered.filter(transaction =>
-        transaction.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        transaction.reference.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        (transaction.recipient && transaction.recipient.toLowerCase().includes(searchTerm.toLowerCase())) ||
-        (transaction.sender && transaction.sender.toLowerCase().includes(searchTerm.toLowerCase()))
-      );
-    }
-
-    // Filter by status
-    if (statusFilter !== "all") {
-      filtered = filtered.filter(transaction => transaction.status === statusFilter);
-    }
-
-    // Filter by category
-    if (categoryFilter !== "all") {
-      filtered = filtered.filter(transaction => transaction.category === categoryFilter);
-    }
-
-    // Filter by date
-    if (dateFilter !== "all") {
-      const today = new Date();
-      const transactionDate = new Date();
-      
-      filtered = filtered.filter(transaction => {
-        transactionDate.setTime(Date.parse(transaction.date));
-        
-        switch (dateFilter) {
-          case "today":
-            return transactionDate.toDateString() === today.toDateString();
-          case "week": {
-            const weekAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
-            return transactionDate >= weekAgo;
-          }
-          case "month":
-            return transactionDate.getMonth() === today.getMonth() && 
-                   transactionDate.getFullYear() === today.getFullYear();
-          case "year":
-            return transactionDate.getFullYear() === today.getFullYear();
-          default:
-            return true;
-        }
-      });
-    }
-
-    setFilteredTransactions(filtered);
-  }, [transactions, searchTerm, statusFilter, categoryFilter, dateFilter]);
-
-  const handleFilterChange = (filterType: string, value: string) => {
-    const newSearchParams = new URLSearchParams(searchParams);
-    
-    if (value === "all") {
-      newSearchParams.delete(filterType);
-    } else {
-      newSearchParams.set(filterType, value);
-    }
-    
-    setSearchParams(newSearchParams);
-    
-    switch (filterType) {
-      case "status":
-        setStatusFilter(value);
-        break;
-      case "category":
-        setCategoryFilter(value);
-        break;
-      case "date":
-        setDateFilter(value);
-        break;
-    }
-  };
-
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-NG', {
-      style: 'currency',
-      currency: 'NGN'
-    }).format(amount);
-  };
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'success':
-        return 'bg-green-100 text-green-800';
-      case 'pending':
-        return 'bg-yellow-100 text-yellow-800';
-      case 'failed':
-        return 'bg-red-100 text-red-800';
-      default:
-        return 'bg-gray-100 text-gray-800';
-    }
-  };
-
-  const getCategoryIcon = (category: string) => {
-    switch (category) {
-      case 'transfer':
-        return <ArrowUpRight className="h-4 w-4" />;
-      case 'bills':
-        return <Building2 className="h-4 w-4" />;
-      case 'airtime':
-        return <CreditCard className="h-4 w-4" />;
-      case 'crypto':
-        return <TrendingUp className="h-4 w-4" />;
-      case 'flight':
-        return <Plane className="h-4 w-4" />;
-      case 'gift-card':
-        return <Gift className="h-4 w-4" />;
-      case 'hotel':
-        return <Building2 className="h-4 w-4" />;
-      case 'chauffeur':
-        return <CreditCard className="h-4 w-4" />;
-      default:
-        return <Activity className="h-4 w-4" />;
-    }
-  };
-
-  const getCategoryColor = (category: string) => {
-    switch (category) {
-      case 'transfer':
-        return 'bg-[#0B63BC]/10 text-[#0B63BC]';
-      case 'bills':
-        return 'bg-green-100 text-green-800';
-      case 'airtime':
-        return 'bg-purple-100 text-purple-800';
-      case 'crypto':
-        return 'bg-orange-100 text-orange-800';
-      case 'flight':
-        return 'bg-indigo-100 text-indigo-800';
-      case 'gift-card':
-        return 'bg-pink-100 text-pink-800';
-      case 'hotel':
-        return 'bg-teal-100 text-teal-800';
-      case 'chauffeur':
-        return 'bg-gray-100 text-gray-800';
-      default:
-        return 'bg-gray-100 text-gray-800';
-    }
-  };
 
   const TransactionsContent = () => (
     <div className="space-y-8">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">Transactions</h1>
-          <p className="text-gray-600 mt-1">View and manage your transaction history</p>
+      {/* Modern Header */}
+      <div className="mb-8">
+        <div className="flex items-center justify-between">
+          <div className="space-y-2">
+            <h1 className="text-4xl font-bold text-gray-900 tracking-tight">Transactions</h1>
+            <p className="text-gray-500 text-lg">View and manage all your transaction history</p>
+          </div>
+          <div className="flex items-center gap-4">
+            <Button 
+              variant="outline" 
+              size="lg" 
+              className="flex items-center gap-2 border-gray-200 hover:bg-gray-50 transition-colors"
+            >
+              <Filter className="h-5 w-5" />
+              Filter
+            </Button>
+            <Button 
+              variant="outline" 
+              size="lg" 
+              className="flex items-center gap-2 border-gray-200 hover:bg-gray-50 transition-colors"
+            >
+              <Search className="h-5 w-5" />
+              Search
+            </Button>
+          </div>
         </div>
-        <Button variant="outline" size="sm" className="flex items-center gap-2">
-          <RefreshCw className="h-4 w-4" />
-          Refresh
-        </Button>
       </div>
 
-      {/* Filters */}
-      <Card className="border-0 shadow-lg bg-white">
-        <CardContent className="p-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            {/* Search */}
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-              <Input
-                placeholder="Search transactions..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
-              />
-            </div>
-
-            {/* Status Filter */}
-            <Select value={statusFilter} onValueChange={(value) => handleFilterChange("status", value)}>
-              <SelectTrigger>
-                <SelectValue placeholder="Filter by status" />
-              </SelectTrigger>
-              <SelectContent>
-                {statusOptions.map((option) => (
-                  <SelectItem key={option.value} value={option.value}>
-                    {option.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-
-            {/* Category Filter */}
-            <Select value={categoryFilter} onValueChange={(value) => handleFilterChange("category", value)}>
-              <SelectTrigger>
-                <SelectValue placeholder="Filter by category" />
-              </SelectTrigger>
-              <SelectContent>
-                {categoryOptions.map((option) => (
-                  <SelectItem key={option.value} value={option.value}>
-                    {option.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-
-            {/* Date Filter */}
-            <Select value={dateFilter} onValueChange={(value) => handleFilterChange("date", value)}>
-              <SelectTrigger>
-                <SelectValue placeholder="Filter by date" />
-              </SelectTrigger>
-              <SelectContent>
-                {dateOptions.map((option) => (
-                  <SelectItem key={option.value} value={option.value}>
-                    {option.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Transactions List */}
-      <Card className="border-0 shadow-lg bg-white">
-        <CardHeader>
-          <CardTitle className="text-xl font-bold text-gray-900">
-            Transaction History ({filteredTransactions.length})
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          {filteredTransactions.length === 0 ? (
-            <div className="text-center py-12">
-              <Activity className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">No transactions found</h3>
-              <p className="text-gray-500">Try adjusting your filters or search terms</p>
-            </div>
-          ) : (
-            <div className="space-y-4">
-              {filteredTransactions.map((transaction) => (
-                <Link
-                  key={transaction.id}
-                  to={`/transactions/${transaction.id}`}
-                  className="block"
-                >
-                  <div
-                    className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50 hover:border-[#0B63BC]/30 transition-all duration-200 cursor-pointer"
-                  >
-                    <div className="flex items-center gap-4">
-                      <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
-                        transaction.type === 'credit' ? 'bg-green-100' : 'bg-red-100'
-                      }`}>
-                        {transaction.type === 'credit' ? (
-                          <ArrowDownLeft className="h-5 w-5 text-green-600" />
-                        ) : (
-                          <ArrowUpRight className="h-5 w-5 text-red-600" />
-                        )}
-                      </div>
-                      <div>
-                        <div className="flex items-center gap-2 mb-1">
-                          <h4 className="font-semibold text-gray-900">{transaction.description}</h4>
-                          <Badge className={getCategoryColor(transaction.category)}>
-                            <div className="flex items-center gap-1">
-                              {getCategoryIcon(transaction.category)}
-                              {transaction.category}
-                            </div>
-                          </Badge>
-                        </div>
-                        <div className="flex items-center gap-4 text-sm text-gray-500">
-                          <span>{transaction.date} at {transaction.time}</span>
-                          <span>Ref: {transaction.reference}</span>
-                          {transaction.recipient && <span>To: {transaction.recipient}</span>}
-                          {transaction.sender && <span>From: {transaction.sender}</span>}
-                        </div>
-                      </div>
+             {/* Transaction Categories Grid */}
+       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+         {transactionCategories.map((category, index) => (
+           <Card
+             key={category.id}
+             className={`group cursor-pointer transition-all duration-500 ease-out hover:scale-105 hover:shadow-2xl border-0 bg-white/80 backdrop-blur-sm hover:bg-white/95 ${
+               selectedCategory === category.id 
+                 ? 'ring-2 ring-blue-500 border-blue-500 shadow-xl scale-105' 
+                 : 'hover:border-gray-200/50'
+             }`}
+             style={{
+               animationDelay: `${index * 50}ms`,
+               transform: selectedCategory === category.id ? 'scale(1.05)' : 'scale(1)'
+             }}
+             onClick={() => {
+               setSelectedCategory(category.id);
+               navigate(category.href);
+             }}
+           >
+             <CardContent className="p-6 relative overflow-hidden">
+               {/* Subtle gradient overlay */}
+               <div className={`absolute inset-0 bg-gradient-to-br ${category.color} opacity-0 group-hover:opacity-5 transition-opacity duration-500`} />
+               
+               {/* Icon with enhanced styling */}
+               <div className="flex items-start justify-between mb-6">
+                 <div className={`w-14 h-14 rounded-2xl flex items-center justify-center ${category.bgColor} group-hover:scale-110 transition-transform duration-300 shadow-sm`}>
+                   <category.icon className={`h-7 w-7 ${category.iconColor} group-hover:rotate-12 transition-transform duration-300`} />
                     </div>
                     <div className="text-right">
-                      <div className={`font-bold text-lg ${
-                        transaction.type === 'credit' ? 'text-green-600' : 'text-red-600'
-                      }`}>
-                        {transaction.type === 'credit' ? '+' : '-'}{formatCurrency(transaction.amount)}
+                   <p className="text-sm font-semibold text-gray-900 group-hover:text-gray-700 transition-colors">{category.count}</p>
+                   <p className="text-xs text-gray-500">transactions</p>
                       </div>
-                      <Badge className={`mt-1 ${getStatusColor(transaction.status)}`}>
-                        {transaction.status}
-                      </Badge>
-                      {transaction.fee && (
-                        <div className="text-xs text-gray-500 mt-1">
-                          Fee: {formatCurrency(transaction.fee)}
                         </div>
-                      )}
+               
+               {/* Content with better spacing */}
+               <div className="space-y-3">
+                 <h3 className="font-bold text-gray-900 text-lg group-hover:text-gray-800 transition-colors">{category.title}</h3>
+                 <p className="text-sm text-gray-600 line-clamp-2 leading-relaxed">{category.description}</p>
+                 <div className="pt-3">
+                   <p className="text-xl font-bold text-gray-900 group-hover:text-gray-800 transition-colors">{category.totalAmount}</p>
+                   <p className="text-xs text-gray-500 font-medium">Total amount</p>
                     </div>
                   </div>
-                </Link>
-              ))}
+
+               {/* Enhanced button */}
+               <div className="mt-6 pt-4 border-t border-gray-100/50">
+                 <Button 
+                   variant="outline" 
+                   size="sm" 
+                   className="w-full group-hover:bg-gray-50 group-hover:border-gray-300 transition-all duration-300 font-medium"
+                   onClick={(e) => {
+                     e.stopPropagation();
+                     navigate(category.href);
+                   }}
+                 >
+                   <div className="flex items-center justify-center gap-2">
+                     {category.buttonText}
+                     <ArrowUpDown className="h-3 w-3 group-hover:translate-x-1 transition-transform duration-300" />
+                   </div>
+                 </Button>
             </div>
-          )}
         </CardContent>
       </Card>
+         ))}
+       </div>
+
+
     </div>
   );
 

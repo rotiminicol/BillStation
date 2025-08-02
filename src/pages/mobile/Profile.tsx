@@ -4,6 +4,7 @@ import { User, Settings, Shield, Bell, HelpCircle, LogOut, ArrowRight, CheckCirc
 import MobileLayout from "@/components/MobileLayout";
 import { MobileCard } from "@/components/ui/mobile-card";
 import { Button } from "@/components/ui/button";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { useAuth } from "@/hooks/use-auth";
 import { useToast } from "@/hooks/use-toast";
 import Loader from "@/components/Loader";
@@ -121,9 +122,18 @@ const Profile = () => {
           {/* Profile Card */}
           <MobileCard className="bg-gradient-to-r from-gray-600 to-gray-800 text-white p-6">
             <div className="flex items-center space-x-4 mb-4">
-              <div className="w-16 h-16 rounded-full bg-white/20 flex items-center justify-center">
-                <User className="h-8 w-8 text-white" />
-              </div>
+              <Avatar className="w-16 h-16">
+                <AvatarImage 
+                  src={profileData?.avatar} 
+                  alt={profileData?.name || 'User'}
+                />
+                <AvatarFallback className="bg-white/20 text-white text-xl font-semibold">
+                  {profileData?.avatar ? 
+                    profileData?.name?.charAt(0).toUpperCase() :
+                    profileData?.email?.charAt(0).toUpperCase()
+                  }
+                </AvatarFallback>
+              </Avatar>
               <div className="flex-1">
                 <h2 className="text-xl font-bold">{profileData?.name}</h2>
                 <p className="text-sm text-gray-300">{profileData?.email}</p>

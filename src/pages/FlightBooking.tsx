@@ -13,7 +13,7 @@ import { useToast } from "@/hooks/use-toast";
 import { getBankLogo } from "@/lib/bankLogos";
 
 const FlightBooking = () => {
-  const [activeTab, setActiveTab] = useState<'flights' | 'hotels' | 'transport'>('flights');
+  const [activeTab, setActiveTab] = useState<'flights' | 'private-jet' | 'hotels' | 'transport'>('flights');
   const [fromLocation, setFromLocation] = useState("");
   const [toLocation, setToLocation] = useState("");
   const [departureDate, setDepartureDate] = useState("");
@@ -74,15 +74,16 @@ const FlightBooking = () => {
       </div>
 
       {/* Tab Navigation */}
-      <div className="flex bg-white rounded-xl p-1 mb-8 shadow-lg max-w-md">
+      <div className="flex bg-white rounded-xl p-1 mb-8 shadow-lg max-w-2xl">
         {[
           { id: 'flights', icon: <Plane className="h-5 w-5" />, label: 'Flights' },
+          { id: 'private-jet', icon: <Plane className="h-5 w-5" />, label: 'Private Jet' },
           { id: 'hotels', icon: <Hotel className="h-5 w-5" />, label: 'Hotels' },
           { id: 'transport', icon: <Car className="h-5 w-5" />, label: 'Transport' }
         ].map((tab) => (
           <button
             key={tab.id}
-            onClick={() => setActiveTab(tab.id as 'flights' | 'hotels' | 'transport')}
+            onClick={() => setActiveTab(tab.id as 'flights' | 'private-jet' | 'hotels' | 'transport')}
             className={`flex-1 py-3 px-6 rounded-lg text-base font-semibold transition-all duration-300 ${
               activeTab === tab.id
                 ? 'bg-[#0B63BC] text-white shadow-lg'
@@ -103,7 +104,7 @@ const FlightBooking = () => {
             <CardHeader>
               <CardTitle className="text-xl font-bold text-gray-900 flex items-center gap-2">
                 <Search className="h-5 w-5 text-[#0B63BC]" />
-                Search {activeTab === 'flights' ? 'Flights' : activeTab === 'hotels' ? 'Hotels' : 'Transport'}
+                Search {activeTab === 'flights' ? 'Flights' : activeTab === 'private-jet' ? 'Private Jets' : activeTab === 'hotels' ? 'Hotels' : 'Transport'}
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
@@ -181,7 +182,7 @@ const FlightBooking = () => {
                 ) : (
                   <div className="flex items-center gap-2">
                     <Search className="h-5 w-5" />
-                    Search {activeTab === 'flights' ? 'Flights' : activeTab === 'hotels' ? 'Hotels' : 'Transport'}
+                    Search {activeTab === 'flights' ? 'Flights' : activeTab === 'private-jet' ? 'Private Jets' : activeTab === 'hotels' ? 'Hotels' : 'Transport'}
                   </div>
                 )}
               </Button>
