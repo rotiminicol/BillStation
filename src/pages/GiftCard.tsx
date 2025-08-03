@@ -12,6 +12,7 @@ import { useToast } from "@/hooks/use-toast";
 import DesktopLayout from "@/components/DesktopLayout";
 import Navigation from "@/components/Navigation";
 import ViewAllButton from "@/components/ui/view-all-button";
+import { motion, AnimatePresence } from "framer-motion";
 
 interface GiftCardPurchase {
   id: string;
@@ -148,187 +149,264 @@ const GiftCard = () => {
 
   const GiftCardContent = () => (
     <div className="space-y-8">
-      {/* Header */}
-      <div className="flex items-center justify-between">
+      {/* Header with animation */}
+      <motion.div
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className="flex items-center justify-between"
+      >
         <div>
           <h1 className="text-3xl font-bold text-gray-900">Gift Cards</h1>
           <p className="text-gray-600 mt-1">Purchase and send gift cards to your loved ones</p>
         </div>
-      </div>
+      </motion.div>
 
       <div className="lg:grid lg:grid-cols-3 lg:gap-8">
         {/* Main Content */}
         <div className="lg:col-span-2 space-y-8">
           {/* Brand Selection */}
-          <Card className="border-0 shadow-lg bg-white">
-            <CardHeader>
-              <CardTitle className="text-xl font-bold text-gray-900 flex items-center gap-2">
-                <Gift className="h-5 w-5 text-blue-600" />
-                Select Gift Card Brand
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
-                {giftCardBrands.map((brand) => (
-                  <Card
-                    key={brand.value}
-                    className={`cursor-pointer transition-all duration-200 hover:shadow-lg ${
-                      selectedBrand === brand.value
-                        ? "border-blue-500 bg-blue-50"
-                        : "border-gray-200 hover:border-blue-300"
-                    }`}
-                    onClick={() => setSelectedBrand(brand.value)}
-                  >
-                    <CardContent className="p-4 text-center">
-                      <div className={`w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3 ${
-                        selectedBrand === brand.value
-                          ? "bg-blue-600 text-white"
-                          : "bg-gray-100 text-gray-600"
-                      }`}>
-                        <brand.icon className="h-6 w-6" />
-                      </div>
-                      <h4 className="font-semibold text-gray-900 mb-1">{brand.label}</h4>
-                      <Badge className="bg-green-100 text-green-800 text-xs">
-                        {brand.discount} off
-                      </Badge>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Purchase Form */}
-          {selectedBrand && (
-            <Card className="border-0 shadow-lg bg-white">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.1 }}
+          >
+            <Card className="border-0 shadow-lg bg-[#F6F6F8]">
               <CardHeader>
-                <CardTitle className="text-xl font-bold text-gray-900">
-                  Purchase Gift Card
+                <CardTitle className="text-xl font-bold text-gray-900 flex items-center gap-2">
+                  <Gift className="h-5 w-5 text-[#0B63BC]" />
+                  Select Gift Card Brand
                 </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="space-y-2">
-                  <Label htmlFor="amount">Amount (USD)</Label>
-                  <Input
-                    id="amount"
-                    type="number"
-                    placeholder="Enter amount"
-                    value={amount}
-                    onChange={(e) => setAmount(e.target.value)}
-                    className="h-12"
-                  />
+              <CardContent>
+                <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
+                  {giftCardBrands.map((brand, index) => (
+                    <motion.div
+                      key={brand.value}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.3, delay: index * 0.1 }}
+                    >
+                      <Card
+                        className={`cursor-pointer transition-all duration-200 hover:shadow-lg ${
+                          selectedBrand === brand.value
+                            ? "border-[#0B63BC] bg-white ring-2 ring-[#0B63BC]"
+                            : "border-gray-200 hover:border-[#0B63BC] bg-white"
+                        }`}
+                        onClick={() => setSelectedBrand(brand.value)}
+                      >
+                        <CardContent className="p-4 text-center">
+                          <div className={`w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3 ${
+                            selectedBrand === brand.value
+                              ? "bg-[#0B63BC] text-white"
+                              : "bg-gray-100 text-gray-600"
+                          }`}>
+                            <brand.icon className="h-6 w-6" />
+                          </div>
+                          <h4 className="font-semibold text-gray-900 mb-1">{brand.label}</h4>
+                          <Badge className="bg-green-100 text-green-800 text-xs">
+                            {brand.discount} off
+                          </Badge>
+                        </CardContent>
+                      </Card>
+                    </motion.div>
+                  ))}
                 </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="recipient">Recipient Email</Label>
-                  <Input
-                    id="recipient"
-                    type="email"
-                    placeholder="Enter recipient email"
-                    value={recipient}
-                    onChange={(e) => setRecipient(e.target.value)}
-                    className="h-12"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="message">Personal Message (Optional)</Label>
-                  <Input
-                    id="message"
-                    placeholder="Add a personal message"
-                    value={message}
-                    onChange={(e) => setMessage(e.target.value)}
-                    className="h-12"
-                  />
-                </div>
-
-                <Button
-                  onClick={handleGiftCardPurchase}
-                  disabled={isProcessing || !amount || !recipient}
-                  className="w-full h-12 bg-blue-600 hover:bg-blue-700 text-lg font-semibold"
-                >
-                  {isProcessing ? (
-                    <div className="flex items-center gap-2">
-                      <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                      Processing...
-                    </div>
-                  ) : (
-                    <div className="flex items-center gap-2">
-                      <CheckCircle className="h-5 w-5" />
-                      Purchase Gift Card
-                    </div>
-                  )}
-                </Button>
               </CardContent>
             </Card>
-          )}
+          </motion.div>
+
+          {/* Purchase Form */}
+          <AnimatePresence>
+            {selectedBrand && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                exit={{ opacity: 0, height: 0 }}
+                transition={{ duration: 0.3 }}
+              >
+                <Card className="border-0 shadow-lg bg-[#F6F6F8]">
+                  <CardHeader>
+                    <CardTitle className="text-xl font-bold text-gray-900">
+                      Purchase Gift Card
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-6">
+                    <motion.div
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ delay: 0.2 }}
+                      className="space-y-2"
+                    >
+                      <Label htmlFor="amount">Amount (USD)</Label>
+                      <Input
+                        id="amount"
+                        type="number"
+                        placeholder="Enter amount"
+                        value={amount}
+                        onChange={(e) => setAmount(e.target.value)}
+                        className="h-12 bg-white"
+                      />
+                    </motion.div>
+
+                    <motion.div
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ delay: 0.3 }}
+                      className="space-y-2"
+                    >
+                      <Label htmlFor="recipient">Recipient Email</Label>
+                      <Input
+                        id="recipient"
+                        type="email"
+                        placeholder="Enter recipient email"
+                        value={recipient}
+                        onChange={(e) => setRecipient(e.target.value)}
+                        className="h-12 bg-white"
+                      />
+                    </motion.div>
+
+                    <motion.div
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ delay: 0.4 }}
+                      className="space-y-2"
+                    >
+                      <Label htmlFor="message">Personal Message (Optional)</Label>
+                      <Input
+                        id="message"
+                        placeholder="Add a personal message"
+                        value={message}
+                        onChange={(e) => setMessage(e.target.value)}
+                        className="h-12 bg-white"
+                      />
+                    </motion.div>
+
+                    <motion.div
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ delay: 0.5 }}
+                    >
+                      <Button
+                        onClick={handleGiftCardPurchase}
+                        disabled={isProcessing || !amount || !recipient}
+                        className="w-full h-12 bg-[#0B63BC] hover:bg-[#0A58A8] text-lg font-semibold transition-colors duration-300"
+                      >
+                        {isProcessing ? (
+                          <div className="flex items-center gap-2">
+                            <motion.div
+                              animate={{ rotate: 360 }}
+                              transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                              className="w-5 h-5 border-2 border-white border-t-transparent rounded-full"
+                            ></motion.div>
+                            Processing...
+                          </div>
+                        ) : (
+                          <div className="flex items-center gap-2">
+                            <CheckCircle className="h-5 w-5" />
+                            Purchase Gift Card
+                          </div>
+                        )}
+                      </Button>
+                    </motion.div>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
 
         {/* Sidebar */}
         <div className="space-y-6">
           {/* Recent Purchases */}
-          <Card className="border-0 shadow-lg bg-white">
-            <CardHeader>
-              <CardTitle className="text-lg font-bold text-gray-900">Recent Purchases</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {recentPurchases.length === 0 ? (
-                  <div className="text-center py-8">
-                    <Gift className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                    <p className="text-gray-500">No recent purchases</p>
-                  </div>
-                ) : (
-                  recentPurchases.map((purchase) => (
-                    <div key={purchase.id} className="flex items-center justify-between p-3 border border-gray-200 rounded-lg">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
-                          <Gift className="h-5 w-5 text-blue-600" />
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+          >
+            <Card className="border-0 shadow-lg bg-[#F6F6F8]">
+              <CardHeader>
+                <CardTitle className="text-lg font-bold text-gray-900">Recent Purchases</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {recentPurchases.length === 0 ? (
+                    <motion.div
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      className="text-center py-8"
+                    >
+                      <Gift className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                      <p className="text-gray-500">No recent purchases</p>
+                    </motion.div>
+                  ) : (
+                    recentPurchases.map((purchase) => (
+                      <motion.div
+                        key={purchase.id}
+                        whileHover={{ scale: 1.02 }}
+                        className="flex items-center justify-between p-3 border border-gray-200 rounded-lg bg-white"
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                            <Gift className="h-5 w-5 text-[#0B63BC]" />
+                          </div>
+                          <div>
+                            <p className="font-medium text-gray-900 text-sm">{purchase.brand}</p>
+                            <p className="text-xs text-gray-500">{purchase.recipient}</p>
+                          </div>
                         </div>
-                        <div>
-                          <p className="font-medium text-gray-900 text-sm">{purchase.brand}</p>
-                          <p className="text-xs text-gray-500">{purchase.recipient}</p>
+                        <div className="text-right">
+                          <p className="font-bold text-gray-900 text-sm">{formatCurrency(purchase.amount)}</p>
+                          <Badge className={`mt-1 ${getStatusColor(purchase.status)}`}>
+                            {purchase.status}
+                          </Badge>
                         </div>
-                      </div>
-                      <div className="text-right">
-                        <p className="font-bold text-gray-900 text-sm">{formatCurrency(purchase.amount)}</p>
-                        <Badge className={`mt-1 ${getStatusColor(purchase.status)}`}>
-                          {purchase.status}
-                        </Badge>
-                      </div>
-                    </div>
-                  ))
-                )}
-              </div>
-            </CardContent>
-          </Card>
+                      </motion.div>
+                    ))
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
 
           {/* Quick Actions */}
-          <Card className="border-0 shadow-lg bg-white">
-            <CardHeader>
-              <CardTitle className="text-lg font-bold text-gray-900">Quick Actions</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <Button variant="outline" size="sm" asChild className="w-full justify-start">
-                <Link to="/cards" className="flex items-center gap-2">
-                  <ShoppingBag className="h-4 w-4" />
-                  Buy Gift Cards
-                </Link>
-              </Button>
-              <Button variant="outline" size="sm" asChild className="w-full justify-start">
-                <Link to="/transactions" className="flex items-center gap-2">
-                  <Activity className="h-4 w-4" />
-                  View History
-                </Link>
-              </Button>
-              <Button variant="outline" size="sm" asChild className="w-full justify-start">
-                <Link to="/transfer" className="flex items-center gap-2">
-                  <ArrowRight className="h-4 w-4" />
-                  Send Money
-                </Link>
-              </Button>
-            </CardContent>
-          </Card>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.3 }}
+          >
+            <Card className="border-0 shadow-lg bg-[#F6F6F8]">
+              <CardHeader>
+                <CardTitle className="text-lg font-bold text-gray-900">Quick Actions</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <motion.div whileHover={{ scale: 1.02 }}>
+                  <Button variant="outline" size="sm" asChild className="w-full justify-start bg-white">
+                    <Link to="/cards" className="flex items-center gap-2">
+                      <ShoppingBag className="h-4 w-4 text-[#0B63BC]" />
+                      Buy Gift Cards
+                    </Link>
+                  </Button>
+                </motion.div>
+                <motion.div whileHover={{ scale: 1.02 }}>
+                  <Button variant="outline" size="sm" asChild className="w-full justify-start bg-white">
+                    <Link to="/transactions" className="flex items-center gap-2">
+                      <Activity className="h-4 w-4 text-[#0B63BC]" />
+                      View History
+                    </Link>
+                  </Button>
+                </motion.div>
+                <motion.div whileHover={{ scale: 1.02 }}>
+                  <Button variant="outline" size="sm" asChild className="w-full justify-start bg-white">
+                    <Link to="/transfer" className="flex items-center gap-2">
+                      <ArrowRight className="h-4 w-4 text-[#0B63BC]" />
+                      Send Money
+                    </Link>
+                  </Button>
+                </motion.div>
+              </CardContent>
+            </Card>
+          </motion.div>
         </div>
       </div>
     </div>
@@ -341,4 +419,4 @@ const GiftCard = () => {
   );
 };
 
-export default GiftCard; 
+export default GiftCard;

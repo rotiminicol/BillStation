@@ -1,5 +1,7 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { useState } from "react";
 import { 
   Send, 
@@ -11,13 +13,39 @@ import {
   Tv, 
   Ticket,
   ChevronRight,
-  CreditCard
+  CreditCard,
+  X,
+  Search,
+  User,
+  ArrowRight,
+  Plus,
+  Loader2
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import DesktopLayout from "@/components/DesktopLayout";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+
+// Mock data for recent transactions and saved billers
+const recentRecipients = [
+  { id: 1, name: 'John Doe', type: 'User', lastPaid: '2h ago', amount: '₦25,000', avatar: 'JD' },
+  { id: 2, name: 'MTN Airtime', type: 'Airtime', lastPaid: '1d ago', amount: '₦1,000', avatar: 'MT' },
+  { id: 3, name: 'IKEDC', type: 'Electricity', lastPaid: '1w ago', amount: '₦15,750', avatar: 'IK' },
+];
+
+const savedBillers = [
+  { id: 1, name: 'DSTV Subscription', type: 'Cable TV', icon: Tv, color: 'text-red-500 bg-red-50' },
+  { id: 2, name: 'Lagos Water', type: 'Utility', icon: Zap, color: 'text-blue-500 bg-blue-50' },
+  { id: 3, name: 'Netflix', type: 'Subscription', icon: Tv, color: 'text-red-500 bg-red-50' },
+];
 
 const Payment = () => {
   const [selectedService, setSelectedService] = useState<string | null>(null);
+  const [showQuickPay, setShowQuickPay] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [activeTab, setActiveTab] = useState('recent');
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [selectedRecipient, setSelectedRecipient] = useState<any>(null);
+  const [amount, setAmount] = useState('');
   const navigate = useNavigate();
 
   const paymentServices = [
@@ -119,25 +147,58 @@ const Payment = () => {
     }
   ];
 
+  const handleQuickPay = (recipient: any) => {
+    setSelectedRecipient(recipient);
+  };
+
+  const handleSubmitPayment = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!amount || isNaN(Number(amount.replace(/[^0-9.]/g, '')))) return;
+    
+    setIsProcessing(true);
+    // Simulate API call
+    setTimeout(() => {
+      setIsProcessing(false);
+      setShowQuickPay(false);
+      setSelectedRecipient(null);
+      setAmount('');
+      // Show success message
+      alert(`Successfully sent ₦${amount} to ${selectedRecipient?.name || 'recipient'}`);
+    }, 1500);
+  };
+
+  const filteredRecipients = recentRecipients.filter(recipient => 
+    recipient.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    recipient.type.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  const filteredBillers = savedBillers.filter(biller => 
+    biller.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    biller.type.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   const PaymentContent = () => (
     <div className="space-y-8">
-      {/* Modern Header */}
-      <div className="mb-8">
-        <div className="flex items-center justify-between">
-          <div className="space-y-2">
-            <h1 className="text-4xl font-bold text-gray-900 tracking-tight">Payments</h1>
-            <p className="text-gray-500 text-lg">Choose your payment service and get started</p>
-          </div>
-          <div className="flex items-center gap-4">
+      {/* Elevated Header */}
+      <div className="mb-8 bg-gradient-to-r from-blue-600 to-blue-700 rounded-2xl p-6 text-white shadow-lg">
+        <div className="max-w-6xl mx-auto">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
+            <div className="space-y-2">
+              <h1 className="text-3xl md:text-4xl font-bold tracking-tight">Payments</h1>
+              <p className="text-blue-100 text-lg">Fast, secure, and convenient payment solutions</p>
+            </div>
             <Button 
-              variant="outline" 
-              size="lg" 
-              className="flex items-center gap-2 border-gray-200 hover:bg-gray-50 transition-colors"
+              onClick={() => setShowQuickPay(true)}
+              className="bg-white text-blue-700 hover:bg-blue-50 hover:text-blue-800 transition-all duration-300 shadow-lg hover:shadow-xl hover:-translate-y-0.5 flex items-center gap-2 px-6 py-6 text-base font-medium"
+              size="lg"
             >
-              <CreditCard className="h-5 w-5" />
+              <CreditCard className="h-6 w-6" />
               Quick Pay
+              <ArrowRight className="h-5 w-5" />
             </Button>
           </div>
+          
+
         </div>
       </div>
 
@@ -212,11 +273,202 @@ const Payment = () => {
     </div>
   );
 
+  // Quick Pay Modal
+  const QuickPayModal = () => (
+    <Dialog open={showQuickPay} onOpenChange={setShowQuickPay}>
+      <DialogContent className="sm:max-w-[500px] rounded-2xl">
+        <DialogHeader>
+          <div className="flex items-center justify-between">
+            <DialogTitle className="text-2xl">Quick Pay</DialogTitle>
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              onClick={() => {
+                setShowQuickPay(false);
+                setSelectedRecipient(null);
+                setAmount('');
+              }}
+              className="rounded-full"
+            >
+              <X className="h-5 w-5" />
+            </Button>
+          </div>
+          <DialogDescription>
+            {!selectedRecipient 
+              ? "Select a recent recipient or saved biller to pay quickly" 
+              : `Paying ${selectedRecipient.name}`}
+          </DialogDescription>
+        </DialogHeader>
+
+        {!selectedRecipient ? (
+          <>
+            <div className="relative mt-4">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+              <Input
+                type="search"
+                placeholder="Search recipients or billers..."
+                className="pl-10 w-full"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+            </div>
+
+            <div className="flex border-b mt-4">
+              <button
+                className={`px-4 py-2 font-medium text-sm ${activeTab === 'recent' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-500'}`}
+                onClick={() => setActiveTab('recent')}
+              >
+                Recent
+              </button>
+              <button
+                className={`px-4 py-2 font-medium text-sm ${activeTab === 'saved' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-500'}`}
+                onClick={() => setActiveTab('saved')}
+              >
+                Saved Billers
+              </button>
+            </div>
+
+            <div className="mt-4 max-h-80 overflow-y-auto">
+              {activeTab === 'recent' ? (
+                filteredRecipients.length > 0 ? (
+                  <div className="space-y-3">
+                    {filteredRecipients.map((recipient) => (
+                      <div 
+                        key={recipient.id}
+                        onClick={() => handleQuickPay(recipient)}
+                        className="flex items-center p-3 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors"
+                      >
+                        <div className="flex items-center justify-center h-10 w-10 rounded-full bg-blue-100 text-blue-600 font-medium">
+                          {recipient.avatar}
+                        </div>
+                        <div className="ml-3 flex-1">
+                          <p className="font-medium text-gray-900">{recipient.name}</p>
+                          <p className="text-xs text-gray-500">{recipient.type} • {recipient.lastPaid}</p>
+                        </div>
+                        <div className="text-right">
+                          <p className="font-medium">{recipient.amount}</p>
+                          <p className="text-xs text-green-600">Pay again</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-8">
+                    <p className="text-gray-500">No recent recipients found</p>
+                  </div>
+                )
+              ) : filteredBillers.length > 0 ? (
+                <div className="grid grid-cols-1 gap-3">
+                  {filteredBillers.map((biller) => (
+                    <div 
+                      key={biller.id}
+                      onClick={() => handleQuickPay(biller)}
+                      className="flex items-center p-3 rounded-lg border hover:border-blue-300 cursor-pointer transition-colors"
+                    >
+                      <div className={`p-2 rounded-lg ${biller.color} mr-3`}>
+                        <biller.icon className="h-5 w-5" />
+                      </div>
+                      <div className="flex-1">
+                        <p className="font-medium">{biller.name}</p>
+                        <p className="text-xs text-gray-500">{biller.type}</p>
+                      </div>
+                      <ChevronRight className="h-5 w-5 text-gray-400" />
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-8">
+                  <p className="text-gray-500">No saved billers found</p>
+                  <Button variant="outline" className="mt-2" size="sm">
+                    <Plus className="h-4 w-4 mr-2" />
+                    Add Biller
+                  </Button>
+                </div>
+              )}
+            </div>
+          </>
+        ) : (
+          <form onSubmit={handleSubmitPayment}>
+            <div className="space-y-6">
+              <div className="flex items-center p-4 bg-gray-50 rounded-xl">
+                <div className="flex items-center justify-center h-12 w-12 rounded-full bg-blue-100 text-blue-600 font-medium text-lg mr-3">
+                  {selectedRecipient.avatar || selectedRecipient.name.charAt(0)}
+                </div>
+                <div>
+                  <p className="font-medium">{selectedRecipient.name}</p>
+                  <p className="text-sm text-gray-500">{selectedRecipient.type}</p>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="amount">Amount (₦)</Label>
+                <Input
+                  id="amount"
+                  type="text"
+                  placeholder="0.00"
+                  value={amount}
+                  onChange={(e) => {
+                    const value = e.target.value.replace(/[^0-9.]/g, '');
+                    if (value === '' || /^\d*\.?\d*$/.test(value)) {
+                      setAmount(value);
+                    }
+                  }}
+                  className="text-lg font-medium py-6 px-4 text-right"
+                  autoFocus
+                />
+              </div>
+
+              <div className="grid grid-cols-4 gap-2">
+                {[1000, 2000, 5000, 10000].map((amt) => (
+                  <Button
+                    key={amt}
+                    type="button"
+                    variant="outline"
+                    className="py-2"
+                    onClick={() => setAmount(amt.toString())}
+                  >
+                    ₦{amt.toLocaleString()}
+                  </Button>
+                ))}
+              </div>
+
+              <div className="pt-4">
+                <Button 
+                  type="submit" 
+                  className="w-full py-6" 
+                  disabled={!amount || isProcessing || isNaN(Number(amount))}
+                >
+                  {isProcessing ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Processing...
+                    </>
+                  ) : (
+                    `Pay ₦${amount ? Number(amount).toLocaleString() : '0.00'}`
+                  )}
+                </Button>
+                <Button 
+                  type="button" 
+                  variant="ghost" 
+                  className="w-full mt-2"
+                  onClick={() => setSelectedRecipient(null)}
+                >
+                  Back to list
+                </Button>
+              </div>
+            </div>
+          </form>
+        )}
+      </DialogContent>
+    </Dialog>
+  );
+
   return (
     <DesktopLayout>
       <PaymentContent />
+      <QuickPayModal />
     </DesktopLayout>
   );
 };
 
-export default Payment; 
+export default Payment;

@@ -1,4 +1,3 @@
-
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -7,9 +6,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useState, useEffect } from "react";
 import { Smartphone, Zap, Tv, GraduationCap, Gamepad2, Home, Wifi, Car, Activity, CheckCircle, ArrowRight, Shield, Clock, DollarSign, TrendingUp, AlertCircle } from "lucide-react";
 import { Link } from "react-router-dom";
+import { motion, AnimatePresence } from "framer-motion";
 import Navigation from "@/components/Navigation";
 import DesktopLayout from "@/components/DesktopLayout";
-
 import { useToast } from "@/hooks/use-toast";
 import { getBankLogo } from "@/lib/bankLogos";
 
@@ -48,6 +47,7 @@ const Bills = () => {
       toast({
         title: "Payment Successful!",
         description: `₦${amount} ${selectedCategory} payment completed.`,
+        className: "bg-[#0B63BC] text-white border-[#0B63BC]/50",
       });
       setLoading(false);
       setAmount("");
@@ -56,133 +56,185 @@ const Bills = () => {
   };
 
   const BillsContent = () => (
-    <div className="space-y-8">
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+      className="space-y-8 p-4 sm:p-6 bg-[#F6F6F8] min-h-screen"
+    >
       {/* Header */}
-      <div className="flex items-center mb-8">
-        <div className="flex items-center gap-3">
-          <h1 className="text-3xl font-bold text-gray-900">
-            Bill Payments
-          </h1>
-        </div>
-      </div>
+      <motion.div
+        initial={{ opacity: 0, x: -20 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ duration: 0.5, delay: 0.1 }}
+        className="flex items-center mb-8"
+      >
+        <h1 className="text-4xl font-bold text-[#0B63BC] tracking-tight">
+          Bill Payments
+        </h1>
+      </motion.div>
 
       <div className="lg:grid lg:grid-cols-3 lg:gap-8">
         {/* Categories */}
-        <div className="lg:col-span-2 mb-8 lg:mb-0">
-          <h3 className="text-xl font-semibold text-gray-900 mb-6 flex items-center gap-2">
-                            <Activity className="h-5 w-5 text-[#0B63BC]" />
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.5, delay: 0.2 }}
+          className="lg:col-span-2 mb-8 lg:mb-0"
+        >
+          <h3 className="text-xl font-semibold text-[#0B63BC] mb-6">
             Select Bill Category
           </h3>
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
             {categories.map((category) => (
-              <Card
+              <motion.div
                 key={category.id}
-                className={`cursor-pointer transition-all duration-200 hover:shadow-lg ${
-                  selectedCategory === category.id
-                                    ? "border-[#0B63BC] bg-[#0B63BC]/10"
-                : "border-gray-200 hover:border-[#0B63BC]/30"
-                }`}
-                onClick={() => setSelectedCategory(category.id)}
+                whileHover={{ scale: 1.05, boxShadow: "0 8px 24px rgba(11, 99, 188, 0.2)" }}
+                whileTap={{ scale: 0.95 }}
               >
-                <CardContent className="p-6 text-center">
-                  <div className={`w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3 ${
+                <Card
+                  className={`cursor-pointer transition-all duration-300 border-2 ${
                     selectedCategory === category.id
-                      ? "bg-[#0B63BC] text-white"
-                      : "bg-gray-100 text-gray-600"
-                  }`}>
-                    <category.icon className="h-6 w-6" />
-                  </div>
-                  <h4 className="font-semibold text-gray-900 mb-1">{category.name}</h4>
-                  <p className="text-sm text-gray-500">{category.description}</p>
-                </CardContent>
-              </Card>
+                      ? "border-[#0B63BC] bg-[#0B63BC]/10 shadow-lg"
+                      : "border-[#F6F6F8] hover:border-[#0B63BC]/50 bg-white"
+                  } rounded-xl overflow-hidden`}
+                  onClick={() => setSelectedCategory(category.id)}
+                >
+                  <CardContent className="p-6 sm:p-8 text-center">
+                    <motion.div
+                      className={`w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 ${
+                        selectedCategory === category.id
+                          ? "bg-[#0B63BC] text-white"
+                          : "bg-[#F6F6F8] text-[#0B63BC]"
+                      }`}
+                      whileHover={{ rotate: 360 }}
+                      transition={{ duration: 0.5 }}
+                    >
+                      <category.icon className="h-8 w-8" />
+                    </motion.div>
+                    <h4 className="font-semibold text-gray-900 text-xl sm:text-2xl">{category.name}</h4>
+                    <p className="text-sm sm:text-base text-gray-500 mt-2">{category.description}</p>
+                  </CardContent>
+                </Card>
+              </motion.div>
             ))}
           </div>
-        </div>
+        </motion.div>
 
         {/* Payment Form */}
-        <div className="lg:col-span-1">
-          <Card className="border-0 shadow-lg bg-white">
-            <CardContent className="p-6">
-              <h3 className="text-lg font-bold text-gray-900 mb-6">Payment Details</h3>
+        <motion.div
+          initial={{ opacity: 0, x: 20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.5, delay: 0.3 }}
+          className="lg:col-span-1"
+        >
+          <Card className="border-0 shadow-xl bg-white rounded-xl overflow-hidden">
+            <CardContent className="p-6 sm:p-8">
+              <h3 className="text-xl font-bold text-[#0B63BC] mb-6">Payment Details</h3>
               
-              {selectedCategory ? (
-                <div className="space-y-4">
-                  {/* Provider Selection */}
-                  <div className="space-y-2">
-                    <Label htmlFor="provider">Provider</Label>
-                    <Select>
-                      <SelectTrigger className="h-12">
-                        <SelectValue placeholder="Select provider" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {providers[selectedCategory as keyof typeof providers]?.map((provider) => (
-                          <SelectItem key={provider} value={provider}>
-                            {provider}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  {/* Phone Number */}
-                  <div className="space-y-2">
-                    <Label htmlFor="phone">Phone Number</Label>
-                    <Input
-                      id="phone"
-                      type="tel"
-                      placeholder="Enter phone number"
-                      value={phone}
-                      onChange={(e) => setPhone(e.target.value)}
-                      className="h-12"
-                    />
-                  </div>
-
-                  {/* Amount */}
-                  <div className="space-y-2">
-                    <Label htmlFor="amount">Amount (₦)</Label>
-                    <Input
-                      id="amount"
-                      type="number"
-                      placeholder="Enter amount"
-                      value={amount}
-                      onChange={(e) => setAmount(e.target.value)}
-                      className="h-12"
-                    />
-                  </div>
-
-                  {/* Pay Button */}
-                  <Button
-                    onClick={handlePayment}
-                    disabled={loading || !amount || !phone}
-                    className="w-full h-12 bg-[#0B63BC] hover:bg-[#0B63BC]/90 text-lg font-semibold"
+              <AnimatePresence>
+                {selectedCategory ? (
+                  <motion.div
+                    key="form"
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: "auto" }}
+                    exit={{ opacity: 0, height: 0 }}
+                    transition={{ duration: 0.3 }}
+                    className="space-y-5"
                   >
-                    {loading ? (
-                      <div className="flex items-center gap-2">
-                        <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                        Processing...
-                      </div>
-                    ) : (
-                      <div className="flex items-center gap-2">
-                        <CheckCircle className="h-5 w-5" />
-                        Pay ₦{amount || "0"}
-                      </div>
-                    )}
-                  </Button>
-                </div>
-              ) : (
-                <div className="text-center py-8">
-                  <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <Activity className="h-8 w-8 text-gray-400" />
-                  </div>
-                  <p className="text-gray-500">Select a bill category to proceed</p>
-                </div>
-              )}
+                    {/* Provider Selection */}
+                    <div className="space-y-2">
+                      <Label htmlFor="provider" className="text-[#0B63BC] font-medium">Provider</Label>
+                      <Select>
+                        <SelectTrigger className="h-12 border-[#0B63BC]/30 focus:ring-[#0B63BC] rounded-lg">
+                          <SelectValue placeholder="Select provider" />
+                        </SelectTrigger>
+                        <SelectContent className="bg-white border-[#0B63BC]/20">
+                          {providers[selectedCategory as keyof typeof providers]?.map((provider) => (
+                            <SelectItem key={provider} value={provider} className="hover:bg-[#F6F6F8]">
+                              {provider}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    {/* Phone Number */}
+                    <div className="space-y-2">
+                      <Label htmlFor="phone" className="text-[#0B63BC] font-medium">Phone Number</Label>
+                      <Input
+                        id="phone"
+                        type="tel"
+                        placeholder="Enter phone number"
+                        value={phone}
+                        onChange={(e) => setPhone(e.target.value)}
+                        className="h-12 border-[#0B63BC]/30 focus:ring-[#0B63BC] rounded-lg transition-all duration-300"
+                      />
+                    </div>
+
+                    {/* Amount */}
+                    <div className="space-y-2">
+                      <Label htmlFor="amount" className="text-[#0B63BC] font-medium">Amount (₦)</Label>
+                      <Input
+                        id="amount"
+                        type="number"
+                        placeholder="Enter amount"
+                        value={amount}
+                        onChange={(e) => setAmount(e.target.value)}
+                        className="h-12 border-[#0B63BC]/30 focus:ring-[#0B63BC] rounded-lg transition-all duration-300"
+                      />
+                    </div>
+
+                    {/* Pay Button */}
+                    <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+                      <Button
+                        onClick={handlePayment}
+                        disabled={loading || !amount || !phone}
+                        className="w-full h-12 bg-[#0B63BC] hover:bg-[#0B63BC]/90 text-white text-lg font-semibold rounded-lg transition-all duration-300"
+                      >
+                        {loading ? (
+                          <div className="flex items-center gap-2">
+                            <motion.div
+                              animate={{ rotate: 360 }}
+                              transition={{ duration: 1, repeat: Infinity }}
+                              className="w-5 h-5 border-2 border-white border-t-transparent rounded-full"
+                            />
+                            Processing...
+                          </div>
+                        ) : (
+                          <div className="flex items-center gap-2">
+                            <CheckCircle className="h-5 w-5" />
+                            Pay ₦{amount || "0"}
+                          </div>
+                        )}
+                      </Button>
+                    </motion.div>
+                  </motion.div>
+                ) : (
+                  <motion.div
+                    key="placeholder"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.3 }}
+                    className="text-center py-12"
+                  >
+                    <motion.div
+                      className="w-16 h-16 bg-[#F6F6F8] rounded-full flex items-center justify-center mx-auto mb-4"
+                      animate={{ scale: [1, 1.1, 1] }}
+                      transition={{ duration: 0.5, repeat: Infinity, repeatDelay: 2 }}
+                    >
+                      <Activity className="h-8 w-8 text-[#0B63BC]/50" />
+                    </motion.div>
+                    <p className="text-gray-500 font-medium">Select a bill category to proceed</p>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </CardContent>
           </Card>
-        </div>
+        </motion.div>
       </div>
-    </div>
+    </motion.div>
   );
 
   return (

@@ -1,10 +1,9 @@
-
-import { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Link } from "react-router-dom";
-import { Eye, EyeOff, Plus, Send, CreditCard, Smartphone, Zap, Gift, TrendingUp, ArrowRight, Sparkles, Activity, DollarSign, RefreshCw, Plane, Bitcoin, Users, Shield, Globe, Clock, CheckCircle, AlertCircle, Building2, ChevronDown, ArrowUpDown, Phone, Tv, Zap as Electricity, Gift as GiftCard, MoreHorizontal, Crown } from "lucide-react";
+import { Eye, EyeOff, Plus, Send, CreditCard, Smartphone, Zap, Gift, TrendingUp, ArrowRight, Sparkles, Activity, DollarSign, RefreshCw, Plane, Bitcoin, Users, Shield, Globe, Clock, CheckCircle, AlertCircle, Building2, ChevronDown, ArrowUpDown, Phone, Tv, Zap as Electricity, Gift as GiftCard, MoreHorizontal } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import Navigation from "@/components/Navigation";
 import DesktopLayout from "@/components/DesktopLayout";
@@ -16,6 +15,7 @@ import { User, Transaction } from "@/types";
 import ViewAllButton from "@/components/ui/view-all-button";
 import { currencyRates, currencySymbols, languages } from "@/lib/utils";
 import { useAuth } from "@/hooks/use-auth";
+import UpgradeCarousel from "@/components/UpgradeCarousel";
 
 const Dashboard = () => {
   const [showBalance, setShowBalance] = useState(true);
@@ -25,6 +25,7 @@ const Dashboard = () => {
   const [animateCards, setAnimateCards] = useState(false);
   const [showCurrencyDropdown, setShowCurrencyDropdown] = useState(false);
   const [showLanguageDropdown, setShowLanguageDropdown] = useState(false);
+  const [currentCard, setCurrentCard] = useState(0);
   const { toast } = useToast();
   const { user } = useAuth();
 
@@ -76,6 +77,8 @@ const Dashboard = () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, [showLanguageDropdown, showCurrencyDropdown]);
+
+
 
   // Updated easy actions with real project pages - limited to 8 items
   const easyActions = [
@@ -381,36 +384,8 @@ const Dashboard = () => {
           </div>
         </div>
 
-        {/* Tier Upgrade Section */}
-        {(userData?.tier === 'tier1' || !userData?.tier) && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.2 }}
-            className="bg-gradient-to-r from-yellow-50 to-orange-50 border border-yellow-200 rounded-2xl p-6 mb-8"
-          >
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 bg-gradient-to-r from-yellow-400 to-orange-400 rounded-full flex items-center justify-center">
-                  <Crown className="h-6 w-6 text-white" />
-                </div>
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-900">Upgrade Your Tier</h3>
-                  <p className="text-sm text-gray-600">Unlock higher transaction limits and premium features</p>
-                </div>
-              </div>
-              <Button 
-                className="bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-white"
-                asChild
-              >
-                <Link to="/upgrade-tier">
-                  Upgrade Now
-                  <ArrowRight className="h-4 w-4 ml-2" />
-                </Link>
-              </Button>
-            </div>
-          </motion.div>
-        )}
+        {/* Upgrade Options Carousel */}
+        <UpgradeCarousel />
 
         {/* Easy Actions Section */}
         <div>
