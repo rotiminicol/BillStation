@@ -26,7 +26,7 @@ const Splash = () => {
     const timer = setTimeout(() => setStage('logo'), 800);        // 0-0.8s: Init
     const timer2 = setTimeout(() => setStage('showcase'), 2000);  // 0.8-2s: Logo reveal
     const timer3 = setTimeout(() => setStage('exit'), 4000);      // 2-4s: Showcase
-    const timer4 = setTimeout(() => navigate("/welcome"), 5000);  // 4-5s: Exit
+    const timer4 = setTimeout(() => navigate("/landing"), 5000);  // 4-5s: Exit
 
     return () => {
       clearTimeout(timer);

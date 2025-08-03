@@ -1,15 +1,34 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { Building2, Calendar, Users, MapPin, CreditCard, ArrowRight, CheckCircle, Search, Star, Bed } from "lucide-react";
-import MobileLayout from "@/components/MobileLayout";
-import { MobileCard } from "@/components/ui/mobile-card";
+import { Building2, Calendar, Users, MapPin, CreditCard, ArrowRight, CheckCircle, Search, Star, Bed, TrendingUp, Activity, Filter, Heart, Eye, ArrowLeft } from "lucide-react";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useToast } from "@/hooks/use-toast";
-import Loader from "@/components/Loader";
-import ViewAllButton from "@/components/ui/view-all-button";
+import MobileLayout from "@/components/MobileLayout";
+import HotelCard from "@/components/hotel/HotelCard";
+import BookingForm from "@/components/hotel/BookingForm";
+import BookingSuccessModal from "@/components/hotel/BookingSuccessModal";
+
+interface Hotel {
+  id: string;
+  name: string;
+  image: string;
+  rating: number;
+  reviewCount: number;
+  location: string;
+  price: number;
+  originalPrice?: number;
+  amenities: string[];
+  type: 'hotel' | 'shortlet';
+  description: string;
+  distance: string;
+  available: boolean;
+}
 
 interface Booking {
   id: string;
@@ -22,15 +41,34 @@ interface Booking {
   status: 'confirmed' | 'pending' | 'cancelled';
 }
 
-const HotelBooking = () => {
-  const [loading, setLoading] = useState(true);
+interface BookingData {
+  hotelId: string;
+  hotelName: string;
+  checkIn: string;
+  checkOut: string;
+  guests: number;
+  rooms: number;
+  nights: number;
+  specialRequests: string;
+  pricing: {
+    basePrice: number;
+    serviceFee: number;
+    tax: number;
+    total: number;
+  };
+}
+
+const MobileHotelBooking = () => {
   const [bookingType, setBookingType] = useState("");
   const [destination, setDestination] = useState("");
-  const [checkIn, setCheckIn] = useState("");
-  const [checkOut, setCheckOut] = useState("");
-  const [guests, setGuests] = useState("");
-  const [isProcessing, setIsProcessing] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedHotel, setSelectedHotel] = useState<Hotel | null>(null);
+  const [showBookingForm, setShowBookingForm] = useState(false);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [currentBooking, setCurrentBooking] = useState<BookingData | null>(null);
+  const [loading, setLoading] = useState(false);
   const [recentBookings, setRecentBookings] = useState<Booking[]>([]);
+  const [hotels, setHotels] = useState<Hotel[]>([]);
   const { toast } = useToast();
 
   const bookingTypes = [
@@ -45,11 +83,87 @@ const HotelBooking = () => {
     { icon: MapPin, label: "Kano", value: "kano", color: "from-orange-500 to-red-500" },
   ];
 
+  // Mock hotel data
+  const mockHotels: Hotel[] = [
+    {
+      id: "1",
+      name: "Lagos Continental Hotel",
+      image: "/hotel1.jpg",
+      rating: 4.5,
+      reviewCount: 1247,
+      location: "Victoria Island, Lagos",
+      price: 45000,
+      originalPrice: 55000,
+      amenities: ["Wifi", "Parking", "Restaurant", "Pool", "Gym", "AC"],
+      type: "hotel",
+      description: "Luxury 5-star hotel with stunning ocean views and world-class amenities.",
+      distance: "2.5 km from center",
+      available: true
+    },
+    {
+      id: "2",
+      name: "Abuja Luxury Suites",
+      image: "/hotel2.jpg",
+      rating: 4.8,
+      reviewCount: 892,
+      location: "Central Business District, Abuja",
+      price: 38000,
+      amenities: ["Wifi", "Parking", "Restaurant", "Gym", "AC", "Security"],
+      type: "hotel",
+      description: "Modern luxury suites in the heart of Abuja's business district.",
+      distance: "1.8 km from center",
+      available: true
+    },
+    {
+      id: "3",
+      name: "Port Harcourt Executive Lodge",
+      image: "/hotel3.jpg",
+      rating: 4.2,
+      reviewCount: 567,
+      location: "GRA, Port Harcourt",
+      price: 28000,
+      originalPrice: 32000,
+      amenities: ["Wifi", "Parking", "Restaurant", "AC"],
+      type: "hotel",
+      description: "Comfortable executive lodge with excellent service and amenities.",
+      distance: "3.2 km from center",
+      available: true
+    },
+    {
+      id: "4",
+      name: "Lagos Premium Shortlet",
+      image: "/shortlet1.jpg",
+      rating: 4.6,
+      reviewCount: 423,
+      location: "Lekki, Lagos",
+      price: 25000,
+      amenities: ["Wifi", "Parking", "Kitchen", "AC", "Laundry"],
+      type: "shortlet",
+      description: "Premium shortlet apartment with full kitchen and modern amenities.",
+      distance: "4.1 km from center",
+      available: true
+    },
+    {
+      id: "5",
+      name: "Abuja Cozy Shortlet",
+      image: "/shortlet2.jpg",
+      rating: 4.4,
+      reviewCount: 298,
+      location: "Wuse Zone 2, Abuja",
+      price: 18000,
+      amenities: ["Wifi", "Kitchen", "AC", "Security"],
+      type: "shortlet",
+      description: "Cozy and comfortable shortlet perfect for business or leisure.",
+      distance: "2.7 km from center",
+      available: true
+    }
+  ];
+
   useEffect(() => {
     const fetchData = async () => {
       try {
         // Simulate API call
-        await new Promise(resolve => setTimeout(resolve, 1500));
+        await new Promise(resolve => setTimeout(resolve, 1000));
         
         // Mock recent bookings data
         const mockBookings: Booking[] = [
@@ -72,20 +186,11 @@ const HotelBooking = () => {
             guests: 1,
             amount: 15000,
             status: "confirmed"
-          },
-          {
-            id: "3",
-            type: "Hotel",
-            destination: "Port Harcourt",
-            checkIn: "2024-01-25",
-            checkOut: "2024-01-27",
-            guests: 3,
-            amount: 18000,
-            status: "pending"
           }
         ];
         
         setRecentBookings(mockBookings);
+        setHotels(mockHotels);
       } catch (error) {
         console.error('Error fetching hotel booking data:', error);
         toast({
@@ -93,57 +198,82 @@ const HotelBooking = () => {
           description: "Failed to load hotel booking data",
           variant: "destructive"
         });
-      } finally {
-        setLoading(false);
       }
     };
 
     fetchData();
   }, [toast]);
 
-  const handleBooking = async () => {
-    if (!bookingType || !destination || !checkIn || !checkOut || !guests) {
-      toast({
-        title: "Error",
-        description: "Please fill in all required fields",
-        variant: "destructive"
-      });
-      return;
-    }
+  const handleHotelSelect = (hotel: Hotel) => {
+    setSelectedHotel(hotel);
+    setShowBookingForm(true);
+  };
 
-    setIsProcessing(true);
+  const handleBooking = async (bookingData: BookingData) => {
+    setLoading(true);
+    
     try {
-      // Simulate booking processing
+      // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 2000));
       
+      setCurrentBooking(bookingData);
+      setShowSuccessModal(true);
+      setShowBookingForm(false);
+      
       toast({
-        title: "Booking Successful",
-        description: `Your ${bookingType} booking has been confirmed`,
+        title: "Booking Successful!",
+        description: `Your booking at ${bookingData.hotelName} has been confirmed`,
       });
       
-      // Reset form
-      setBookingType("");
-      setDestination("");
-      setCheckIn("");
-      setCheckOut("");
-      setGuests("");
     } catch (error) {
       toast({
-        title: "Booking Failed",
-        description: "Please try again later",
+        title: "Error",
+        description: "Failed to process booking",
         variant: "destructive"
       });
     } finally {
-      setIsProcessing(false);
+      setLoading(false);
     }
   };
 
+  const handleSuccessModalClose = () => {
+    setShowSuccessModal(false);
+    setCurrentBooking(null);
+    setSelectedHotel(null);
+  };
+
+  const handleDownload = () => {
+    toast({
+      title: "Download Started",
+      description: "Your booking receipt is being downloaded.",
+    });
+  };
+
+  const handleShare = () => {
+    toast({
+      title: "Shared!",
+      description: "Your booking details have been shared.",
+    });
+  };
+
+  const handleViewHistory = () => {
+    toast({
+      title: "Redirecting...",
+      description: "Taking you to booking history.",
+    });
+  };
+
+  const filteredHotels = hotels.filter(hotel => {
+    const matchesType = !bookingType || hotel.type === bookingType;
+    const matchesDestination = !destination || destination === "all" || hotel.location.toLowerCase().includes(destination.toLowerCase());
+    const matchesSearch = !searchTerm || hotel.name.toLowerCase().includes(searchTerm.toLowerCase()) || hotel.location.toLowerCase().includes(searchTerm.toLowerCase());
+    return matchesType && matchesDestination && matchesSearch;
+  });
+
   const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-US', {
+    return new Intl.NumberFormat('en-NG', {
       style: 'currency',
-      currency: 'USD',
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
+      currency: 'NGN'
     }).format(amount);
   };
 
@@ -160,204 +290,201 @@ const HotelBooking = () => {
     }
   };
 
-  if (loading) {
-    return (
-      <MobileLayout>
-        <div className="flex items-center justify-center h-full">
-          <Loader text="Loading hotels..." />
-        </div>
-      </MobileLayout>
-    );
-  }
-
   return (
     <MobileLayout>
-      <div className="p-4 space-y-6">
-        {/* Header Section */}
-        <div className="space-y-4">
-          <div className="text-center">
-            <h1 className="text-2xl font-bold text-gray-900">Hotel & Shortlet</h1>
-            <p className="text-sm text-gray-600 mt-1">
-              Book hotels and shortlets worldwide
-            </p>
-          </div>
-
-          {/* Balance Card */}
-          <MobileCard className="bg-gradient-to-r from-blue-600 to-blue-800 text-white p-6">
-            <div className="text-center mb-4">
-              <p className="text-sm text-blue-100 mb-2">Available Balance</p>
-              <h2 className="text-3xl font-bold">$3,250.00</h2>
-            </div>
-            
-            <div className="flex justify-between items-center pt-4 border-t border-white/20">
+      <div className="min-h-screen bg-[#F6F6F8]">
+        {/* Header */}
+        <div className="bg-white shadow-sm border-b border-gray-200 px-4 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-3">
+              <Link to="/dashboard" className="p-2">
+                <ArrowLeft className="w-5 h-5 text-gray-600" />
+              </Link>
               <div>
-                <p className="text-xs text-blue-200">This Month</p>
-                <p className="text-sm font-medium">$1,200.00</p>
-              </div>
-              <div className="text-right">
-                <p className="text-xs text-blue-200">Total Bookings</p>
-                <p className="text-sm font-medium">12</p>
+                <h1 className="text-xl font-bold text-gray-900">
+                  Hotel Booking
+                </h1>
+                <p className="text-sm text-gray-500">Find your perfect stay</p>
               </div>
             </div>
-          </MobileCard>
+          </div>
         </div>
 
-        {/* Booking Type Selection */}
-        <div className="grid grid-cols-2 gap-3">
-          {bookingTypes.map((type) => (
-            <button
-              key={type.value}
-              onClick={() => setBookingType(type.value)}
-                              className={`flex flex-col items-center justify-center p-4 rounded-xl transition-all duration-200 ${
-                  bookingType === type.value
-                    ? 'bg-[#0B63BC]/10 border-2 border-[#0B63BC]/20'
-                    : 'bg-white border border-gray-200 hover:bg-gray-50'
-                }`}
-            >
-              <div className="w-12 h-12 rounded-full bg-[#0B63BC]/10 flex items-center justify-center mb-3">
-                <type.icon className="h-5 w-5 text-[#0B63BC]" />
-              </div>
-              <span className="text-xs font-medium text-gray-700 text-center leading-tight">{type.label}</span>
-            </button>
-          ))}
-        </div>
-
-        {/* Popular Destinations */}
-        <div className="grid grid-cols-2 gap-3">
-          {popularDestinations.map((destination) => (
-            <button
-              key={destination.value}
-              onClick={() => setDestination(destination.value)}
-                              className={`flex flex-col items-center justify-center p-4 rounded-xl transition-all duration-200 ${
-                  destination === destination.value
-                    ? 'bg-[#0B63BC]/10 border-2 border-[#0B63BC]/20'
-                    : 'bg-white border border-gray-200 hover:bg-gray-50'
-                }`}
-            >
-              <div className="w-12 h-12 rounded-full bg-[#0B63BC]/10 flex items-center justify-center mb-3">
-                <destination.icon className="h-5 w-5 text-[#0B63BC]" />
-              </div>
-              <span className="text-xs font-medium text-gray-700 text-center leading-tight">{destination.label}</span>
-            </button>
-          ))}
-        </div>
-
-        {/* Booking Form */}
-        {bookingType && (
-          <MobileCard>
-            <MobileCard.Header>
-              <MobileCard.Title>Book {bookingType.charAt(0).toUpperCase() + bookingType.slice(1)}</MobileCard.Title>
-            </MobileCard.Header>
-            
-            <MobileCard.Content className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="destination">Destination</Label>
-                <Input
-                  id="destination"
-                  placeholder="Enter destination"
-                  value={destination}
-                  onChange={(e) => setDestination(e.target.value)}
-                />
-              </div>
-              
-              <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-2">
-                  <Label htmlFor="checkIn">Check In</Label>
-                  <Input
-                    id="checkIn"
-                    type="date"
-                    value={checkIn}
-                    onChange={(e) => setCheckIn(e.target.value)}
-                  />
+        <div className="p-4 space-y-6">
+          {/* Search and Filters */}
+          <Card className="border-0 shadow-lg bg-white">
+            <CardHeader>
+              <CardTitle className="text-lg font-bold text-gray-900 flex items-center gap-2">
+                <Search className="h-4 w-4 text-[#0B63BC]" />
+                Search & Filter
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {/* Booking Type Selection */}
+              <div className="space-y-3">
+                <Label>Booking Type</Label>
+                <div className="grid grid-cols-2 gap-3">
+                  {bookingTypes.map((type) => (
+                    <Card
+                      key={type.value}
+                      className={`cursor-pointer transition-all duration-200 hover:shadow-lg ${
+                        bookingType === type.value
+                          ? "border-[#0B63BC] bg-blue-50"
+                          : "border-gray-200 hover:border-[#0B63BC]/30"
+                      }`}
+                      onClick={() => setBookingType(type.value)}
+                    >
+                      <CardContent className="p-3 text-center">
+                        <div className={`w-10 h-10 rounded-full flex items-center justify-center mx-auto mb-2 ${
+                          bookingType === type.value
+                            ? "bg-[#0B63BC] text-white"
+                            : "bg-gray-100 text-gray-600"
+                        }`}>
+                          <type.icon className="h-5 w-5" />
+                        </div>
+                        <h4 className="font-semibold text-gray-900 text-sm">{type.label}</h4>
+                      </CardContent>
+                    </Card>
+                  ))}
                 </div>
-                
+              </div>
+
+              {/* Destination and Search */}
+              <div className="space-y-3">
                 <div className="space-y-2">
-                  <Label htmlFor="checkOut">Check Out</Label>
+                  <Label htmlFor="destination">Destination</Label>
+                  <Select value={destination} onValueChange={setDestination}>
+                    <SelectTrigger className="h-12">
+                      <SelectValue placeholder="Select destination" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Destinations</SelectItem>
+                      {popularDestinations.map((dest) => (
+                        <SelectItem key={dest.value} value={dest.label}>
+                          {dest.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="search">Search Hotels</Label>
                   <Input
-                    id="checkOut"
-                    type="date"
-                    value={checkOut}
-                    onChange={(e) => setCheckOut(e.target.value)}
+                    id="search"
+                    placeholder="Search by name or location..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="h-12"
                   />
                 </div>
               </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="guests">Number of Guests</Label>
-                <Select value={guests} onValueChange={setGuests}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select guests" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {[1, 2, 3, 4, 5, 6].map((num) => (
-                      <SelectItem key={num} value={num.toString()}>
-                        {num} {num === 1 ? 'Guest' : 'Guests'}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+            </CardContent>
+          </Card>
+
+          {/* Hotel Listings */}
+          {!showBookingForm && (
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <h2 className="text-lg font-bold text-gray-900">
+                  Available Properties ({filteredHotels.length})
+                </h2>
+                <Button variant="outline" size="sm">
+                  <Filter className="h-4 w-4 mr-2" />
+                  Filter
+                </Button>
               </div>
-              
-              <Button
-                onClick={handleBooking}
-                disabled={isProcessing}
-                className="w-full bg-[#0B63BC] hover:bg-[#0B63BC]/90 text-white"
-              >
-                {isProcessing ? (
-                  <div className="flex items-center">
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                    Processing...
+
+              {filteredHotels.length === 0 ? (
+                <Card className="border-0 shadow-lg bg-white">
+                  <CardContent className="p-8 text-center">
+                    <Building2 className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                    <h3 className="text-base font-semibold text-gray-900 mb-2">No hotels found</h3>
+                    <p className="text-gray-500 mb-4 text-sm">Try adjusting your search criteria</p>
+                    <Button size="sm" onClick={() => {
+                      setBookingType("");
+                      setDestination("");
+                      setSearchTerm("");
+                    }}>
+                      Clear Filters
+                    </Button>
+                  </CardContent>
+                </Card>
+              ) : (
+                <div className="space-y-4">
+                  {filteredHotels.map((hotel, index) => (
+                    <HotelCard
+                      key={hotel.id}
+                      hotel={hotel}
+                      onSelect={handleHotelSelect}
+                      index={index}
+                    />
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Booking Form */}
+          {showBookingForm && selectedHotel && (
+            <BookingForm
+              selectedHotel={selectedHotel}
+              onBook={handleBooking}
+              loading={loading}
+            />
+          )}
+
+          {/* Recent Bookings */}
+          <Card className="border-0 shadow-lg bg-white mb-20">
+            <CardHeader>
+              <CardTitle className="text-lg font-bold text-gray-900">Recent Bookings</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                {recentBookings.length === 0 ? (
+                  <div className="text-center py-6">
+                    <Building2 className="h-10 w-10 text-gray-400 mx-auto mb-3" />
+                    <p className="text-gray-500 text-sm">No recent bookings</p>
                   </div>
                 ) : (
-                  "Book Now"
+                  recentBookings.map((booking) => (
+                    <div key={booking.id} className="flex items-center justify-between p-3 border border-gray-200 rounded-lg">
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                          <Building2 className="h-4 w-4 text-blue-600" />
+                        </div>
+                        <div>
+                          <p className="font-medium text-gray-900 text-sm">{booking.type}</p>
+                          <p className="text-xs text-gray-500">{booking.destination}</p>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <p className="font-bold text-gray-900 text-sm">{formatCurrency(booking.amount)}</p>
+                        <Badge className={`mt-1 text-xs ${getStatusColor(booking.status)}`}>
+                          {booking.status}
+                        </Badge>
+                      </div>
+                    </div>
+                  ))
                 )}
-              </Button>
-            </MobileCard.Content>
-          </MobileCard>
-        )}
-
-        {/* Recent Bookings */}
-        <MobileCard>
-          <MobileCard.Header>
-            <MobileCard.Title>Recent Bookings</MobileCard.Title>
-            <ViewAllButton category="hotel" />
-          </MobileCard.Header>
-          
-          <MobileCard.Content className="mt-4 space-y-4">
-            {recentBookings.length > 0 ? (
-              recentBookings.map((booking) => (
-                <div key={booking.id} className="flex items-center justify-between py-3 border-b border-gray-100 last:border-b-0">
-                  <div className="flex items-center">
-                    <div className="w-10 h-10 bg-[#0B63BC]/10 rounded-full flex items-center justify-center mr-3">
-                                              <Building2 className="h-5 w-5 text-[#0B63BC]" />
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium text-gray-900">
-                        {booking.type} - {booking.destination}
-                      </p>
-                      <p className="text-xs text-gray-500">{booking.checkIn} to {booking.checkOut} • {booking.guests} guests</p>
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-sm font-medium text-gray-900">{formatCurrency(booking.amount)}</p>
-                    <span className={`text-xs px-2 py-0.5 rounded-full ${getStatusColor(booking.status)}`}>
-                      {booking.status.charAt(0).toUpperCase() + booking.status.slice(1)}
-                    </span>
-                  </div>
-                </div>
-              ))
-            ) : (
-              <div className="text-center py-8">
-                <Building2 className="h-12 w-12 text-gray-400 mx-auto mb-3" />
-                <p className="text-gray-500 text-sm">No recent bookings</p>
-                <p className="text-gray-400 text-xs mt-1">Your booking history will appear here</p>
               </div>
-            )}
-          </MobileCard.Content>
-        </MobileCard>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Success Modal */}
+        {currentBooking && (
+          <BookingSuccessModal
+            booking={currentBooking}
+            isOpen={showSuccessModal}
+            onClose={handleSuccessModalClose}
+            onDownload={handleDownload}
+            onShare={handleShare}
+            onViewHistory={handleViewHistory}
+          />
+        )}
       </div>
     </MobileLayout>
   );
 };
 
-export default HotelBooking; 
+export default MobileHotelBooking; 

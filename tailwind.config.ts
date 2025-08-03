@@ -26,13 +26,13 @@ export default {
 				background: 'hsl(var(--background))',
 				foreground: 'hsl(var(--foreground))',
 				primary: {
-					DEFAULT: '#1E40AF',
+					DEFAULT: '#0B63BC',
 					foreground: '#FFFFFF',
-					50: '#EFF6FF',
-					100: '#DBEAFE',
-					500: '#3B82F6',
-					600: '#1E40AF',
-					700: '#1E3A8A'
+					50: '#E6F3FF',
+					100: '#CCE7FF',
+					500: '#0B63BC',
+					600: '#0952A3',
+					700: '#07418A'
 				},
 				secondary: {
 					DEFAULT: 'hsl(var(--secondary))',
@@ -69,9 +69,9 @@ export default {
 					ring: 'hsl(var(--sidebar-ring))'
 				},
 				billstation: {
-					blue: '#1E40AF',
-					light: '#EFF6FF',
-					dark: '#1E3A8A'
+					blue: '#0B63BC',
+					light: '#F6F6F8',
+					dark: '#0952A3'
 				}
 			},
 			borderRadius: {

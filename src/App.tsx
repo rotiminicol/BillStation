@@ -10,6 +10,11 @@ import ErrorBoundary from "@/components/ErrorBoundary";
 
 // Desktop Imports
 import Splash from "./pages/Splash";
+import Landing from "./pages/Landing";
+import About from "./pages/About";
+import Crypto from "./pages/Crypto";
+import Services from "./pages/Services";
+import Agent from "./pages/Agent";
 import Welcome from "./pages/Welcome";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
@@ -22,9 +27,18 @@ import Payment from "./pages/Payment";
 import CardPage from "./pages/Card";
 import OurStation from "./pages/OurStation";
 import Bills from "./pages/Bills";
+import BillsAirtime from "./pages/bills/Airtime";
+import BillsData from "./pages/bills/Data";
+import BillsElectricity from "./pages/bills/Electricity";
+import BillsTv from "./pages/bills/Tv";
+import BillsEducation from "./pages/bills/Education";
+import BillsBetting from "./pages/bills/Betting";
+import BillsRent from "./pages/bills/Rent";
+import BillsTransport from "./pages/bills/Transport";
 import Cards from "./pages/Cards";
 import Profile from "./pages/Profile";
 import Transfer from "./pages/Transfer";
+import TransferDemo from "./pages/TransferDemo";
 import AirtimeSwap from "./pages/AirtimeSwap";
 import FlightBooking from "./pages/FlightBooking";
 import BitcoinTrading from "./pages/BitcoinTrading";
@@ -55,6 +69,14 @@ import MobileOnboarding from "./pages/mobile/Onboarding";
 import MobileWelcome from "./pages/mobile/Welcome";
 import MobileTransfer from "./pages/mobile/Transfer";
 import MobileBills from "./pages/mobile/Bills";
+import MobileBillsAirtime from "./pages/mobile/bills/Airtime";
+import MobileBillsData from "./pages/mobile/bills/Data";
+import MobileBillsElectricity from "./pages/mobile/bills/Electricity";
+import MobileBillsTv from "./pages/mobile/bills/Tv";
+import MobileBillsEducation from "./pages/mobile/bills/Education";
+import MobileBillsBetting from "./pages/mobile/bills/Betting";
+import MobileBillsRent from "./pages/mobile/bills/Rent";
+import MobileBillsTransport from "./pages/mobile/bills/Transport";
 import MobileAirtimeSwap from "./pages/mobile/AirtimeSwap";
 import MobileFlightBook from "./pages/mobile/FlightBook";
 import MobileBitcoinTrading from "./pages/mobile/BitcoinTrading";
@@ -101,6 +123,7 @@ const AppRouter = () => {
     return (
       <Routes>
         <Route path="/" element={<Splash />} />
+        <Route path="/landing" element={<Landing />} />
         <Route path="/welcome" element={<MobileWelcome />} />
         <Route path="/login" element={<MobileLogin />} />
         <Route path="/signup" element={<MobileSignup />} />
@@ -113,7 +136,16 @@ const AppRouter = () => {
         <Route path="/card" element={<CardPage />} />
         <Route path="/our-station" element={<OurStation />} />
         <Route path="/transfer" element={<MobileTransfer />} />
+        <Route path="/transfer-demo" element={<TransferDemo />} />
         <Route path="/bills" element={<MobileBills />} />
+        <Route path="/bills/airtime" element={<MobileBillsAirtime />} />
+        <Route path="/bills/data" element={<MobileBillsData />} />
+        <Route path="/bills/electricity" element={<MobileBillsElectricity />} />
+        <Route path="/bills/tv" element={<MobileBillsTv />} />
+        <Route path="/bills/education" element={<MobileBillsEducation />} />
+        <Route path="/bills/betting" element={<MobileBillsBetting />} />
+        <Route path="/bills/rent" element={<MobileBillsRent />} />
+        <Route path="/bills/transport" element={<MobileBillsTransport />} />
         <Route path="/cards" element={<MobileCards />} />
         <Route path="/airtime-swap" element={<MobileAirtimeSwap />} />
         <Route path="/flight-book" element={<MobileFlightBook />} />
@@ -144,8 +176,13 @@ const AppRouter = () => {
   return (
     <Routes>
       <Route path="/" element={<Splash />} />
-      <Route path="/welcome" element={<Welcome />} />
-      <Route path="/login" element={<Login />} />
+              <Route path="/landing" element={<Landing />} />
+        <Route path="/welcome" element={<Welcome />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/about" element={<About />} />
+        <Route path="/crypto" element={<Crypto />} />
+        <Route path="/services" element={<Services />} />
+        <Route path="/agent" element={<Agent />} />
       <Route path="/signup" element={<Signup />} />
       <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="/terms" element={<Terms />} />
@@ -155,10 +192,19 @@ const AppRouter = () => {
       <Route path="/payment" element={<Payment />} />
               <Route path="/card" element={<CardPage />} />
         <Route path="/our-station" element={<OurStation />} />
-        <Route path="/bills" element={<Bills />} />
-      <Route path="/cards" element={<Cards />} />
+                <Route path="/bills" element={<Bills />} />
+        <Route path="/bills/airtime" element={<BillsAirtime />} />
+        <Route path="/bills/data" element={<BillsData />} />
+        <Route path="/bills/electricity" element={<BillsElectricity />} />
+        <Route path="/bills/tv" element={<BillsTv />} />
+        <Route path="/bills/education" element={<BillsEducation />} />
+        <Route path="/bills/betting" element={<BillsBetting />} />
+        <Route path="/bills/rent" element={<BillsRent />} />
+        <Route path="/bills/transport" element={<BillsTransport />} />
+        <Route path="/cards" element={<Cards />} />
       <Route path="/profile" element={<Profile />} />
       <Route path="/transfer" element={<Transfer />} />
+      <Route path="/transfer-demo" element={<TransferDemo />} />
       <Route path="/airtime-swap" element={<AirtimeSwap />} />
       <Route path="/flight-booking" element={<FlightBooking />} />
       <Route path="/bitcoin-trading" element={<BitcoinTrading />} />

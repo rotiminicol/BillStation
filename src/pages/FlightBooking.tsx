@@ -1,25 +1,60 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
 import { useState, useEffect } from "react";
-import { Plane, Hotel, Car, Activity, CheckCircle, ArrowRight, Calendar, MapPin, Users, Search, DollarSign, Shield, Clock, Globe, Star, TrendingUp } from "lucide-react";
+import { Plane, Hotel, Car, Activity, CheckCircle, ArrowRight, Calendar, MapPin, Users, Search, DollarSign, Shield, Clock, Globe, Star, TrendingUp, Crown } from "lucide-react";
 import { Link } from "react-router-dom";
 import Navigation from "@/components/Navigation";
 import DesktopLayout from "@/components/DesktopLayout";
+import TravelTabs from "@/components/travel/TravelTabs";
+import BookingResultCard from "@/components/travel/BookingResultCard";
+import TravelSuccessModal from "@/components/travel/TravelSuccessModal";
+import { PinInput } from "@/components/PinInput";
 
 import { useToast } from "@/hooks/use-toast";
 import { getBankLogo } from "@/lib/bankLogos";
 
+interface BookingResult {
+  id: string;
+  name: string;
+  logo: string;
+  rating: number;
+  price: number;
+  originalPrice?: number;
+  duration?: string;
+  departureTime?: string;
+  arrivalTime?: string;
+  stops?: number;
+  type: 'flight' | 'hotel' | 'transport' | 'private-jet';
+  features: string[];
+  description: string;
+  color: string;
+}
+
+interface TravelBooking {
+  id: string;
+  service: string;
+  provider: string;
+  from: string;
+  to: string;
+  date: string;
+  time?: string;
+  passengers: string;
+  price: number;
+  bookingId: string;
+  status: 'confirmed' | 'pending' | 'cancelled';
+}
+
 const FlightBooking = () => {
   const [activeTab, setActiveTab] = useState<'flights' | 'private-jet' | 'hotels' | 'transport'>('flights');
-  const [fromLocation, setFromLocation] = useState("");
-  const [toLocation, setToLocation] = useState("");
-  const [departureDate, setDepartureDate] = useState("");
-  const [returnDate, setReturnDate] = useState("");
-  const [passengers, setPassengers] = useState("1");
   const [loading, setLoading] = useState(false);
+  const [searchResults, setSearchResults] = useState<BookingResult[]>([]);
+  const [showResults, setShowResults] = useState(false);
+  const [showPinInput, setShowPinInput] = useState(false);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [selectedBooking, setSelectedBooking] = useState<BookingResult | null>(null);
+  const [currentBooking, setCurrentBooking] = useState<TravelBooking | null>(null);
+  const [pinError, setPinError] = useState('');
   const { toast } = useToast();
 
   const popularDestinations = [
@@ -42,24 +77,161 @@ const FlightBooking = () => {
     { name: "Lufthansa", logo: "🛬", rating: 4.4, color: "from-purple-500 to-purple-600", description: "German precision" },
   ];
 
-  const handleSearch = () => {
-    if (!fromLocation || !toLocation || !departureDate) {
-      toast({
-        title: "Error",
-        description: "Please fill in all required fields.",
-        variant: "destructive"
-      });
-      return;
+  const hotels = [
+    { name: "Eko Hotels & Suites", logo: "🏨", rating: 4.6, color: "from-green-500 to-green-600", description: "Luxury 5-star hotel" },
+    { name: "Sheraton Lagos Hotel", logo: "🏢", rating: 4.4, color: "from-blue-500 to-blue-600", description: "Business-friendly hotel" },
+    { name: "Radisson Blu Hotel", logo: "🏩", rating: 4.5, color: "from-purple-500 to-purple-600", description: "Premium accommodation" },
+    { name: "Hilton Lagos", logo: "🏨", rating: 4.7, color: "from-red-500 to-red-600", description: "International luxury" },
+  ];
+
+  const transportServices = [
+    { name: "Uber Premium", logo: "🚗", rating: 4.3, color: "from-orange-500 to-orange-600", description: "Premium ride service" },
+    { name: "Bolt Business", logo: "🚙", rating: 4.2, color: "from-green-500 to-green-600", description: "Business travel solution" },
+    { name: "Lagos Taxi Service", logo: "🚕", rating: 4.1, color: "from-yellow-500 to-yellow-600", description: "Local taxi service" },
+    { name: "Private Chauffeur", logo: "🚐", rating: 4.8, color: "from-purple-500 to-purple-600", description: "Luxury chauffeur service" },
+  ];
+
+  const privateJets = [
+    { name: "NetJets", logo: "🛩️", rating: 4.9, color: "from-purple-500 to-purple-600", description: "Premium private jet service" },
+    { name: "Wheels Up", logo: "✈️", rating: 4.7, color: "from-blue-500 to-blue-600", description: "Luxury jet charter" },
+    { name: "VistaJet", logo: "🛫", rating: 4.8, color: "from-red-500 to-red-600", description: "Global private aviation" },
+    { name: "Flexjet", logo: "🛬", rating: 4.6, color: "from-green-500 to-green-600", description: "Fractional jet ownership" },
+  ];
+
+  const generateMockResults = (service: string, searchData: any): BookingResult[] => {
+    let baseResults: any[] = [];
+    
+    switch (service) {
+      case 'flights':
+        baseResults = airlines;
+        break;
+      case 'hotels':
+        baseResults = hotels;
+        break;
+      case 'transport':
+        baseResults = transportServices;
+        break;
+      case 'private-jet':
+        baseResults = privateJets;
+        break;
+      default:
+        baseResults = airlines;
     }
 
+    return baseResults.map((item, index) => ({
+      id: `${service}-${index + 1}`,
+      name: item.name,
+      logo: item.logo,
+      rating: item.rating + (Math.random() * 0.3 - 0.15), // Add some variation
+      price: Math.floor(Math.random() * 500000) + 50000, // Random price between 50k and 550k
+      originalPrice: Math.random() > 0.7 ? Math.floor(Math.random() * 600000) + 60000 : undefined,
+      duration: service === 'flights' ? `${Math.floor(Math.random() * 8) + 2}h ${Math.floor(Math.random() * 30)}m` : undefined,
+      departureTime: service === 'flights' ? `${Math.floor(Math.random() * 12) + 6}:${Math.floor(Math.random() * 60).toString().padStart(2, '0')}` : undefined,
+      arrivalTime: service === 'flights' ? `${Math.floor(Math.random() * 12) + 6}:${Math.floor(Math.random() * 60).toString().padStart(2, '0')}` : undefined,
+      stops: service === 'flights' ? Math.floor(Math.random() * 2) : undefined,
+      type: service as 'flight' | 'hotel' | 'transport' | 'private-jet',
+      features: getFeaturesForService(service),
+      description: item.description,
+      color: item.color
+    }));
+  };
+
+  const getFeaturesForService = (service: string): string[] => {
+    switch (service) {
+      case 'flights':
+        return ['Free WiFi', 'In-flight entertainment', 'Meal included', 'Priority boarding'];
+      case 'hotels':
+        return ['Free WiFi', 'Swimming pool', 'Spa & wellness', 'Restaurant'];
+      case 'transport':
+        return ['Air conditioning', 'Professional driver', 'GPS tracking', '24/7 support'];
+      case 'private-jet':
+        return ['VIP lounge access', 'Custom catering', 'Flexible scheduling', 'Concierge service'];
+      default:
+        return ['Premium service', '24/7 support'];
+    }
+  };
+
+  const handleSearch = (searchData: any) => {
     setLoading(true);
+    setShowResults(false);
+    
+    // Simulate API call
     setTimeout(() => {
+      const results = generateMockResults(activeTab, searchData);
+      setSearchResults(results);
+      setShowResults(true);
+      setLoading(false);
+      
       toast({
         title: "Search Complete!",
-        description: "Found 15 available options for your trip.",
+        description: `Found ${results.length} available options for your ${activeTab} search.`,
       });
-      setLoading(false);
     }, 2000);
+  };
+
+  const handleBook = (result: BookingResult) => {
+    setSelectedBooking(result);
+    setShowPinInput(true);
+  };
+
+  const handlePinComplete = async (pin: string) => {
+    if (pin === '1234') { // Mock PIN validation
+      setShowPinInput(false);
+      setPinError('');
+      
+      // Simulate booking processing
+      setTimeout(() => {
+        const booking: TravelBooking = {
+          id: `booking-${Date.now()}`,
+          service: activeTab,
+          provider: selectedBooking?.name || '',
+          from: 'Lagos',
+          to: 'Abuja',
+          date: new Date().toLocaleDateString(),
+          time: selectedBooking?.departureTime,
+          passengers: '1',
+          price: selectedBooking?.price || 0,
+          bookingId: `BK${Math.random().toString(36).substr(2, 9).toUpperCase()}`,
+          status: 'confirmed'
+        };
+        
+        setCurrentBooking(booking);
+        setShowSuccessModal(true);
+        
+        toast({
+          title: "Booking Confirmed!",
+          description: "Your travel booking has been successfully confirmed.",
+        });
+      }, 1500);
+    } else {
+      setPinError('Incorrect PIN. Please try again.');
+    }
+  };
+
+  const handlePinClose = () => {
+    setShowPinInput(false);
+    setPinError('');
+    setSelectedBooking(null);
+  };
+
+  const handleSuccessModalClose = () => {
+    setShowSuccessModal(false);
+    setCurrentBooking(null);
+    setSelectedBooking(null);
+  };
+
+  const handleDownload = () => {
+    toast({
+      title: "Download Started",
+      description: "Your booking receipt is being downloaded.",
+    });
+  };
+
+  const handleShare = () => {
+    toast({
+      title: "Shared!",
+      description: "Your booking details have been shared.",
+    });
   };
 
   const FlightBookingContent = () => (
@@ -68,127 +240,50 @@ const FlightBooking = () => {
       <div className="flex items-center mb-8">
         <div className="flex items-center gap-3">
           <h1 className="text-3xl font-bold text-gray-900">
-            Travel & Booking
+            Travel & Booking Suite
           </h1>
         </div>
       </div>
 
-      {/* Tab Navigation */}
-      <div className="flex bg-white rounded-xl p-1 mb-8 shadow-lg max-w-2xl">
-        {[
-          { id: 'flights', icon: <Plane className="h-5 w-5" />, label: 'Flights' },
-          { id: 'private-jet', icon: <Plane className="h-5 w-5" />, label: 'Private Jet' },
-          { id: 'hotels', icon: <Hotel className="h-5 w-5" />, label: 'Hotels' },
-          { id: 'transport', icon: <Car className="h-5 w-5" />, label: 'Transport' }
-        ].map((tab) => (
-          <button
-            key={tab.id}
-            onClick={() => setActiveTab(tab.id as 'flights' | 'private-jet' | 'hotels' | 'transport')}
-            className={`flex-1 py-3 px-6 rounded-lg text-base font-semibold transition-all duration-300 ${
-              activeTab === tab.id
-                ? 'bg-[#0B63BC] text-white shadow-lg'
-                : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
-            }`}
-          >
-            <span className="inline mr-2">{tab.icon}</span>
-            {tab.label}
-          </button>
-        ))}
-      </div>
+      {/* Travel Tabs Component */}
+      <TravelTabs
+        activeTab={activeTab}
+        onTabChange={(tab) => {
+          setActiveTab(tab as 'flights' | 'private-jet' | 'hotels' | 'transport');
+          setShowResults(false);
+          setSearchResults([]);
+        }}
+        onSearch={handleSearch}
+        loading={loading}
+      />
+
+      {/* Search Results */}
+      {showResults && searchResults.length > 0 && (
+        <Card className="border-0 shadow-lg bg-white">
+          <CardHeader>
+            <CardTitle className="text-xl font-bold text-gray-900 flex items-center gap-2">
+              <Search className="h-5 w-5 text-[#0B63BC]" />
+              Available {activeTab === 'flights' ? 'Flights' : activeTab === 'private-jet' ? 'Private Jets' : activeTab === 'hotels' ? 'Hotels' : 'Transport Options'}
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid gap-6">
+              {searchResults.map((result, index) => (
+                <BookingResultCard
+                  key={result.id}
+                  result={result}
+                  onBook={handleBook}
+                  index={index}
+                />
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       <div className="lg:grid lg:grid-cols-3 lg:gap-8">
         {/* Main Content */}
         <div className="lg:col-span-2 space-y-8">
-          {/* Search Form */}
-          <Card className="border-0 shadow-lg bg-white">
-            <CardHeader>
-              <CardTitle className="text-xl font-bold text-gray-900 flex items-center gap-2">
-                <Search className="h-5 w-5 text-[#0B63BC]" />
-                Search {activeTab === 'flights' ? 'Flights' : activeTab === 'private-jet' ? 'Private Jets' : activeTab === 'hotels' ? 'Hotels' : 'Transport'}
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="from">From</Label>
-                  <Input
-                    id="from"
-                    placeholder="Departure location"
-                    value={fromLocation}
-                    onChange={(e) => setFromLocation(e.target.value)}
-                    className="h-12"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="to">To</Label>
-                  <Input
-                    id="to"
-                    placeholder="Destination"
-                    value={toLocation}
-                    onChange={(e) => setToLocation(e.target.value)}
-                    className="h-12"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="departure">Departure Date</Label>
-                  <Input
-                    id="departure"
-                    type="date"
-                    value={departureDate}
-                    onChange={(e) => setDepartureDate(e.target.value)}
-                    className="h-12"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="return">Return Date (Optional)</Label>
-                  <Input
-                    id="return"
-                    type="date"
-                    value={returnDate}
-                    onChange={(e) => setReturnDate(e.target.value)}
-                    className="h-12"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="passengers">Passengers</Label>
-                  <Select value={passengers} onValueChange={setPassengers}>
-                    <SelectTrigger className="h-12">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((num) => (
-                        <SelectItem key={num} value={num.toString()}>
-                          {num} {num === 1 ? 'Passenger' : 'Passengers'}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-
-              <Button
-                onClick={handleSearch}
-                disabled={loading}
-                className="w-full h-12 bg-[#0B63BC] hover:bg-[#0B63BC]/90 text-lg font-semibold"
-              >
-                {loading ? (
-                  <div className="flex items-center gap-2">
-                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                    Searching...
-                  </div>
-                ) : (
-                  <div className="flex items-center gap-2">
-                    <Search className="h-5 w-5" />
-                    Search {activeTab === 'flights' ? 'Flights' : activeTab === 'private-jet' ? 'Private Jets' : activeTab === 'hotels' ? 'Hotels' : 'Transport'}
-                  </div>
-                )}
-              </Button>
-            </CardContent>
-          </Card>
-
           {/* Popular Destinations */}
           <Card className="border-0 shadow-lg bg-white">
             <CardHeader>
@@ -208,7 +303,7 @@ const FlightBooking = () => {
                       <div className="text-3xl mb-2">{destination.image}</div>
                       <h4 className="font-semibold text-gray-900 text-sm mb-1">{destination.name}</h4>
                       <p className="text-xs text-gray-500">{destination.country}</p>
-                                              <p className="text-xs text-[#0B63BC] font-medium">{destination.code}</p>
+                      <p className="text-xs text-[#0B63BC] font-medium">{destination.code}</p>
                     </CardContent>
                   </Card>
                 ))}
@@ -283,6 +378,26 @@ const FlightBooking = () => {
           </Card>
         </div>
       </div>
+
+      {/* PIN Input Modal */}
+      {showPinInput && (
+        <PinInput
+          onComplete={handlePinComplete}
+          onClose={handlePinClose}
+          error={pinError}
+        />
+      )}
+
+      {/* Success Modal */}
+      {currentBooking && (
+        <TravelSuccessModal
+          booking={currentBooking}
+          isOpen={showSuccessModal}
+          onClose={handleSuccessModalClose}
+          onDownload={handleDownload}
+          onShare={handleShare}
+        />
+      )}
     </div>
   );
 

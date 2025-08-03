@@ -1,340 +1,415 @@
-import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
-import { Bitcoin, TrendingUp, TrendingDown, ArrowRight, Wallet, Clock, CheckCircle } from "lucide-react";
-import MobileLayout from "@/components/MobileLayout";
-import { MobileCard } from "@/components/ui/mobile-card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useToast } from "@/hooks/use-toast";
-import Loader from "@/components/Loader";
-import ViewAllButton from "@/components/ui/view-all-button";
+import { Badge } from "@/components/ui/badge";
+import { useState, useEffect } from "react";
+import { Bitcoin, TrendingUp, TrendingDown, Activity, CheckCircle, ArrowRight, DollarSign, Wallet, BarChart3, RefreshCw, Calculator, Shield, Clock, Globe, Star, Zap, Users, ArrowLeft } from "lucide-react";
+import { Link } from "react-router-dom";
+import MobileLayout from "@/components/MobileLayout";
+import CryptoCard from "@/components/crypto/CryptoCard";
+import TradeInput from "@/components/crypto/TradeInput";
+import TradeSummaryModal from "@/components/crypto/TradeSummaryModal";
+import { PinInput } from "@/components/PinInput";
 
-interface Trade {
+import { useToast } from "@/hooks/use-toast";
+
+interface CryptoCurrency {
   id: string;
-  crypto: string;
-  type: 'buy' | 'sell';
-  amount: number;
+  name: string;
+  symbol: string;
+  logo: string;
   price: number;
-  total: number;
-  date: string;
-  status: 'completed' | 'pending' | 'failed';
+  change: number;
+  color: string;
+  bgColor: string;
+  description: string;
+  marketCap?: string;
+  volume24h?: string;
 }
 
-const CryptoTrading = () => {
-  const [loading, setLoading] = useState(true);
-  const [selectedCrypto, setSelectedCrypto] = useState("");
-  const [tradeType, setTradeType] = useState("");
-  const [amount, setAmount] = useState("");
-  const [walletAddress, setWalletAddress] = useState("");
-  const [isProcessing, setIsProcessing] = useState(false);
-  const [recentTrades, setRecentTrades] = useState<Trade[]>([]);
+interface TradeSummary {
+  id: string;
+  type: 'buy' | 'sell';
+  crypto: {
+    name: string;
+    symbol: string;
+    logo: string;
+  };
+  amountCrypto: string;
+  amountNaira: number;
+  price: number;
+  timestamp: string;
+  transactionId: string;
+  status: 'completed' | 'pending' | 'failed';
+  profitLoss?: number;
+  originalPrice?: number;
+}
+
+const MobileBitcoinTrading = () => {
+  const [activeTab, setActiveTab] = useState<'buy' | 'sell'>('buy');
+  const [selectedCrypto, setSelectedCrypto] = useState('bitcoin');
+  const [currentAmount, setCurrentAmount] = useState(0);
+  const [currentAmountType, setCurrentAmountType] = useState<'naira' | 'crypto'>('naira');
+  const [loading, setLoading] = useState(false);
+  const [showPinInput, setShowPinInput] = useState(false);
+  const [showTradeModal, setShowTradeModal] = useState(false);
+  const [currentTrade, setCurrentTrade] = useState<TradeSummary | null>(null);
+  const [pinError, setPinError] = useState('');
   const { toast } = useToast();
 
-  const cryptoTypes = [
-    { icon: Bitcoin, label: "Bitcoin", value: "bitcoin", color: "from-orange-500 to-yellow-500", price: 45000 },
-    { icon: Bitcoin, label: "Ethereum", value: "ethereum", color: "from-purple-500 to-blue-500", price: 2800 },
-    { icon: Bitcoin, label: "USDT", value: "usdt", color: "from-green-500 to-emerald-500", price: 1 },
-    { icon: Bitcoin, label: "BNB", value: "bnb", color: "from-yellow-500 to-orange-500", price: 320 },
+  // Mock Crypto prices with enhanced data
+  const cryptoCurrencies: CryptoCurrency[] = [
+    { 
+      id: 'bitcoin', 
+      name: 'Bitcoin', 
+      symbol: 'BTC', 
+      logo: '₿', 
+      price: 45000000, 
+      change: 2.5, 
+      color: 'from-orange-500 to-orange-600', 
+      bgColor: 'from-orange-50 to-orange-100', 
+      description: 'Digital gold',
+      marketCap: '₦850T',
+      volume24h: '₦2.1T'
+    },
+    { 
+      id: 'ethereum', 
+      name: 'Ethereum', 
+      symbol: 'ETH', 
+      logo: 'Ξ', 
+      price: 2800000, 
+      change: -1.2, 
+      color: 'from-blue-500 to-blue-600', 
+      bgColor: 'from-blue-50 to-blue-100', 
+      description: 'Smart contracts',
+      marketCap: '₦320T',
+      volume24h: '₦890B'
+    },
+    { 
+      id: 'binance', 
+      name: 'Binance Coin', 
+      symbol: 'BNB', 
+      logo: '🟡', 
+      price: 45000, 
+      change: 3.8, 
+      color: 'from-yellow-500 to-yellow-600', 
+      bgColor: 'from-yellow-50 to-yellow-100', 
+      description: 'Exchange token',
+      marketCap: '₦68T',
+      volume24h: '₦120B'
+    },
+    { 
+      id: 'cardano', 
+      name: 'Cardano', 
+      symbol: 'ADA', 
+      logo: '₳', 
+      price: 450, 
+      change: 1.5, 
+      color: 'from-blue-600 to-blue-700', 
+      bgColor: 'from-blue-50 to-blue-100', 
+      description: 'Research-driven',
+      marketCap: '₦15T',
+      volume24h: '₦45B'
+    },
   ];
 
-  const transactionTypes = [
-    { icon: TrendingUp, label: "Buy", value: "buy", color: "from-green-500 to-emerald-500" },
-    { icon: TrendingDown, label: "Sell", value: "sell", color: "from-red-500 to-pink-500" },
-  ];
+  // Mock original purchase prices for profit/loss calculation
+  const originalPrices = {
+    bitcoin: 42000000, // ₦42,000,000
+    ethereum: 3000000,  // ₦3,000,000
+    binance: 42000,     // ₦42,000
+    cardano: 400,       // ₦400
+  };
 
+  // Simulate live price updates
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        // Simulate API call
-        await new Promise(resolve => setTimeout(resolve, 1500));
-        
-        // Mock recent trades data
-        const mockTrades: Trade[] = [
-          {
-            id: "1",
-            crypto: "Bitcoin",
-            type: "buy",
-            amount: 0.5,
-            price: 45000,
-            total: 22500,
-            date: "2024-01-15",
-            status: "completed"
-          },
-          {
-            id: "2",
-            crypto: "Ethereum",
-            type: "sell",
-            amount: 2.5,
-            price: 2800,
-            total: 7000,
-            date: "2024-01-14",
-            status: "completed"
-          },
-          {
-            id: "3",
-            crypto: "USDT",
-            type: "buy",
-            amount: 1000,
-            price: 1,
-            total: 1000,
-            date: "2024-01-13",
-            status: "pending"
-          }
-        ];
-        
-        setRecentTrades(mockTrades);
-      } catch (error) {
-        console.error('Error fetching crypto data:', error);
-        toast({
-          title: "Error",
-          description: "Failed to load crypto data",
-          variant: "destructive"
-        });
-      } finally {
-        setLoading(false);
-      }
-    };
+    const interval = setInterval(() => {
+      // In a real app, this would fetch live prices from an API
+      console.log('Price update simulation...');
+    }, 15000);
 
-    fetchData();
-  }, [toast]);
+    return () => clearInterval(interval);
+  }, []);
 
-  const handleCryptoTrade = async () => {
-    if (!selectedCrypto || !tradeType || !amount || !walletAddress) {
+  const selectedCryptoData = cryptoCurrencies.find(c => c.id === selectedCrypto);
+
+  const calculateCryptoAmount = (naira: number) => {
+    if (!selectedCryptoData) return 0;
+    return naira / selectedCryptoData.price;
+  };
+
+  const calculateNairaAmount = (cryptoAmount: number) => {
+    if (!selectedCryptoData) return 0;
+    return cryptoAmount * selectedCryptoData.price;
+  };
+
+  const calculateProfitLoss = () => {
+    if (!selectedCryptoData || activeTab !== 'sell') return 0;
+    
+    const originalPrice = originalPrices[selectedCrypto as keyof typeof originalPrices];
+    const currentPrice = selectedCryptoData.price;
+    const cryptoAmount = currentAmountType === 'crypto' ? currentAmount : calculateCryptoAmount(currentAmount);
+    
+    return (currentPrice - originalPrice) * cryptoAmount;
+  };
+
+  const handleAmountChange = (amount: number, type: 'naira' | 'crypto') => {
+    setCurrentAmount(amount);
+    setCurrentAmountType(type);
+  };
+
+  const handleTrade = () => {
+    if (!selectedCryptoData || currentAmount <= 0) {
       toast({
         title: "Error",
-        description: "Please fill in all required fields",
+        description: "Please enter a valid amount.",
         variant: "destructive"
       });
       return;
     }
 
-    setIsProcessing(true);
-    try {
-      // Simulate trade processing
-      await new Promise(resolve => setTimeout(resolve, 2000));
+    setShowPinInput(true);
+  };
+
+  const handlePinComplete = async (pin: string) => {
+    if (pin === '1234') {
+      setShowPinInput(false);
+      setPinError('');
       
-      toast({
-        title: "Trade Successful",
-        description: `Your ${tradeType} order has been processed successfully`,
-      });
+      setLoading(true);
       
-      // Reset form
-      setSelectedCrypto("");
-      setTradeType("");
-      setAmount("");
-      setWalletAddress("");
-    } catch (error) {
-      toast({
-        title: "Trade Failed",
-        description: "Please try again later",
-        variant: "destructive"
-      });
-    } finally {
-      setIsProcessing(false);
+      setTimeout(() => {
+        const cryptoAmount = currentAmountType === 'crypto' ? currentAmount : calculateCryptoAmount(currentAmount);
+        const nairaAmount = currentAmountType === 'naira' ? currentAmount : calculateNairaAmount(currentAmount);
+        const profitLoss = calculateProfitLoss();
+        
+        const trade: TradeSummary = {
+          id: `trade-${Date.now()}`,
+          type: activeTab,
+          crypto: {
+            name: selectedCryptoData!.name,
+            symbol: selectedCryptoData!.symbol,
+            logo: selectedCryptoData!.logo
+          },
+          amountCrypto: cryptoAmount.toFixed(8),
+          amountNaira: nairaAmount,
+          price: selectedCryptoData!.price,
+          timestamp: new Date().toLocaleString(),
+          transactionId: `TX${Math.random().toString(36).substr(2, 9).toUpperCase()}`,
+          status: 'completed',
+          profitLoss: activeTab === 'sell' ? profitLoss : undefined,
+          originalPrice: activeTab === 'sell' ? originalPrices[selectedCrypto as keyof typeof originalPrices] : undefined
+        };
+        
+        setCurrentTrade(trade);
+        setShowTradeModal(true);
+        setLoading(false);
+        
+        toast({
+          title: "Trade Successful!",
+          description: `Successfully ${activeTab === 'buy' ? 'purchased' : 'sold'} ${cryptoAmount.toFixed(8)} ${selectedCryptoData!.symbol}`,
+        });
+      }, 2000);
+    } else {
+      setPinError('Incorrect PIN. Please try again.');
     }
   };
 
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    }).format(amount);
+  const handlePinClose = () => {
+    setShowPinInput(false);
+    setPinError('');
   };
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'completed':
-        return 'bg-green-100 text-green-800';
-      case 'pending':
-        return 'bg-yellow-100 text-yellow-800';
-      case 'failed':
-        return 'bg-red-100 text-red-800';
-      default:
-        return 'bg-gray-100 text-gray-800';
-    }
+  const handleTradeModalClose = () => {
+    setShowTradeModal(false);
+    setCurrentTrade(null);
+    setCurrentAmount(0);
   };
 
-  if (loading) {
-    return (
-      <MobileLayout>
-        <div className="flex items-center justify-center h-full">
-          <Loader text="Loading crypto data..." />
-        </div>
-      </MobileLayout>
-    );
-  }
+  const handleViewWallet = () => {
+    toast({
+      title: "Redirecting...",
+      description: "Taking you to your crypto wallet.",
+    });
+  };
+
+  const handleViewHistory = () => {
+    toast({
+      title: "Redirecting...",
+      description: "Taking you to transaction history.",
+    });
+  };
+
+  const handleDownload = () => {
+    toast({
+      title: "Download Started",
+      description: "Your trade receipt is being downloaded.",
+    });
+  };
+
+  const handleShare = () => {
+    toast({
+      title: "Shared!",
+      description: "Your trade details have been shared.",
+    });
+  };
 
   return (
     <MobileLayout>
-      <div className="p-4 space-y-6">
-        {/* Header Section */}
-        <div className="space-y-4">
-          <div className="text-center">
-            <h1 className="text-2xl font-bold text-gray-900">Crypto Trading</h1>
-            <p className="text-sm text-gray-600 mt-1">
-              Buy and sell cryptocurrencies securely
-            </p>
-          </div>
-
-          {/* Balance Card */}
-          <MobileCard className="bg-gradient-to-r from-orange-600 to-orange-800 text-white p-6">
-            <div className="text-center mb-4">
-              <p className="text-sm text-orange-100 mb-2">Portfolio Value</p>
-              <h2 className="text-3xl font-bold">$45,250.00</h2>
-            </div>
-            
-            <div className="flex justify-between items-center pt-4 border-t border-white/20">
+      <div className="min-h-screen bg-[#F6F6F8]">
+        {/* Header */}
+        <div className="bg-white shadow-sm border-b border-gray-200 px-4 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-3">
+              <Link to="/dashboard" className="p-2">
+                <ArrowLeft className="w-5 h-5 text-gray-600" />
+              </Link>
               <div>
-                <p className="text-xs text-orange-200">24h Change</p>
-                <p className="text-sm font-medium text-green-300">+$2,450.00</p>
-              </div>
-              <div className="text-right">
-                <p className="text-xs text-orange-200">Total Trades</p>
-                <p className="text-sm font-medium">156</p>
+                <h1 className="text-xl font-bold text-gray-900">
+                  Crypto Trading
+                </h1>
+                <p className="text-sm text-gray-500">Buy & sell cryptocurrencies</p>
               </div>
             </div>
-          </MobileCard>
+          </div>
         </div>
 
-        {/* Crypto Selection Grid */}
-        <div className="grid grid-cols-2 gap-3">
-          {cryptoTypes.map((crypto) => (
-            <button
-              key={crypto.value}
-              onClick={() => setSelectedCrypto(crypto.value)}
-              className={`flex flex-col items-center justify-center p-4 rounded-xl transition-all duration-200 ${
-                selectedCrypto === crypto.value
-                  ? 'bg-orange-50 border-2 border-orange-200'
-                  : 'bg-white border border-gray-200 hover:bg-gray-50'
-              }`}
-            >
-                              <div className="w-12 h-12 rounded-full bg-[#0B63BC]/10 flex items-center justify-center mb-3">
-                                  <crypto.icon className="h-5 w-5 text-[#0B63BC]" />
-              </div>
-              <span className="text-xs font-medium text-gray-700 text-center leading-tight">{crypto.label}</span>
-              <span className="text-xs text-gray-500">${crypto.price.toLocaleString()}</span>
-            </button>
-          ))}
-        </div>
-
-        {/* Trade Type Selection */}
-        {selectedCrypto && (
-          <div className="grid grid-cols-2 gap-3">
-            {transactionTypes.map((type) => (
+        <div className="p-4 space-y-6">
+          {/* Tab Navigation */}
+          <div className="flex bg-white rounded-xl p-1 shadow-lg">
+            {[
+              { id: 'buy', icon: <TrendingUp className="h-4 w-4" />, label: 'Buy' },
+              { id: 'sell', icon: <TrendingDown className="h-4 w-4" />, label: 'Sell' }
+            ].map((tab) => (
               <button
-                key={type.value}
-                onClick={() => setTradeType(type.value)}
-                className={`flex flex-col items-center justify-center p-4 rounded-xl transition-all duration-200 ${
-                  tradeType === type.value
-                    ? 'bg-orange-50 border-2 border-orange-200'
-                    : 'bg-white border border-gray-200 hover:bg-gray-50'
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id as 'buy' | 'sell')}
+                className={`flex-1 py-3 px-4 rounded-lg text-sm font-semibold transition-all duration-300 ${
+                  activeTab === tab.id
+                    ? 'bg-[#0B63BC] text-white shadow-lg'
+                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
                 }`}
               >
-                <div className={`w-12 h-12 rounded-full bg-gradient-to-br ${type.color} flex items-center justify-center mb-3`}>
-                  <type.icon className="h-6 w-6 text-white" />
-                </div>
-                <span className="text-xs font-medium text-gray-700 text-center leading-tight">{type.label}</span>
+                <span className="inline mr-2">{tab.icon}</span>
+                {tab.label}
               </button>
             ))}
           </div>
-        )}
 
-        {/* Trade Form */}
-        {selectedCrypto && tradeType && (
-          <MobileCard>
-            <MobileCard.Header>
-              <MobileCard.Title>{tradeType.toUpperCase()} {selectedCrypto.toUpperCase()}</MobileCard.Title>
-            </MobileCard.Header>
-            
-            <MobileCard.Content className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="amount">Amount</Label>
-                <Input
-                  id="amount"
-                  type="number"
-                  placeholder="0.00"
-                  value={amount}
-                  onChange={(e) => setAmount(e.target.value)}
-                  className="text-2xl font-bold text-center bg-gradient-to-r from-gray-50 to-gray-100"
-                />
+          {/* Crypto Selection */}
+          <Card className="border-0 shadow-lg bg-white">
+            <CardHeader>
+              <CardTitle className="text-lg font-bold text-gray-900 flex items-center gap-2">
+                <Bitcoin className="h-4 w-4 text-[#0B63BC]" />
+                Select Cryptocurrency
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-2 gap-3">
+                {cryptoCurrencies.map((crypto, index) => (
+                  <CryptoCard
+                    key={crypto.id}
+                    crypto={crypto}
+                    isSelected={selectedCrypto === crypto.id}
+                    onSelect={setSelectedCrypto}
+                    index={index}
+                  />
+                ))}
               </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="wallet">Wallet Address</Label>
-                <Input
-                  id="wallet"
-                  placeholder="Enter wallet address"
-                  value={walletAddress}
-                  onChange={(e) => setWalletAddress(e.target.value)}
-                />
-              </div>
-              
-              <Button
-                onClick={handleCryptoTrade}
-                disabled={isProcessing}
-                className="w-full bg-orange-600 hover:bg-orange-700 text-white"
-              >
-                {isProcessing ? (
-                  <div className="flex items-center">
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                    Processing...
-                  </div>
-                ) : (
-                  `${tradeType.toUpperCase()} ${formatCurrency(parseFloat(amount) || 0)}`
-                )}
-              </Button>
-            </MobileCard.Content>
-          </MobileCard>
-        )}
+            </CardContent>
+          </Card>
 
-        {/* Recent Trades */}
-        <MobileCard>
-          <MobileCard.Header>
-            <MobileCard.Title>Recent Trades</MobileCard.Title>
-            <ViewAllButton category="crypto" />
-          </MobileCard.Header>
-          
-          <MobileCard.Content className="mt-4 space-y-4">
-            {recentTrades.length > 0 ? (
-              recentTrades.map((trade) => (
-                <div key={trade.id} className="flex items-center justify-between py-3 border-b border-gray-100 last:border-b-0">
-                  <div className="flex items-center">
-                    <div className="w-10 h-10 bg-[#0B63BC]/10 rounded-full flex items-center justify-center mr-3">
-                                              <Bitcoin className="h-5 w-5 text-[#0B63BC]" />
+          {/* Trading Form */}
+          {selectedCryptoData && (
+            <TradeInput
+              crypto={selectedCryptoData}
+              tradeType={activeTab}
+              onAmountChange={handleAmountChange}
+              onTrade={handleTrade}
+              loading={loading}
+              profitLoss={activeTab === 'sell' ? calculateProfitLoss() : undefined}
+              originalPrice={activeTab === 'sell' ? originalPrices[selectedCrypto as keyof typeof originalPrices] : undefined}
+            />
+          )}
+
+          {/* Market Overview */}
+          <Card className="border-0 shadow-lg bg-white">
+            <CardHeader>
+              <CardTitle className="text-lg font-bold text-gray-900">Market Overview</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              {cryptoCurrencies.slice(0, 3).map((crypto) => (
+                <div key={crypto.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center">
+                      <span className="text-sm">{crypto.logo}</span>
                     </div>
                     <div>
-                      <p className="text-sm font-medium text-gray-900">
-                        {trade.type.toUpperCase()} {trade.crypto}
-                      </p>
-                      <p className="text-xs text-gray-500">{trade.date}</p>
+                      <p className="font-medium text-gray-900 text-sm">{crypto.symbol}</p>
+                      <p className="text-xs text-gray-500">₦{crypto.price.toLocaleString()}</p>
                     </div>
                   </div>
-                  <div className="text-right">
-                    <p className="text-sm font-medium text-gray-900">
-                      {trade.amount} {trade.crypto}
-                    </p>
-                    <span className={`text-xs px-2 py-0.5 rounded-full ${getStatusColor(trade.status)}`}>
-                      {trade.status.charAt(0).toUpperCase() + trade.status.slice(1)}
-                    </span>
+                  <div className={`text-sm font-medium ${
+                    crypto.change >= 0 ? 'text-green-600' : 'text-red-600'
+                  }`}>
+                    {crypto.change >= 0 ? '+' : ''}{crypto.change}%
                   </div>
                 </div>
-              ))
-            ) : (
-              <div className="text-center py-8">
-                <Bitcoin className="h-12 w-12 text-gray-400 mx-auto mb-3" />
-                <p className="text-gray-500 text-sm">No recent trades</p>
-                <p className="text-gray-400 text-xs mt-1">Your trade history will appear here</p>
-              </div>
-            )}
-          </MobileCard.Content>
-        </MobileCard>
+              ))}
+            </CardContent>
+          </Card>
+
+          {/* Quick Actions */}
+          <Card className="border-0 shadow-lg bg-white mb-20">
+            <CardHeader>
+              <CardTitle className="text-lg font-bold text-gray-900">Quick Actions</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <Button variant="outline" size="sm" asChild className="w-full justify-start">
+                <Link to="/transfer" className="flex items-center gap-2">
+                  <ArrowRight className="h-4 w-4" />
+                  Send Money
+                </Link>
+              </Button>
+              <Button variant="outline" size="sm" asChild className="w-full justify-start">
+                <Link to="/transactions" className="flex items-center gap-2">
+                  <Activity className="h-4 w-4" />
+                  View History
+                </Link>
+              </Button>
+              <Button variant="outline" size="sm" asChild className="w-full justify-start">
+                <Link to="/wallet" className="flex items-center gap-2">
+                  <Wallet className="h-4 w-4" />
+                  My Wallet
+                </Link>
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* PIN Input Modal */}
+        {showPinInput && (
+          <PinInput
+            onComplete={handlePinComplete}
+            onClose={handlePinClose}
+            error={pinError}
+          />
+        )}
+
+        {/* Trade Summary Modal */}
+        {currentTrade && (
+          <TradeSummaryModal
+            trade={currentTrade}
+            isOpen={showTradeModal}
+            onClose={handleTradeModalClose}
+            onViewWallet={handleViewWallet}
+            onViewHistory={handleViewHistory}
+            onDownload={handleDownload}
+            onShare={handleShare}
+          />
+        )}
       </div>
     </MobileLayout>
   );
 };
 
-export default CryptoTrading;
+export default MobileBitcoinTrading;

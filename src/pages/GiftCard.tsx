@@ -1,18 +1,31 @@
-import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
-import { Gift, ShoppingBag, Star, ArrowRight, CheckCircle, TrendingUp, Activity, CheckCircle2, ArrowRightCircle } from "lucide-react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { useToast } from "@/hooks/use-toast";
-import DesktopLayout from "@/components/DesktopLayout";
-import Navigation from "@/components/Navigation";
-import ViewAllButton from "@/components/ui/view-all-button";
-import { motion, AnimatePresence } from "framer-motion";
+import React, { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Gift, ArrowLeft, Lock, Shield, Clock } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+import { useToast } from '@/hooks/use-toast';
+import DesktopLayout from '@/components/DesktopLayout';
+import { useNavigate } from 'react-router-dom';
+import BrandSelector from '@/components/giftcard/BrandSelector';
+import GiftForm from '@/components/giftcard/GiftForm';
+import SuccessScreen from '@/components/giftcard/SuccessScreen';
+import PurchaseList from '@/components/giftcard/PurchaseList';
+import { PinInput } from '@/components/PinInput';
+
+interface GiftCardBrand {
+  icon: any;
+  label: string;
+  value: string;
+  color: string;
+  discount: string;
+  description?: string;
+}
+
+interface GiftFormData {
+  amount: string;
+  recipient: string;
+  message: string;
+}
 
 interface GiftCardPurchase {
   id: string;
@@ -23,24 +36,79 @@ interface GiftCardPurchase {
   status: 'delivered' | 'pending' | 'failed';
 }
 
+type Step = 'brand-selection' | 'form' | 'pin' | 'success';
+
 const GiftCard = () => {
-  const [selectedBrand, setSelectedBrand] = useState("");
-  const [amount, setAmount] = useState("");
-  const [recipient, setRecipient] = useState("");
-  const [message, setMessage] = useState("");
+  const navigate = useNavigate();
+  const { toast } = useToast();
+  
+  // State management
+  const [currentStep, setCurrentStep] = useState<Step>('brand-selection');
+  const [selectedBrand, setSelectedBrand] = useState('');
+  const [formData, setFormData] = useState<GiftFormData>({
+    amount: '',
+    recipient: '',
+    message: ''
+  });
+  const [showPinInput, setShowPinInput] = useState(false);
+  const [pinError, setPinError] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
   const [recentPurchases, setRecentPurchases] = useState<GiftCardPurchase[]>([]);
-  const { toast } = useToast();
+  const [savedRecipients, setSavedRecipients] = useState<string[]>([]);
 
-  const giftCardBrands = [
-    { icon: Gift, label: "Amazon", value: "amazon", color: "from-orange-500 to-yellow-500", discount: "10%" },
-    { icon: Gift, label: "Apple", value: "apple", color: "from-gray-500 to-gray-700", discount: "5%" },
-    { icon: Gift, label: "Google Play", value: "google-play", color: "from-green-500 to-blue-500", discount: "15%" },
-    { icon: Gift, label: "Steam", value: "steam", color: "from-blue-500 to-purple-500", discount: "8%" },
-    { icon: Gift, label: "Netflix", value: "netflix", color: "from-red-500 to-pink-500", discount: "12%" },
-    { icon: Gift, label: "Spotify", value: "spotify", color: "from-green-500 to-emerald-500", discount: "7%" },
+  // Gift card brands data
+  const giftCardBrands: GiftCardBrand[] = [
+    { 
+      icon: Gift, 
+      label: "Amazon", 
+      value: "amazon", 
+      color: "from-orange-500 to-yellow-500", 
+      discount: "10%",
+      description: "Shop millions of products"
+    },
+    { 
+      icon: Gift, 
+      label: "Apple", 
+      value: "apple", 
+      color: "from-gray-500 to-gray-700", 
+      discount: "5%",
+      description: "Apps, music, movies & more"
+    },
+    { 
+      icon: Gift, 
+      label: "Google Play", 
+      value: "google-play", 
+      color: "from-green-500 to-blue-500", 
+      discount: "15%",
+      description: "Android apps & games"
+    },
+    { 
+      icon: Gift, 
+      label: "Steam", 
+      value: "steam", 
+      color: "from-blue-500 to-purple-500", 
+      discount: "8%",
+      description: "PC games & software"
+    },
+    { 
+      icon: Gift, 
+      label: "Netflix", 
+      value: "netflix", 
+      color: "from-red-500 to-pink-500", 
+      discount: "12%",
+      description: "Stream movies & TV shows"
+    },
+    { 
+      icon: Gift, 
+      label: "Spotify", 
+      value: "spotify", 
+      color: "from-green-500 to-emerald-500", 
+      discount: "7%",
+      description: "Music streaming service"
+    },
   ];
 
+  // Load recent purchases and saved recipients
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -76,6 +144,10 @@ const GiftCard = () => {
         ];
         
         setRecentPurchases(mockPurchases);
+        
+        // Extract unique recipients for saved recipients
+        const recipients = [...new Set(mockPurchases.map(p => p.recipient))];
+        setSavedRecipients(recipients);
       } catch (error) {
         console.error('Error fetching gift card data:', error);
         toast({
@@ -89,37 +161,71 @@ const GiftCard = () => {
     fetchData();
   }, [toast]);
 
-  const handleGiftCardPurchase = async () => {
-    if (!selectedBrand || !amount || !recipient) {
-      toast({
-        title: "Error",
-        description: "Please fill in all required fields",
-        variant: "destructive"
-      });
-      return;
-    }
+  // Handle brand selection
+  const handleBrandSelect = (brand: string) => {
+    setSelectedBrand(brand);
+    setCurrentStep('form');
+  };
 
+  // Handle form data changes
+  const handleFormDataChange = (data: GiftFormData) => {
+    setFormData(data);
+  };
+
+  // Handle form continue
+  const handleFormContinue = () => {
+    setShowPinInput(true);
+    setCurrentStep('pin');
+  };
+
+  // Handle PIN completion
+  const handlePinComplete = async (pin: string) => {
     setIsProcessing(true);
-    
+    setPinError('');
+
     try {
-      // Simulate API call
+      // Simulate payment processing
       await new Promise(resolve => setTimeout(resolve, 2000));
-      
-      toast({
-        title: "Success!",
-        description: `Gift card purchased successfully for ${recipient}`,
-      });
-      
-      // Reset form
-      setSelectedBrand("");
-      setAmount("");
-      setRecipient("");
-      setMessage("");
-      
+
+      if (pin === '1234') {
+        // Success - show success screen
+        setShowPinInput(false);
+        setCurrentStep('success');
+        
+        // Add to recent purchases
+        const newPurchase: GiftCardPurchase = {
+          id: Date.now().toString(),
+          brand: selectedBrand,
+          amount: parseInt(formData.amount.replace(/[^0-9]/g, '')),
+          recipient: formData.recipient,
+          date: new Date().toISOString(),
+          status: 'delivered'
+        };
+        
+        setRecentPurchases(prev => [newPurchase, ...prev.slice(0, 4)]);
+        
+        // Add recipient to saved recipients if not already there
+        if (!savedRecipients.includes(formData.recipient)) {
+          setSavedRecipients(prev => [...prev, formData.recipient]);
+        }
+
+        toast({
+          title: "Success!",
+          description: "Gift card sent successfully",
+        });
+      } else {
+        setPinError('Incorrect PIN. Please try again.');
+        toast({
+          title: "Error",
+          description: "Incorrect PIN entered",
+          variant: "destructive"
+        });
+      }
     } catch (error) {
+      setPinError('Payment failed. Please try again.');
       toast({
         title: "Error",
-        description: "Failed to purchase gift card",
+        description: "Payment processing failed",
         variant: "destructive"
       });
     } finally {
@@ -127,294 +233,189 @@ const GiftCard = () => {
     }
   };
 
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD'
-    }).format(amount);
+  // Handle success screen actions
+  const handleBuyAnother = () => {
+    setCurrentStep('brand-selection');
+    setSelectedBrand('');
+    setFormData({ amount: '', recipient: '', message: '' });
   };
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'delivered':
-        return 'bg-green-100 text-green-800';
-      case 'pending':
-        return 'bg-yellow-100 text-yellow-800';
-      case 'failed':
-        return 'bg-red-100 text-red-800';
-      default:
-        return 'bg-gray-100 text-gray-800';
-    }
+  const handleGoHome = () => {
+    navigate('/dashboard');
   };
 
-  const GiftCardContent = () => (
-    <div className="space-y-8">
-      {/* Header with animation */}
-      <motion.div
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-        className="flex items-center justify-between"
-      >
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">Gift Cards</h1>
-          <p className="text-gray-600 mt-1">Purchase and send gift cards to your loved ones</p>
-        </div>
-      </motion.div>
+  const handleShareReceipt = () => {
+    // Implement share functionality
+    toast({
+      title: "Receipt Shared",
+      description: "Receipt has been shared successfully",
+    });
+  };
 
-      <div className="lg:grid lg:grid-cols-3 lg:gap-8">
-        {/* Main Content */}
-        <div className="lg:col-span-2 space-y-8">
-          {/* Brand Selection */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.1 }}
-          >
-            <Card className="border-0 shadow-lg bg-[#F6F6F8]">
-              <CardHeader>
-                <CardTitle className="text-xl font-bold text-gray-900 flex items-center gap-2">
-                  <Gift className="h-5 w-5 text-[#0B63BC]" />
-                  Select Gift Card Brand
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
-                  {giftCardBrands.map((brand, index) => (
-                    <motion.div
-                      key={brand.value}
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.3, delay: index * 0.1 }}
-                    >
-                      <Card
-                        className={`cursor-pointer transition-all duration-200 hover:shadow-lg ${
-                          selectedBrand === brand.value
-                            ? "border-[#0B63BC] bg-white ring-2 ring-[#0B63BC]"
-                            : "border-gray-200 hover:border-[#0B63BC] bg-white"
-                        }`}
-                        onClick={() => setSelectedBrand(brand.value)}
-                      >
-                        <CardContent className="p-4 text-center">
-                          <div className={`w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3 ${
-                            selectedBrand === brand.value
-                              ? "bg-[#0B63BC] text-white"
-                              : "bg-gray-100 text-gray-600"
-                          }`}>
-                            <brand.icon className="h-6 w-6" />
-                          </div>
-                          <h4 className="font-semibold text-gray-900 mb-1">{brand.label}</h4>
-                          <Badge className="bg-green-100 text-green-800 text-xs">
-                            {brand.discount} off
-                          </Badge>
-                        </CardContent>
-                      </Card>
-                    </motion.div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          </motion.div>
+  // Animation variants
+  const pageVariants = {
+    initial: { opacity: 0, x: 20 },
+    animate: { opacity: 1, x: 0 },
+    exit: { opacity: 0, x: -20 }
+  };
 
-          {/* Purchase Form */}
-          <AnimatePresence>
-            {selectedBrand && (
-              <motion.div
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: 'auto' }}
-                exit={{ opacity: 0, height: 0 }}
-                transition={{ duration: 0.3 }}
-              >
-                <Card className="border-0 shadow-lg bg-[#F6F6F8]">
-                  <CardHeader>
-                    <CardTitle className="text-xl font-bold text-gray-900">
-                      Purchase Gift Card
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-6">
-                    <motion.div
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      transition={{ delay: 0.2 }}
-                      className="space-y-2"
-                    >
-                      <Label htmlFor="amount">Amount (USD)</Label>
-                      <Input
-                        id="amount"
-                        type="number"
-                        placeholder="Enter amount"
-                        value={amount}
-                        onChange={(e) => setAmount(e.target.value)}
-                        className="h-12 bg-white"
-                      />
-                    </motion.div>
-
-                    <motion.div
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      transition={{ delay: 0.3 }}
-                      className="space-y-2"
-                    >
-                      <Label htmlFor="recipient">Recipient Email</Label>
-                      <Input
-                        id="recipient"
-                        type="email"
-                        placeholder="Enter recipient email"
-                        value={recipient}
-                        onChange={(e) => setRecipient(e.target.value)}
-                        className="h-12 bg-white"
-                      />
-                    </motion.div>
-
-                    <motion.div
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      transition={{ delay: 0.4 }}
-                      className="space-y-2"
-                    >
-                      <Label htmlFor="message">Personal Message (Optional)</Label>
-                      <Input
-                        id="message"
-                        placeholder="Add a personal message"
-                        value={message}
-                        onChange={(e) => setMessage(e.target.value)}
-                        className="h-12 bg-white"
-                      />
-                    </motion.div>
-
-                    <motion.div
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      transition={{ delay: 0.5 }}
-                    >
-                      <Button
-                        onClick={handleGiftCardPurchase}
-                        disabled={isProcessing || !amount || !recipient}
-                        className="w-full h-12 bg-[#0B63BC] hover:bg-[#0A58A8] text-lg font-semibold transition-colors duration-300"
-                      >
-                        {isProcessing ? (
-                          <div className="flex items-center gap-2">
-                            <motion.div
-                              animate={{ rotate: 360 }}
-                              transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-                              className="w-5 h-5 border-2 border-white border-t-transparent rounded-full"
-                            ></motion.div>
-                            Processing...
-                          </div>
-                        ) : (
-                          <div className="flex items-center gap-2">
-                            <CheckCircle className="h-5 w-5" />
-                            Purchase Gift Card
-                          </div>
-                        )}
-                      </Button>
-                    </motion.div>
-                  </CardContent>
-                </Card>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </div>
-
-        {/* Sidebar */}
-        <div className="space-y-6">
-          {/* Recent Purchases */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.2 }}
-          >
-            <Card className="border-0 shadow-lg bg-[#F6F6F8]">
-              <CardHeader>
-                <CardTitle className="text-lg font-bold text-gray-900">Recent Purchases</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {recentPurchases.length === 0 ? (
-                    <motion.div
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      className="text-center py-8"
-                    >
-                      <Gift className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                      <p className="text-gray-500">No recent purchases</p>
-                    </motion.div>
-                  ) : (
-                    recentPurchases.map((purchase) => (
-                      <motion.div
-                        key={purchase.id}
-                        whileHover={{ scale: 1.02 }}
-                        className="flex items-center justify-between p-3 border border-gray-200 rounded-lg bg-white"
-                      >
-                        <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
-                            <Gift className="h-5 w-5 text-[#0B63BC]" />
-                          </div>
-                          <div>
-                            <p className="font-medium text-gray-900 text-sm">{purchase.brand}</p>
-                            <p className="text-xs text-gray-500">{purchase.recipient}</p>
-                          </div>
-                        </div>
-                        <div className="text-right">
-                          <p className="font-bold text-gray-900 text-sm">{formatCurrency(purchase.amount)}</p>
-                          <Badge className={`mt-1 ${getStatusColor(purchase.status)}`}>
-                            {purchase.status}
-                          </Badge>
-                        </div>
-                      </motion.div>
-                    ))
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          </motion.div>
-
-          {/* Quick Actions */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.3 }}
-          >
-            <Card className="border-0 shadow-lg bg-[#F6F6F8]">
-              <CardHeader>
-                <CardTitle className="text-lg font-bold text-gray-900">Quick Actions</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <motion.div whileHover={{ scale: 1.02 }}>
-                  <Button variant="outline" size="sm" asChild className="w-full justify-start bg-white">
-                    <Link to="/cards" className="flex items-center gap-2">
-                      <ShoppingBag className="h-4 w-4 text-[#0B63BC]" />
-                      Buy Gift Cards
-                    </Link>
-                  </Button>
-                </motion.div>
-                <motion.div whileHover={{ scale: 1.02 }}>
-                  <Button variant="outline" size="sm" asChild className="w-full justify-start bg-white">
-                    <Link to="/transactions" className="flex items-center gap-2">
-                      <Activity className="h-4 w-4 text-[#0B63BC]" />
-                      View History
-                    </Link>
-                  </Button>
-                </motion.div>
-                <motion.div whileHover={{ scale: 1.02 }}>
-                  <Button variant="outline" size="sm" asChild className="w-full justify-start bg-white">
-                    <Link to="/transfer" className="flex items-center gap-2">
-                      <ArrowRight className="h-4 w-4 text-[#0B63BC]" />
-                      Send Money
-                    </Link>
-                  </Button>
-                </motion.div>
-              </CardContent>
-            </Card>
-          </motion.div>
-        </div>
-      </div>
-    </div>
-  );
+  const getCurrentPurchase = () => ({
+    brand: selectedBrand,
+    amount: formData.amount,
+    recipient: formData.recipient,
+    message: formData.message,
+    transactionId: 'GC' + Date.now().toString().slice(-8),
+    timestamp: new Date().toLocaleString()
+  });
 
   return (
     <DesktopLayout>
-      <GiftCardContent />
+      <div className="min-h-screen bg-[#F6F6F8]">
+        <div className="max-w-7xl mx-auto p-6">
+          {/* Header */}
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="flex items-center justify-between mb-8"
+          >
+            <div className="flex items-center space-x-4">
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={() => navigate('/dashboard')} 
+                className="text-gray-600 hover:text-gray-900"
+              >
+                <ArrowLeft className="w-5 h-5 mr-2" /> Back to Dashboard
+              </Button>
+              <div>
+                <h1 className="text-2xl font-bold text-gray-900">Gift Cards</h1>
+                <p className="text-gray-600">Send digital gift cards instantly</p>
+              </div>
+            </div>
+          </motion.div>
+
+          <div className="grid lg:grid-cols-3 gap-8">
+            {/* Main Content */}
+            <div className="lg:col-span-2">
+              <AnimatePresence mode="wait">
+                {currentStep === 'brand-selection' && (
+                  <motion.div
+                    key="brand-selection"
+                    variants={pageVariants}
+                    initial="initial"
+                    animate="animate"
+                    exit="exit"
+                    transition={{ duration: 0.3 }}
+                  >
+                    <BrandSelector
+                      brands={giftCardBrands}
+                      selectedBrand={selectedBrand}
+                      onBrandSelect={handleBrandSelect}
+                    />
+                  </motion.div>
+                )}
+
+                {currentStep === 'form' && (
+                  <motion.div
+                    key="form"
+                    variants={pageVariants}
+                    initial="initial"
+                    animate="animate"
+                    exit="exit"
+                    transition={{ duration: 0.3 }}
+                  >
+                    <GiftForm
+                      selectedBrand={selectedBrand}
+                      formData={formData}
+                      onFormDataChange={handleFormDataChange}
+                      onContinue={handleFormContinue}
+                      savedRecipients={savedRecipients}
+                    />
+                  </motion.div>
+                )}
+
+                {currentStep === 'success' && (
+                  <motion.div
+                    key="success"
+                    variants={pageVariants}
+                    initial="initial"
+                    animate="animate"
+                    exit="exit"
+                    transition={{ duration: 0.3 }}
+                  >
+                    <SuccessScreen
+                      purchase={getCurrentPurchase()}
+                      onBuyAnother={handleBuyAnother}
+                      onGoHome={handleGoHome}
+                      onShareReceipt={handleShareReceipt}
+                    />
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+
+            {/* Sidebar */}
+            <div className="lg:col-span-1">
+              <div className="sticky top-6">
+                <PurchaseList
+                  purchases={recentPurchases}
+                  onPurchaseClick={(purchase) => {
+                    // Handle purchase click - could show details modal
+                    console.log('Purchase clicked:', purchase);
+                  }}
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* PIN Input Modal */}
+        <AnimatePresence>
+          {showPinInput && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50"
+            >
+              <motion.div
+                initial={{ scale: 0.9, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0.9, opacity: 0 }}
+                className="bg-white rounded-2xl p-6 w-full max-w-md"
+              >
+                <div className="text-center mb-6">
+                  <div className="w-12 h-12 bg-[#0B63BC] rounded-full flex items-center justify-center mx-auto mb-4">
+                    <Lock className="w-6 h-6 text-white" />
+                  </div>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                    Enter Your PIN
+                  </h3>
+                  <p className="text-gray-600 text-sm">
+                    Complete your gift card purchase
+                  </p>
+                </div>
+
+                                 <PinInput
+                   onComplete={handlePinComplete}
+                   onClose={() => {
+                     setShowPinInput(false);
+                     setCurrentStep('form');
+                   }}
+                   error={pinError}
+                 />
+
+                <div className="mt-4 text-center">
+                  <p className="text-xs text-gray-500">
+                    <Shield className="w-3 h-3 inline mr-1" />
+                    Your payment is secure and encrypted
+                  </p>
+                </div>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
     </DesktopLayout>
   );
 };
