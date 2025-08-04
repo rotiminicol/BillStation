@@ -54,57 +54,74 @@ const Landing: React.FC = () => {
               </Link>
             </div>
 
-            {/* Mobile menu button */}
-            <div className="md:hidden">
-              <button
-                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                className="text-white p-2"
-              >
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  {isMobileMenuOpen ? (
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                  ) : (
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                  )}
-                </svg>
-              </button>
-            </div>
+            {/* Mobile Menu Button */}
+            <button
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              className="md:hidden flex flex-col space-y-1 p-2"
+            >
+              <span className={`block w-6 h-0.5 bg-white transition-all duration-300 ${isMobileMenuOpen ? 'rotate-45 translate-y-1.5' : ''}`}></span>
+              <span className={`block w-6 h-0.5 bg-white transition-all duration-300 ${isMobileMenuOpen ? 'opacity-0' : ''}`}></span>
+              <span className={`block w-6 h-0.5 bg-white transition-all duration-300 ${isMobileMenuOpen ? '-rotate-45 -translate-y-1.5' : ''}`}></span>
+            </button>
           </div>
 
-          {/* Mobile Navigation */}
-          {isMobileMenuOpen && (
-            <div className="md:hidden">
-              <div className="px-2 pt-2 pb-3 space-y-1 bg-[#2a61de]">
-                <Link to="/landing" className="block text-white hover:text-white hover:underline px-3 py-2 text-base font-bold">
+          {/* Mobile Menu */}
+          <div className={`md:hidden transition-all duration-300 ease-in-out ${isMobileMenuOpen ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0 overflow-hidden'}`}>
+            <div className="py-4 space-y-4 border-t border-white/20 bg-[#2a61de]">
+              {/* Mobile Navigation Links */}
+              <nav className="space-y-3">
+                <Link 
+                  to="/landing" 
+                  className="block text-white hover:text-white/80 px-3 py-2 text-base font-semibold transition-all duration-200"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
                   Home
                 </Link>
-                <Link to="/about" className="block text-white hover:text-white hover:underline px-3 py-2 text-base font-bold">
+                <Link 
+                  to="/about" 
+                  className="block text-white hover:text-white/80 px-3 py-2 text-base font-semibold transition-all duration-200"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
                   About us
                 </Link>
-                <Link to="/crypto" className="block text-white hover:text-white hover:underline px-3 py-2 text-base font-bold">
+                <Link 
+                  to="/crypto" 
+                  className="block text-white hover:text-white/80 px-3 py-2 text-base font-semibold transition-all duration-200"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
                   Crypto
                 </Link>
-                <Link to="/services" className="block text-white hover:text-white hover:underline px-3 py-2 text-base font-bold">
+                <Link 
+                  to="/services" 
+                  className="block text-white hover:text-white/80 px-3 py-2 text-base font-semibold transition-all duration-200"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
                   Services
                 </Link>
-                <Link to="/agent" className="block text-white hover:text-white hover:underline px-3 py-2 text-base font-bold">
+                <Link 
+                  to="/agent" 
+                  className="block text-white hover:text-white/80 px-3 py-2 text-base font-semibold transition-all duration-200"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
                   Become an agent
                 </Link>
-                <div className="pt-4 space-y-2">
-                  <Link to="/signup">
-                    <Button className="w-full bg-white text-[#2a61de] hover:bg-gray-100 border-white px-6 py-2 text-base font-semibold">
-                      Register
-                    </Button>
-                  </Link>
-                  <Link to="/login">
-                    <Button className="w-full bg-[#2a61de] hover:bg-[#1e4bb8] text-white px-6 py-2 text-base font-semibold border border-white">
-                      Login
-                    </Button>
-                  </Link>
-                </div>
+              </nav>
+              
+              {/* Mobile Auth Buttons */}
+              <div className="flex flex-col space-y-3 pt-4 border-t border-white/20">
+                <Link to="/signup" onClick={() => setIsMobileMenuOpen(false)}>
+                  <Button className="w-full bg-white text-[#2a61de] hover:bg-gray-100 border-white py-3 text-base font-semibold">
+                    Register
+                  </Button>
+                </Link>
+                <Link to="/login" onClick={() => setIsMobileMenuOpen(false)}>
+                  <Button className="w-full bg-[#2a61de] hover:bg-[#1e4bb8] text-white border-2 border-white py-3 text-base font-semibold">
+                    Login
+                  </Button>
+                </Link>
               </div>
             </div>
-          )}
+          </div>
         </div>
       </header>
 

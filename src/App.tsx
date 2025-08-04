@@ -124,6 +124,10 @@ const AppRouter = () => {
       <Routes>
         <Route path="/" element={<Splash />} />
         <Route path="/landing" element={<Landing />} />
+        <Route path="/about" element={<About />} />
+        <Route path="/crypto" element={<Crypto />} />
+        <Route path="/services" element={<Services />} />
+        <Route path="/agent" element={<Agent />} />
         <Route path="/welcome" element={<MobileWelcome />} />
         <Route path="/login" element={<MobileLogin />} />
         <Route path="/signup" element={<MobileSignup />} />

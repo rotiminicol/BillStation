@@ -1,13 +1,15 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '../components/ui/button';
 import { Card, CardContent } from '../components/ui/card';
 
 const About: React.FC = () => {
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
   return (
     <div className="min-h-screen bg-white">
       {/* Header */}
-      <header className="bg-[#2a61de] shadow-sm">
+      <header className="bg-[#2a61de] shadow-sm relative">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             {/* Logo */}
@@ -19,7 +21,7 @@ const About: React.FC = () => {
               />
             </div>
 
-            {/* Navigation */}
+            {/* Desktop Navigation */}
             <nav className="hidden md:flex space-x-8">
               <Link to="/landing" className="text-white hover:text-white hover:underline px-3 py-2 text-base font-bold transition-all duration-200">
                 Home
@@ -38,7 +40,7 @@ const About: React.FC = () => {
               </Link>
             </nav>
 
-            {/* Auth Buttons */}
+            {/* Desktop Auth Buttons */}
             <div className="hidden md:flex items-center space-x-4">
               <Link to="/signup">
                 <Button className="bg-white text-[#2a61de] hover:bg-gray-100 border-white px-4 sm:px-6 py-2 text-sm sm:text-base font-semibold">
@@ -50,6 +52,74 @@ const About: React.FC = () => {
                   Login
                 </Button>
               </Link>
+            </div>
+
+            {/* Mobile Menu Button */}
+            <button
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              className="md:hidden flex flex-col space-y-1 p-2"
+            >
+              <span className={`block w-6 h-0.5 bg-white transition-all duration-300 ${isMobileMenuOpen ? 'rotate-45 translate-y-1.5' : ''}`}></span>
+              <span className={`block w-6 h-0.5 bg-white transition-all duration-300 ${isMobileMenuOpen ? 'opacity-0' : ''}`}></span>
+              <span className={`block w-6 h-0.5 bg-white transition-all duration-300 ${isMobileMenuOpen ? '-rotate-45 -translate-y-1.5' : ''}`}></span>
+            </button>
+          </div>
+
+          {/* Mobile Menu */}
+          <div className={`md:hidden transition-all duration-300 ease-in-out ${isMobileMenuOpen ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0 overflow-hidden'}`}>
+            <div className="py-4 space-y-4 border-t border-white/20 bg-[#2a61de]">
+              {/* Mobile Navigation Links */}
+              <nav className="space-y-3">
+                <Link 
+                  to="/landing" 
+                  className="block text-white hover:text-white/80 px-3 py-2 text-base font-semibold transition-all duration-200"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  Home
+                </Link>
+                <Link 
+                  to="/about" 
+                  className="block text-white hover:text-white/80 px-3 py-2 text-base font-semibold transition-all duration-200"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  About us
+                </Link>
+                <Link 
+                  to="/crypto" 
+                  className="block text-white hover:text-white/80 px-3 py-2 text-base font-semibold transition-all duration-200"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  Crypto
+                </Link>
+                <Link 
+                  to="/services" 
+                  className="block text-white hover:text-white/80 px-3 py-2 text-base font-semibold transition-all duration-200"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  Services
+                </Link>
+                <Link 
+                  to="/agent" 
+                  className="block text-white hover:text-white/80 px-3 py-2 text-base font-semibold transition-all duration-200"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  Become an agent
+                </Link>
+              </nav>
+
+              {/* Mobile Auth Buttons */}
+              <div className="flex flex-col space-y-3 pt-4 border-t border-white/20">
+                <Link to="/signup" onClick={() => setIsMobileMenuOpen(false)}>
+                  <Button className="w-full bg-white text-[#2a61de] hover:bg-gray-100 border-white py-3 text-base font-semibold">
+                    Register
+                  </Button>
+                </Link>
+                <Link to="/login" onClick={() => setIsMobileMenuOpen(false)}>
+                  <Button className="w-full bg-[#2a61de] hover:bg-[#1e4bb8] text-white border-2 border-white py-3 text-base font-semibold">
+                    Login
+                  </Button>
+                </Link>
+              </div>
             </div>
           </div>
         </div>
@@ -426,11 +496,11 @@ const About: React.FC = () => {
           </div>
 
           {/* Image at Bottom Right */}
-          <div className="flex justify-end -mb-12 -mr-16 lg:-mr-32">
+          <div className="flex justify-center lg:justify-end -mb-8 lg:-mb-12 lg:-mr-16 xl:-mr-32">
             <img 
               src="/Screenshot (412).png" 
               alt="Our Values Illustration" 
-              className="w-[500px] h-auto rounded-lg shadow-lg"
+              className="w-64 sm:w-80 lg:w-[500px] h-auto rounded-lg shadow-lg"
             />
           </div>
 

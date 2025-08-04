@@ -1,13 +1,15 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '../components/ui/button';
 import { Card, CardContent } from '../components/ui/card';
 
 const Crypto: React.FC = () => {
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
   return (
     <div className="min-h-screen bg-white">
              {/* Header */}
-       <header className="bg-[#2a61de] shadow-sm">
+       <header className="bg-[#2a61de] shadow-sm relative">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             {/* Logo */}
@@ -15,11 +17,11 @@ const Crypto: React.FC = () => {
               <img 
                 src="/logo.png" 
                 alt="Bill Station Logo" 
-                className="h-12 w-auto"
+                className="h-8 sm:h-10 md:h-12 w-auto"
               />
             </div>
 
-            {/* Navigation */}
+            {/* Desktop Navigation */}
             <nav className="hidden md:flex space-x-8">
               <Link to="/landing" className="text-white hover:text-white hover:underline px-3 py-2 text-base font-bold transition-all duration-200">
                 Home
@@ -38,18 +40,86 @@ const Crypto: React.FC = () => {
               </Link>
             </nav>
 
-            {/* Auth Buttons */}
-            <div className="flex items-center space-x-4">
+            {/* Desktop Auth Buttons */}
+            <div className="hidden md:flex items-center space-x-4">
                              <Link to="/signup">
-                 <Button className="bg-white text-[#2a61de] hover:bg-gray-100 border-white px-6 py-2 text-base font-semibold">
+                 <Button className="bg-white text-[#2a61de] hover:bg-gray-100 border-white px-4 sm:px-6 py-2 text-sm sm:text-base font-semibold">
                    Register
                  </Button>
                </Link>
                <Link to="/login">
-                 <Button className="bg-[#2a61de] hover:bg-[#1e4bb8] text-white px-6 py-2 text-base font-semibold">
+                 <Button className="bg-[#2a61de] hover:bg-[#1e4bb8] text-white px-4 sm:px-6 py-2 text-sm sm:text-base font-semibold">
                    Login
                  </Button>
                </Link>
+            </div>
+
+            {/* Mobile Menu Button */}
+            <button
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              className="md:hidden flex flex-col space-y-1 p-2"
+            >
+              <span className={`block w-6 h-0.5 bg-white transition-all duration-300 ${isMobileMenuOpen ? 'rotate-45 translate-y-1.5' : ''}`}></span>
+              <span className={`block w-6 h-0.5 bg-white transition-all duration-300 ${isMobileMenuOpen ? 'opacity-0' : ''}`}></span>
+              <span className={`block w-6 h-0.5 bg-white transition-all duration-300 ${isMobileMenuOpen ? '-rotate-45 -translate-y-1.5' : ''}`}></span>
+            </button>
+          </div>
+
+          {/* Mobile Menu */}
+          <div className={`md:hidden transition-all duration-300 ease-in-out ${isMobileMenuOpen ? 'max-h-screen opacity-100' : 'max-h-0 opacity-0 overflow-hidden'}`}>
+            <div className="py-6 space-y-4 border-t border-white/20 bg-[#2a61de] min-h-[60vh]">
+              {/* Mobile Navigation Links */}
+              <nav className="space-y-4 px-4">
+                <Link 
+                  to="/landing" 
+                  className="block text-white hover:text-white/80 px-4 py-3 text-base font-semibold transition-all duration-200 rounded-lg hover:bg-white/10"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  Home
+                </Link>
+                <Link 
+                  to="/about" 
+                  className="block text-white hover:text-white/80 px-4 py-3 text-base font-semibold transition-all duration-200 rounded-lg hover:bg-white/10"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  About us
+                </Link>
+                <Link 
+                  to="/crypto" 
+                  className="block text-white hover:text-white/80 px-4 py-3 text-base font-semibold transition-all duration-200 rounded-lg hover:bg-white/10 bg-white/10"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  Crypto
+                </Link>
+                <Link 
+                  to="/services" 
+                  className="block text-white hover:text-white/80 px-4 py-3 text-base font-semibold transition-all duration-200 rounded-lg hover:bg-white/10"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  Services
+                </Link>
+                <Link 
+                  to="/agent" 
+                  className="block text-white hover:text-white/80 px-4 py-3 text-base font-semibold transition-all duration-200 rounded-lg hover:bg-white/10"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  Become an agent
+                </Link>
+              </nav>
+
+              {/* Mobile Auth Buttons - Added more spacing */}
+              <div className="flex flex-col space-y-4 pt-6 px-4 pb-8 border-t border-white/20 mt-auto">
+                <Link to="/signup" onClick={() => setIsMobileMenuOpen(false)}>
+                  <Button className="w-full bg-white text-[#2a61de] hover:bg-gray-100 border-white py-4 text-base font-semibold rounded-lg shadow-lg transition-all duration-200 hover:shadow-xl">
+                    Register
+                  </Button>
+                </Link>
+                <Link to="/login" onClick={() => setIsMobileMenuOpen(false)}>
+                  <Button className="w-full bg-[#2a61de] hover:bg-[#1e4bb8] text-white border-2 border-white py-4 text-base font-semibold rounded-lg shadow-lg transition-all duration-200 hover:shadow-xl">
+                    Login
+                  </Button>
+                </Link>
+              </div>
             </div>
           </div>
         </div>
@@ -242,24 +312,24 @@ const Crypto: React.FC = () => {
           
 
                      {/* Instant Crypto Swaps */}
-           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center mb-16">
+           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center mb-16">
              {/* Left Side - Image */}
-             <div className="flex justify-center lg:justify-start">
+             <div className="flex justify-center lg:justify-start order-1 lg:order-1">
                <img 
                  src="/Screenshot (417).png" 
                  alt="Crypto Swaps Illustration" 
-                 className="w-96 h-auto"
+                 className="w-64 sm:w-80 lg:w-96 h-auto"
                />
              </div>
              
              {/* Right Side - Text Content */}
-             <div className="text-left">
-               <h2 className="text-3xl font-bold text-[#2a61de] mb-6">Instant Crypto Swaps</h2>
-               <p className="text-lg text-gray-600 mb-6">
+             <div className="text-center lg:text-left order-2 lg:order-2">
+               <h2 className="text-2xl sm:text-3xl font-bold text-[#2a61de] mb-4 lg:mb-6">Instant Crypto Swaps</h2>
+               <p className="text-base sm:text-lg text-gray-600 mb-6 px-4 lg:px-0">
                  You can swap one asset for the other easily with Bill Station at the current market prices. Don't go through multiple stressful channels when you can do it all on your Bill Station account.
                </p>
                <Link to="/welcome">
-                 <Button className="bg-[#2a61de] hover:bg-[#1e4bb8] px-8 py-3 text-lg">
+                 <Button className="bg-[#2a61de] hover:bg-[#1e4bb8] px-6 sm:px-8 py-2 sm:py-3 text-base sm:text-lg">
                    Get Started
                  </Button>
                </Link>
@@ -267,44 +337,44 @@ const Crypto: React.FC = () => {
            </div>
 
                      {/* Digital Asset Management */}
-           <div className="bg-[#2a61de] py-16 mb-16 w-screen relative left-1/2 transform -translate-x-1/2">
+           <div className="bg-[#2a61de] py-12 sm:py-16 mb-16 w-screen relative left-1/2 transform -translate-x-1/2">
              <div className="px-4 sm:px-6 lg:px-8">
-               <h2 className="text-3xl font-bold text-white mb-12 text-center max-w-7xl mx-auto">Digital Asset Management with MPC custody wallet</h2>
+               <h2 className="text-2xl sm:text-3xl font-bold text-white mb-8 sm:mb-12 text-center max-w-7xl mx-auto px-4">Digital Asset Management with MPC custody wallet</h2>
                
-               <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-6xl mx-auto">
-                 <div className="p-8">
-                   <div className="bg-white text-[#2a61de] rounded-full w-16 h-16 flex items-center justify-center mb-6 text-2xl font-bold">
+               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8 max-w-6xl mx-auto">
+                 <div className="p-4 sm:p-6 lg:p-8">
+                   <div className="bg-white text-[#2a61de] rounded-full w-12 h-12 sm:w-16 sm:h-16 flex items-center justify-center mb-4 sm:mb-6 text-xl sm:text-2xl font-bold">
                      1
                    </div>
-                   <h3 className="text-xl font-semibold text-white mb-4">Safely process crypto payment</h3>
-                   <p className="text-white">
+                   <h3 className="text-lg sm:text-xl font-semibold text-white mb-3 sm:mb-4">Safely process crypto payment</h3>
+                   <p className="text-white text-sm sm:text-base">
                      With our custodial online crypto wallets, all your user data is stored in secured storage, which reduces the risk of data being stolen, unless the user shares the details with someone, or their device gets stolen. Be your bank!.
                    </p>
                  </div>
-                 <div className="p-8">
-                   <div className="bg-white text-[#2a61de] rounded-full w-16 h-16 flex items-center justify-center mb-6 text-2xl font-bold">
+                 <div className="p-4 sm:p-6 lg:p-8">
+                   <div className="bg-white text-[#2a61de] rounded-full w-12 h-12 sm:w-16 sm:h-16 flex items-center justify-center mb-4 sm:mb-6 text-xl sm:text-2xl font-bold">
                      2
                    </div>
-                   <h3 className="text-xl font-semibold text-white mb-4">Stay Ahead of Hackers</h3>
-                   <p className="text-white">
+                   <h3 className="text-lg sm:text-xl font-semibold text-white mb-3 sm:mb-4">Stay Ahead of Hackers</h3>
+                   <p className="text-white text-sm sm:text-base">
                      Security is paramount when it comes to managing your cryptocurrencies, and our MPC Wallet delivers unbeatable protection.
                    </p>
                  </div>
-                 <div className="p-8">
-                   <div className="bg-white text-[#2a61de] rounded-full w-16 h-16 flex items-center justify-center mb-6 text-2xl font-bold">
+                 <div className="p-4 sm:p-6 lg:p-8">
+                   <div className="bg-white text-[#2a61de] rounded-full w-12 h-12 sm:w-16 sm:h-16 flex items-center justify-center mb-4 sm:mb-6 text-xl sm:text-2xl font-bold">
                      3
                    </div>
-                   <h3 className="text-xl font-semibold text-white mb-4">Safely process crypto payment</h3>
-                   <p className="text-white">
+                   <h3 className="text-lg sm:text-xl font-semibold text-white mb-3 sm:mb-4">Safely process crypto payment</h3>
+                   <p className="text-white text-sm sm:text-base">
                      With our custodial online crypto wallets, all your user data is stored in secured storage, which reduces the risk of data being stolen, unless the user shares the details with someone, or their device gets stolen. Be your bank!.
                    </p>
                  </div>
-                 <div className="p-8">
-                   <div className="bg-white text-[#2a61de] rounded-full w-16 h-16 flex items-center justify-center mb-6 text-2xl font-bold">
+                 <div className="p-4 sm:p-6 lg:p-8">
+                   <div className="bg-white text-[#2a61de] rounded-full w-12 h-12 sm:w-16 sm:h-16 flex items-center justify-center mb-4 sm:mb-6 text-xl sm:text-2xl font-bold">
                      4
                    </div>
-                   <h3 className="text-xl font-semibold text-white mb-4">Next level security for your assets</h3>
-                   <p className="text-white">
+                   <h3 className="text-lg sm:text-xl font-semibold text-white mb-3 sm:mb-4">Next level security for your assets</h3>
+                   <p className="text-white text-sm sm:text-base">
                      Say goodbye to the vulnerabilities of traditional single-key wallets and embrace the unbeatable security of our MPC Wallet.
                    </p>
                  </div>
