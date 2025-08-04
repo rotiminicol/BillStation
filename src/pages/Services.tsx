@@ -7,7 +7,7 @@ const Services: React.FC = () => {
   return (
     <div className="min-h-screen bg-white">
       {/* Header */}
-      <header className="bg-white shadow-sm border-b">
+      <header className="bg-gradient-to-r from-blue-600 to-blue-800 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             {/* Logo */}
@@ -15,26 +15,25 @@ const Services: React.FC = () => {
               <img 
                 src="/logo.png" 
                 alt="Bill Station Logo" 
-                className="h-8 w-auto"
+                className="h-12 w-auto"
               />
-              <span className="ml-2 text-xl font-bold text-gray-900">BILL STATION</span>
             </div>
 
             {/* Navigation */}
             <nav className="hidden md:flex space-x-8">
-              <Link to="/landing" className="text-gray-700 hover:text-blue-600 px-3 py-2 text-sm font-medium">
+              <Link to="/landing" className="text-white hover:text-white hover:underline px-3 py-2 text-base font-bold transition-all duration-200">
                 Home
               </Link>
-              <Link to="/about" className="text-gray-700 hover:text-blue-600 px-3 py-2 text-sm font-medium">
+              <Link to="/about" className="text-white hover:text-white hover:underline px-3 py-2 text-base font-bold transition-all duration-200">
                 About us
               </Link>
-              <Link to="/crypto" className="text-gray-700 hover:text-blue-600 px-3 py-2 text-sm font-medium">
+              <Link to="/crypto" className="text-white hover:text-white hover:underline px-3 py-2 text-base font-bold transition-all duration-200">
                 Crypto
               </Link>
-              <Link to="/services" className="text-blue-600 px-3 py-2 text-sm font-medium">
+              <Link to="/services" className="text-white hover:text-white hover:underline px-3 py-2 text-base font-bold transition-all duration-200">
                 Services
               </Link>
-              <Link to="/agent" className="text-gray-700 hover:text-blue-600 px-3 py-2 text-sm font-medium">
+              <Link to="/agent" className="text-white hover:text-white hover:underline px-3 py-2 text-base font-bold transition-all duration-200">
                 Become an agent
               </Link>
             </nav>
@@ -42,12 +41,12 @@ const Services: React.FC = () => {
             {/* Auth Buttons */}
             <div className="flex items-center space-x-4">
               <Link to="/signup">
-                <Button variant="outline" className="border-blue-600 text-blue-600 hover:bg-blue-50">
+                <Button className="bg-white text-blue-600 hover:bg-gray-100 border-white px-6 py-2 text-base font-semibold">
                   Register
                 </Button>
               </Link>
               <Link to="/login">
-                <Button className="bg-blue-600 hover:bg-blue-700">
+                <Button className="bg-blue-700 hover:bg-blue-800 text-white px-6 py-2 text-base font-semibold">
                   Login
                 </Button>
               </Link>
@@ -238,7 +237,7 @@ const Services: React.FC = () => {
       </section>
 
       {/* Footer */}
-      <footer className="bg-gray-900 text-white py-12">
+      <footer className="bg-[#2a61de] text-white py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             <div>
