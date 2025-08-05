@@ -2,18 +2,41 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Link } from "react-router-dom";
-import { ArrowLeft, Mail, CheckCircle } from "lucide-react";
+import { ArrowLeft, Mail, CheckCircle, AlertCircle } from "lucide-react";
 import { useState } from "react";
+import { authAPI } from "@/services/api";
+import { useToast } from "@/hooks/use-toast";
 
 const ForgotPassword = () => {
+  const { toast } = useToast();
   const [email, setEmail] = useState('');
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle forgot password logic here
-    console.log('Forgot password for:', email);
-    setIsSubmitted(true);
+    setError('');
+    setIsLoading(true);
+    
+    try {
+      await authAPI.forgotPassword(email);
+      setIsSubmitted(true);
+      toast({
+        title: "Email Sent",
+        description: "Check your email for a link to reset your password.",
+      });
+    } catch (error) {
+      console.error('Password reset error:', error);
+      setError(error instanceof Error ? error.message : 'Failed to send reset email');
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : 'Failed to send reset email',
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -62,13 +85,38 @@ const ForgotPassword = () => {
                         onChange={(e) => setEmail(e.target.value)}
                         className="h-12 pl-10 border-2 border-gray-200 focus:border-[#0B63BC] transition-colors duration-300"
                         required
+                        disabled={isLoading}
                       />
                     </div>
                   </div>
 
+                  {/* Error Message */}
+                  {error && (
+                    <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                      <div className="flex items-start space-x-3">
+                        <AlertCircle className="h-5 w-5 text-red-600 mt-0.5" />
+                        <div className="space-y-1">
+                          <h4 className="text-sm font-medium text-red-900">Error</h4>
+                          <p className="text-sm text-red-700">{error}</p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
                   {/* Submit Button */}
-                  <Button type="submit" className="w-full h-12 bg-gradient-to-r from-[#0B63BC] to-[#0B63BC]/90 hover:from-[#0B63BC]/90 hover:to-[#0B63BC] text-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-300">
-                    Send Reset Link
+                  <Button 
+                    type="submit" 
+                    className="w-full h-12 bg-gradient-to-r from-[#0B63BC] to-[#0B63BC]/90 hover:from-[#0B63BC]/90 hover:to-[#0B63BC] text-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-300"
+                    disabled={isLoading}
+                  >
+                    {isLoading ? (
+                      <div className="flex items-center justify-center">
+                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
+                        <span>Sending...</span>
+                      </div>
+                    ) : (
+                      <span>Send Reset Link</span>
+                    )}
                   </Button>
                 </form>
               ) : (
@@ -92,7 +140,10 @@ const ForgotPassword = () => {
                     <p className="text-sm text-gray-600">
                       Didn't receive the email?{" "}
                       <button 
-                        onClick={() => setIsSubmitted(false)}
+                        onClick={() => {
+                          setIsSubmitted(false);
+                          setError('');
+                        }}
                         className="text-[#0B63BC] hover:text-[#0B63BC]/80 font-medium"
                       >
                         Try again
@@ -195,31 +246,56 @@ const ForgotPassword = () => {
             </div>
           </div>
 
-          {/* Mobile Form */}
-          {!isSubmitted ? (
-            <form onSubmit={handleSubmit} className="space-y-4">
-              {/* Email */}
-              <div className="space-y-2">
-                <Label htmlFor="email-mobile" className="text-sm">Email</Label>
-                <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-                  <Input
-                    id="email-mobile"
-                    type="email"
-                    placeholder="john@example.com"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className="h-12 pl-10 border-2 border-gray-200 focus:border-[#0B63BC] transition-colors duration-300"
-                    required
-                  />
-                </div>
-              </div>
+                        {/* Mobile Form */}
+              {!isSubmitted ? (
+                <form onSubmit={handleSubmit} className="space-y-4">
+                  {/* Email */}
+                  <div className="space-y-2">
+                    <Label htmlFor="email-mobile" className="text-sm">Email</Label>
+                    <div className="relative">
+                      <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                      <Input
+                        id="email-mobile"
+                        type="email"
+                        placeholder="john@example.com"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        className="h-12 pl-10 border-2 border-gray-200 focus:border-[#0B63BC] transition-colors duration-300"
+                        required
+                        disabled={isLoading}
+                      />
+                    </div>
+                  </div>
 
-              {/* Submit Button */}
-              <Button type="submit" className="w-full h-12 bg-gradient-to-r from-[#0B63BC] to-[#0B63BC]/90 hover:from-[#0B63BC]/90 hover:to-[#0B63BC] text-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-300">
-                Send Reset Link
-              </Button>
-            </form>
+                  {/* Error Message */}
+                  {error && (
+                    <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                      <div className="flex items-start space-x-3">
+                        <AlertCircle className="h-4 w-4 text-red-600 mt-0.5" />
+                        <div className="space-y-1">
+                          <h4 className="text-xs font-medium text-red-900">Error</h4>
+                          <p className="text-xs text-red-700">{error}</p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Submit Button */}
+                  <Button 
+                    type="submit" 
+                    className="w-full h-12 bg-gradient-to-r from-[#0B63BC] to-[#0B63BC]/90 hover:from-[#0B63BC]/90 hover:to-[#0B63BC] text-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-300"
+                    disabled={isLoading}
+                  >
+                    {isLoading ? (
+                      <div className="flex items-center justify-center">
+                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
+                        <span>Sending...</span>
+                      </div>
+                    ) : (
+                      <span>Send Reset Link</span>
+                    )}
+                  </Button>
+                </form>
           ) : (
             <div className="space-y-4">
               {/* Success Message */}
@@ -241,7 +317,10 @@ const ForgotPassword = () => {
                 <p className="text-xs text-gray-600">
                   Didn't receive the email?{" "}
                   <button 
-                    onClick={() => setIsSubmitted(false)}
+                    onClick={() => {
+                      setIsSubmitted(false);
+                      setError('');
+                    }}
                     className="text-[#0B63BC] hover:text-[#0B63BC]/80 font-medium"
                   >
                     Try again

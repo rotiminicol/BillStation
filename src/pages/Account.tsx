@@ -3,7 +3,6 @@ import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { 
   User, 
-  Settings, 
   Crown, 
   HelpCircle, 
   Shield, 
@@ -36,17 +35,7 @@ const Account = () => {
       href: "/profile",
       badge: null
     },
-    {
-      id: "settings",
-      title: "Settings",
-      description: "Customize your account preferences and security settings",
-      icon: Settings,
-      color: "from-gray-500 to-gray-600",
-      bgColor: "bg-gray-50",
-      iconColor: "text-gray-600",
-      href: "/settings",
-      badge: null
-    },
+
     {
       id: "upgrade-tier",
       title: "Upgrade Tier",
@@ -114,14 +103,7 @@ const Account = () => {
             <p className="text-gray-500 text-lg">Manage your account settings and preferences</p>
           </div>
           <div className="flex items-center gap-4">
-            <Button 
-              variant="outline" 
-              size="lg" 
-              className="flex items-center gap-2 border-gray-200 hover:bg-gray-50 transition-colors"
-            >
-              <Settings className="h-5 w-5" />
-              Quick Settings
-            </Button>
+
           </div>
         </div>
       </div>

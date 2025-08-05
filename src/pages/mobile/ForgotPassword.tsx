@@ -1,9 +1,10 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Mail, CheckCircle } from "lucide-react";
+import { Mail, CheckCircle, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
+import { authAPI } from "@/services/api";
 
 const ForgotPassword = () => {
   const navigate = useNavigate();
@@ -11,6 +12,7 @@ const ForgotPassword = () => {
   const [email, setEmail] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [emailSent, setEmailSent] = useState(false);
+  const [error, setError] = useState("");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -25,14 +27,10 @@ const ForgotPassword = () => {
     }
 
     setIsLoading(true);
+    setError("");
     
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      // In a real app, you would call your password reset API here
-      // await authAPI.forgotPassword(email);
-      
+      await authAPI.forgotPassword(email);
       setEmailSent(true);
       
       toast({
@@ -41,9 +39,11 @@ const ForgotPassword = () => {
       });
     } catch (error) {
       console.error("Password reset error:", error);
+      const errorMessage = error instanceof Error ? error.message : 'Failed to send reset email';
+      setError(errorMessage);
       toast({
         title: "Error",
-        description: "Failed to send reset email. Please try again.",
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {
@@ -99,7 +99,10 @@ const ForgotPassword = () => {
               {/* Action Buttons */}
               <div className="space-y-4">
                 <Button 
-                  onClick={() => setEmailSent(false)}
+                  onClick={() => {
+                    setEmailSent(false);
+                    setError('');
+                  }}
                   className="w-full bg-[#0B63BC] hover:bg-[#0B63BC]/90 text-white py-3 rounded-lg font-medium"
                 >
                   Resend Email
@@ -117,7 +120,10 @@ const ForgotPassword = () => {
               <p className="text-sm text-gray-500 mt-8">
                 Didn't receive the email? Check your spam folder or{" "}
                 <button 
-                  onClick={() => setEmailSent(false)}
+                  onClick={() => {
+                    setEmailSent(false);
+                    setError('');
+                  }}
                   className="text-[#0B63BC] hover:text-[#0B63BC]/80 hover:underline font-medium"
                 >
                   try another email address
@@ -186,9 +192,23 @@ const ForgotPassword = () => {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
+                    disabled={isLoading}
                   />
                 </div>
               </div>
+
+              {/* Error Message */}
+              {error && (
+                <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                  <div className="flex items-start space-x-3">
+                    <AlertCircle className="h-4 w-4 text-red-600 mt-0.5" />
+                    <div className="space-y-1">
+                      <h4 className="text-xs font-medium text-red-900">Error</h4>
+                      <p className="text-xs text-red-700">{error}</p>
+                    </div>
+                  </div>
+                </div>
+              )}
 
               {/* Send Reset Link Button */}
               <Button 

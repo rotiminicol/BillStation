@@ -2,7 +2,6 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { 
   User, 
-  Settings, 
   Crown, 
   HelpCircle, 
   Shield, 
@@ -35,17 +34,7 @@ const Account = () => {
       href: "/profile",
       badge: null
     },
-    {
-      id: "settings",
-      title: "Settings",
-      description: "Customize your account preferences and security settings",
-      icon: Settings,
-      color: "from-gray-500 to-gray-600",
-      bgColor: "bg-gray-50",
-      iconColor: "text-gray-600",
-      href: "/settings",
-      badge: null
-    },
+
     {
       id: "upgrade-tier",
       title: "Upgrade Tier",
@@ -111,12 +100,7 @@ const Account = () => {
           <h1 className="text-2xl font-bold text-gray-900">Account</h1>
           <p className="text-sm text-gray-600">Manage your account settings and preferences</p>
         </div>
-        <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" className="flex items-center gap-1">
-            <Settings className="h-4 w-4" />
-            Settings
-          </Button>
-        </div>
+
       </div>
 
       {/* Account Options Grid */}

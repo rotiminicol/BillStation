@@ -1,242 +1,654 @@
-import { Link } from "react-router-dom";
-import { ArrowLeft, Shield, Lock, Users, Eye, Database, FileText } from "lucide-react";
+import { useState } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Switch } from "@/components/ui/switch";
+import { 
+  Shield, 
+  Eye, 
+  Lock, 
+  Users, 
+  FileText, 
+  CheckCircle,
+  AlertTriangle,
+  Info,
+  Download,
+  Mail,
+  Phone,
+  Globe,
+  Smartphone,
+  Database,
+  Key,
+  Fingerprint,
+  BarChart3,
+  Settings,
+  User,
+  Bell,
+  Camera,
+  MapPin,
+  Calendar,
+  CreditCard,
+  Building,
+  Home,
+  Briefcase,
+  GraduationCap,
+  Heart,
+  Star,
+  Clock,
+  RefreshCw,
+  ExternalLink,
+  ChevronDown,
+  ChevronRight,
+  Plus,
+  Minus,
+  Trash2
+} from "lucide-react";
+import DesktopLayout from "@/components/DesktopLayout";
+import { useToast } from "@/hooks/use-toast";
 
 const Privacy = () => {
+  const { toast } = useToast();
+  const [expandedSection, setExpandedSection] = useState<string | null>(null);
+  const [privacySettings, setPrivacySettings] = useState({
+    profileVisibility: "private",
+    dataSharing: false,
+    analyticsTracking: true,
+    marketingEmails: false,
+    thirdPartySharing: false,
+    locationSharing: false,
+    biometricData: false,
+    transactionHistory: "private",
+    socialFeatures: false,
+    personalizedAds: false
+  });
+
+  const privacyPolicies = [
+    {
+      id: "data-collection",
+      title: "Data Collection",
+      icon: Database,
+      color: "from-blue-500 to-blue-600",
+      content: [
+        {
+          subtitle: "Personal Information",
+          items: [
+            "Name, email address, and phone number",
+            "Date of birth and identification documents",
+            "Address and location information",
+            "Employment and financial information"
+          ]
+        },
+        {
+          subtitle: "Usage Information",
+          items: [
+            "Transaction history and patterns",
+            "App usage and feature interactions",
+            "Device information and IP addresses",
+            "Cookies and tracking technologies"
+          ]
+        },
+        {
+          subtitle: "Financial Information",
+          items: [
+            "Bank account details and balances",
+            "Transaction amounts and recipients",
+            "Payment method information",
+            "Credit and debit card details"
+          ]
+        }
+      ]
+    },
+    {
+      id: "data-usage",
+      title: "How We Use Your Data",
+      icon: BarChart3,
+      color: "from-green-500 to-green-600",
+      content: [
+        {
+          subtitle: "Service Provision",
+          items: [
+            "Process transactions and payments",
+            "Verify your identity and prevent fraud",
+            "Provide customer support",
+            "Send important account notifications"
+          ]
+        },
+        {
+          subtitle: "Improvement & Analytics",
+          items: [
+            "Improve our services and user experience",
+            "Analyze usage patterns and trends",
+            "Develop new features and products",
+            "Conduct research and surveys"
+          ]
+        },
+        {
+          subtitle: "Legal & Compliance",
+          items: [
+            "Comply with legal obligations",
+            "Prevent money laundering and fraud",
+            "Respond to law enforcement requests",
+            "Protect our rights and property"
+          ]
+        }
+      ]
+    },
+    {
+      id: "data-sharing",
+      title: "Data Sharing",
+      icon: Users,
+      color: "from-purple-500 to-purple-600",
+      content: [
+        {
+          subtitle: "Service Providers",
+          items: [
+            "Payment processors and banks",
+            "Cloud storage and hosting services",
+            "Customer support platforms",
+            "Analytics and monitoring tools"
+          ]
+        },
+        {
+          subtitle: "Legal Requirements",
+          items: [
+            "Government authorities when required by law",
+            "Regulatory bodies for compliance",
+            "Law enforcement with proper warrants",
+            "Court orders and legal proceedings"
+          ]
+        },
+        {
+          subtitle: "Business Partners",
+          items: [
+            "Financial institutions for transactions",
+            "Travel partners for booking services",
+            "Crypto exchanges for trading",
+            "Marketing partners (with consent)"
+          ]
+        }
+      ]
+    },
+    {
+      id: "data-security",
+      title: "Data Security",
+      icon: Lock,
+      color: "from-red-500 to-red-600",
+      content: [
+        {
+          subtitle: "Encryption",
+          items: [
+            "End-to-end encryption for all data",
+            "256-bit SSL encryption for transfers",
+            "Encrypted storage at rest",
+            "Secure key management systems"
+          ]
+        },
+        {
+          subtitle: "Access Controls",
+          items: [
+            "Multi-factor authentication",
+            "Role-based access controls",
+            "Regular security audits",
+            "Employee background checks"
+          ]
+        },
+        {
+          subtitle: "Monitoring",
+          items: [
+            "24/7 security monitoring",
+            "Fraud detection systems",
+            "Anomaly detection algorithms",
+            "Real-time threat response"
+          ]
+        }
+      ]
+    },
+    {
+      id: "your-rights",
+      title: "Your Rights",
+      icon: User,
+      color: "from-yellow-500 to-yellow-600",
+      content: [
+        {
+          subtitle: "Access & Control",
+          items: [
+            "Access your personal data",
+            "Correct inaccurate information",
+            "Delete your account and data",
+            "Export your data in portable format"
+          ]
+        },
+        {
+          subtitle: "Consent Management",
+          items: [
+            "Withdraw consent at any time",
+            "Opt-out of marketing communications",
+            "Control data sharing preferences",
+            "Manage privacy settings"
+          ]
+        },
+        {
+          subtitle: "Complaints",
+          items: [
+            "File privacy complaints",
+            "Contact our Data Protection Officer",
+            "Appeal data processing decisions",
+            "Seek legal remedies if needed"
+          ]
+        }
+      ]
+    }
+  ];
+
+  const dataCategories = [
+    {
+      id: "personal",
+      title: "Personal Information",
+      icon: User,
+      color: "from-blue-500 to-blue-600",
+      description: "Basic personal details like name, email, phone",
+      examples: ["Full name", "Email address", "Phone number", "Date of birth"],
+      retention: "7 years after account closure"
+    },
+    {
+      id: "financial",
+      title: "Financial Data",
+      icon: CreditCard,
+      color: "from-green-500 to-green-600",
+      description: "Banking and transaction information",
+      examples: ["Account balances", "Transaction history", "Payment methods", "Transfer limits"],
+      retention: "10 years for regulatory compliance"
+    },
+    {
+      id: "location",
+      title: "Location Data",
+      icon: MapPin,
+      color: "from-purple-500 to-purple-600",
+      description: "Geographic location information",
+      examples: ["IP addresses", "Device location", "Transaction locations", "Travel bookings"],
+      retention: "2 years for fraud prevention"
+    },
+    {
+      id: "behavioral",
+      title: "Behavioral Data",
+      icon: BarChart3,
+      color: "from-yellow-500 to-yellow-600",
+      description: "How you use our services",
+      examples: ["App usage patterns", "Feature preferences", "Search history", "Click behavior"],
+      retention: "3 years for service improvement"
+    },
+    {
+      id: "biometric",
+      title: "Biometric Data",
+      icon: Fingerprint,
+      color: "from-red-500 to-red-600",
+      description: "Fingerprint and facial recognition data",
+      examples: ["Fingerprint scans", "Face ID data", "Voice patterns", "Gait analysis"],
+      retention: "Until account deletion"
+    }
+  ];
+
+  const handlePrivacySettingChange = (key: string, value: any) => {
+    setPrivacySettings(prev => ({
+      ...prev,
+      [key]: value
+    }));
+    
+    toast({
+      title: "Privacy Setting Updated",
+      description: `Your ${key.replace(/([A-Z])/g, ' $1').toLowerCase()} setting has been updated.`,
+    });
+  };
+
+  const toggleSection = (sectionId: string) => {
+    setExpandedSection(expandedSection === sectionId ? null : sectionId);
+  };
+
+  const downloadPrivacyPolicy = () => {
+    toast({
+      title: "Download Started",
+      description: "Privacy policy PDF is being downloaded...",
+    });
+  };
+
+  const requestDataExport = () => {
+    toast({
+      title: "Data Export Requested",
+      description: "We'll prepare your data export and email it to you within 30 days.",
+    });
+  };
+
+  const deleteAccount = () => {
+    toast({
+      title: "Account Deletion",
+      description: "This action cannot be undone. Please contact support for account deletion.",
+      variant: "destructive"
+    });
+  };
+
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-4xl mx-auto px-6 py-12">
+    <DesktopLayout>
+      <div className="space-y-8">
         {/* Header */}
-        <div className="mb-8">
-          <Link to="/signup" className="inline-flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors mb-6">
-            <ArrowLeft className="h-5 w-5" />
-            <span>Back to Sign Up</span>
-          </Link>
-          
-          <div className="flex items-center gap-3 mb-4">
-            <Shield className="h-8 w-8 text-blue-600" />
-            <h1 className="text-3xl font-bold text-gray-900">Privacy Policy</h1>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-gradient-to-r from-green-500 to-green-600 rounded-lg flex items-center justify-center">
+              <Shield className="h-5 w-5 text-white" />
+            </div>
+            <div>
+              <h1 className="text-2xl font-bold text-gray-900">Privacy & Data Protection</h1>
+              <p className="text-gray-600 text-sm">Control your data and privacy settings</p>
+            </div>
           </div>
-          <p className="text-gray-600">Last updated: December 2024</p>
+          <Badge className="bg-green-100 text-green-800">
+            <CheckCircle className="h-3 w-3 mr-1" />
+            GDPR Compliant
+          </Badge>
         </div>
 
-        {/* Content */}
-        <div className="bg-white rounded-2xl shadow-lg p-8 space-y-8">
-          
-          {/* Introduction */}
-          <section>
-            <h2 className="text-2xl font-semibold text-gray-900 mb-4">1. Introduction</h2>
-            <p className="text-gray-700 leading-relaxed">
-              At Bill Station, we are committed to protecting your privacy and ensuring the security of your personal information. 
-              This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our digital 
-              financial platform and services.
-            </p>
-          </section>
+        {/* Privacy Settings */}
+        <Card className="border-0 shadow-lg">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-lg">
+              <Settings className="h-5 w-5 text-blue-600" />
+              Privacy Settings
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-4">
+                <h3 className="font-semibold text-gray-900">Profile & Visibility</h3>
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between p-3 border border-gray-200 rounded-lg">
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
+                        <Eye className="h-4 w-4 text-blue-600" />
+                      </div>
+                      <div>
+                        <p className="font-medium text-gray-900">Profile Visibility</p>
+                        <p className="text-sm text-gray-500">Who can see your profile</p>
+                      </div>
+                    </div>
+                    <select
+                      value={privacySettings.profileVisibility}
+                      onChange={(e) => handlePrivacySettingChange('profileVisibility', e.target.value)}
+                      className="border border-gray-300 rounded-md px-3 py-1"
+                    >
+                      <option value="public">Public</option>
+                      <option value="private">Private</option>
+                      <option value="friends">Friends Only</option>
+                    </select>
+                  </div>
 
-          {/* Information We Collect */}
-          <section>
-            <h2 className="text-2xl font-semibold text-gray-900 mb-4">2. Information We Collect</h2>
-            
-            <h3 className="text-xl font-medium text-gray-900 mb-3">Personal Information</h3>
-            <p className="text-gray-700 leading-relaxed mb-4">
-              We collect the following personal information:
-            </p>
-            <ul className="list-disc list-inside space-y-2 text-gray-700 ml-4 mb-6">
-              <li>Name, email address, and phone number</li>
-              <li>Date of birth and identification documents</li>
-              <li>Financial information and transaction history</li>
-              <li>Device information and IP addresses</li>
-              <li>Usage data and preferences</li>
-            </ul>
+                  <div className="flex items-center justify-between p-3 border border-gray-200 rounded-lg">
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
+                        <Users className="h-4 w-4 text-green-600" />
+                      </div>
+                      <div>
+                        <p className="font-medium text-gray-900">Data Sharing</p>
+                        <p className="text-sm text-gray-500">Share data with partners</p>
+                      </div>
+                    </div>
+                    <Switch
+                      checked={privacySettings.dataSharing}
+                      onCheckedChange={(checked) => handlePrivacySettingChange('dataSharing', checked)}
+                    />
+                  </div>
 
-            <h3 className="text-xl font-medium text-gray-900 mb-3">Automatically Collected Information</h3>
-            <p className="text-gray-700 leading-relaxed mb-4">
-              We automatically collect certain information when you use our services:
-            </p>
-            <ul className="list-disc list-inside space-y-2 text-gray-700 ml-4">
-              <li>Log data and analytics</li>
-              <li>Device and browser information</li>
-              <li>Location data (with your consent)</li>
-              <li>Cookies and similar technologies</li>
-            </ul>
-          </section>
+                  <div className="flex items-center justify-between p-3 border border-gray-200 rounded-lg">
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">
+                        <BarChart3 className="h-4 w-4 text-purple-600" />
+                      </div>
+                      <div>
+                        <p className="font-medium text-gray-900">Analytics Tracking</p>
+                        <p className="text-sm text-gray-500">Help improve our services</p>
+                      </div>
+                    </div>
+                    <Switch
+                      checked={privacySettings.analyticsTracking}
+                      onCheckedChange={(checked) => handlePrivacySettingChange('analyticsTracking', checked)}
+                    />
+                  </div>
+                </div>
+              </div>
 
-          {/* How We Use Information */}
-          <section>
-            <h2 className="text-2xl font-semibold text-gray-900 mb-4">3. How We Use Your Information</h2>
-            <p className="text-gray-700 leading-relaxed mb-4">
-              We use your information for the following purposes:
-            </p>
-            <ul className="list-disc list-inside space-y-2 text-gray-700 ml-4">
-              <li>Provide and maintain our financial services</li>
-              <li>Process transactions and payments</li>
-              <li>Verify your identity and prevent fraud</li>
-              <li>Communicate with you about your account</li>
-              <li>Improve our services and user experience</li>
-              <li>Comply with legal and regulatory requirements</li>
-            </ul>
-          </section>
+              <div className="space-y-4">
+                <h3 className="font-semibold text-gray-900">Communications</h3>
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between p-3 border border-gray-200 rounded-lg">
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 bg-yellow-100 rounded-lg flex items-center justify-center">
+                        <Mail className="h-4 w-4 text-yellow-600" />
+                      </div>
+                      <div>
+                        <p className="font-medium text-gray-900">Marketing Emails</p>
+                        <p className="text-sm text-gray-500">Receive promotional content</p>
+                      </div>
+                    </div>
+                    <Switch
+                      checked={privacySettings.marketingEmails}
+                      onCheckedChange={(checked) => handlePrivacySettingChange('marketingEmails', checked)}
+                    />
+                  </div>
 
-          {/* Information Sharing */}
-          <section>
-            <h2 className="text-2xl font-semibold text-gray-900 mb-4">4. Information Sharing and Disclosure</h2>
-            <p className="text-gray-700 leading-relaxed mb-4">
-              We do not sell, trade, or rent your personal information to third parties. We may share your information in the following circumstances:
-            </p>
-            <ul className="list-disc list-inside space-y-2 text-gray-700 ml-4">
-              <li>With your explicit consent</li>
-              <li>To comply with legal obligations</li>
-              <li>To protect our rights and safety</li>
-              <li>With trusted service providers (under strict confidentiality agreements)</li>
-              <li>In connection with business transfers or mergers</li>
-            </ul>
-          </section>
+                  <div className="flex items-center justify-between p-3 border border-gray-200 rounded-lg">
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 bg-red-100 rounded-lg flex items-center justify-center">
+                        <Globe className="h-4 w-4 text-red-600" />
+                      </div>
+                      <div>
+                        <p className="font-medium text-gray-900">Third-Party Sharing</p>
+                        <p className="text-sm text-gray-500">Share with external services</p>
+                      </div>
+                    </div>
+                    <Switch
+                      checked={privacySettings.thirdPartySharing}
+                      onCheckedChange={(checked) => handlePrivacySettingChange('thirdPartySharing', checked)}
+                    />
+                  </div>
 
-          {/* Data Security */}
-          <section>
-            <h2 className="text-2xl font-semibold text-gray-900 mb-4">5. Data Security</h2>
-            <p className="text-gray-700 leading-relaxed mb-4">
-              We implement comprehensive security measures to protect your information:
-            </p>
-            <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-4">
-              <div className="flex items-start space-x-3">
-                <Lock className="h-5 w-5 text-blue-600 mt-0.5" />
-                <div>
-                  <h4 className="text-sm font-medium text-blue-900">Security Measures</h4>
-                  <ul className="text-xs text-blue-700 space-y-1 mt-2">
-                    <li>• Bank-level encryption (256-bit SSL/TLS)</li>
-                    <li>• Multi-factor authentication</li>
-                    <li>• Regular security audits and penetration testing</li>
-                    <li>• Secure data centers with 24/7 monitoring</li>
-                    <li>• Compliance with international security standards</li>
-                  </ul>
+                  <div className="flex items-center justify-between p-3 border border-gray-200 rounded-lg">
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 bg-indigo-100 rounded-lg flex items-center justify-center">
+                        <MapPin className="h-4 w-4 text-indigo-600" />
+                      </div>
+                      <div>
+                        <p className="font-medium text-gray-900">Location Sharing</p>
+                        <p className="text-sm text-gray-500">Share your location data</p>
+                      </div>
+                    </div>
+                    <Switch
+                      checked={privacySettings.locationSharing}
+                      onCheckedChange={(checked) => handlePrivacySettingChange('locationSharing', checked)}
+                    />
+                  </div>
                 </div>
               </div>
             </div>
-          </section>
+          </CardContent>
+        </Card>
 
-          {/* Data Retention */}
-          <section>
-            <h2 className="text-2xl font-semibold text-gray-900 mb-4">6. Data Retention</h2>
-            <p className="text-gray-700 leading-relaxed">
-              We retain your personal information for as long as necessary to provide our services, comply with legal obligations, 
-              resolve disputes, and enforce our agreements. Financial records are retained for a minimum of 7 years as required by law.
-            </p>
-          </section>
-
-          {/* Your Rights */}
-          <section>
-            <h2 className="text-2xl font-semibold text-gray-900 mb-4">7. Your Rights</h2>
-            <p className="text-gray-700 leading-relaxed mb-4">
-              You have the following rights regarding your personal information:
-            </p>
-            <ul className="list-disc list-inside space-y-2 text-gray-700 ml-4">
-              <li>Access and review your personal information</li>
-              <li>Request correction of inaccurate data</li>
-              <li>Request deletion of your data (subject to legal requirements)</li>
-              <li>Object to processing of your data</li>
-              <li>Request data portability</li>
-              <li>Withdraw consent at any time</li>
-            </ul>
-          </section>
-
-          {/* Cookies and Tracking */}
-          <section>
-            <h2 className="text-2xl font-semibold text-gray-900 mb-4">8. Cookies and Tracking Technologies</h2>
-            <p className="text-gray-700 leading-relaxed mb-4">
-              We use cookies and similar technologies to:
-            </p>
-            <ul className="list-disc list-inside space-y-2 text-gray-700 ml-4">
-              <li>Remember your preferences and settings</li>
-              <li>Analyze website usage and performance</li>
-              <li>Provide personalized content and advertisements</li>
-              <li>Ensure security and prevent fraud</li>
-            </ul>
-            <p className="text-gray-700 leading-relaxed mt-4">
-              You can control cookie settings through your browser preferences, though disabling certain cookies may affect 
-              the functionality of our services.
-            </p>
-          </section>
-
-          {/* Third-Party Services */}
-          <section>
-            <h2 className="text-2xl font-semibold text-gray-900 mb-4">9. Third-Party Services</h2>
-            <p className="text-gray-700 leading-relaxed mb-4">
-              Our services may integrate with third-party services for:
-            </p>
-            <ul className="list-disc list-inside space-y-2 text-gray-700 ml-4">
-              <li>Payment processing and banking services</li>
-              <li>Analytics and performance monitoring</li>
-              <li>Customer support and communication</li>
-              <li>Security and fraud prevention</li>
-            </ul>
-            <p className="text-gray-700 leading-relaxed mt-4">
-              These third parties have their own privacy policies, and we encourage you to review them.
-            </p>
-          </section>
-
-          {/* International Transfers */}
-          <section>
-            <h2 className="text-2xl font-semibold text-gray-900 mb-4">10. International Data Transfers</h2>
-            <p className="text-gray-700 leading-relaxed">
-              Your information may be transferred to and processed in countries other than your own. We ensure that such transfers 
-              comply with applicable data protection laws and implement appropriate safeguards to protect your information.
-            </p>
-          </section>
-
-          {/* Children's Privacy */}
-          <section>
-            <h2 className="text-2xl font-semibold text-gray-900 mb-4">11. Children's Privacy</h2>
-            <p className="text-gray-700 leading-relaxed">
-              Our services are not intended for children under 18 years of age. We do not knowingly collect personal information 
-              from children under 18. If you believe we have collected information from a child under 18, please contact us immediately.
-            </p>
-          </section>
-
-          {/* Changes to Privacy Policy */}
-          <section>
-            <h2 className="text-2xl font-semibold text-gray-900 mb-4">12. Changes to This Privacy Policy</h2>
-            <p className="text-gray-700 leading-relaxed">
-              We may update this Privacy Policy from time to time. We will notify you of any material changes by posting the new 
-              Privacy Policy on our platform and updating the "Last updated" date. Your continued use of our services after such 
-              changes constitutes acceptance of the updated Privacy Policy.
-            </p>
-          </section>
-
-          {/* Contact Information */}
-          <section>
-            <h2 className="text-2xl font-semibold text-gray-900 mb-4">13. Contact Us</h2>
-            <p className="text-gray-700 leading-relaxed mb-4">
-              If you have any questions about this Privacy Policy or our data practices, please contact us:
-            </p>
-            <div className="bg-gray-50 rounded-xl p-4">
-              <p className="text-gray-700">
-                <strong>Email:</strong> privacy@billstation.com<br />
-                <strong>Address:</strong> Bill Station Privacy Team<br />
-                <strong>Phone:</strong> +234 800 BILL STATION<br />
-                <strong>Data Protection Officer:</strong> dpo@billstation.com
-              </p>
-            </div>
-          </section>
-
-          {/* Footer */}
-          <div className="border-t border-gray-200 pt-8 mt-8">
-            <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
-              <p className="text-sm text-gray-600">
-                © 2024 Bill Station. All rights reserved.
-              </p>
-              <div className="flex gap-4">
-                <Link to="/terms" className="text-sm text-blue-600 hover:text-blue-700">
-                  Terms of Service
-                </Link>
-                <Link to="/signup" className="text-sm text-blue-600 hover:text-blue-700">
-                  Sign Up
-                </Link>
-              </div>
-            </div>
+        {/* Data Categories */}
+        <div className="space-y-6">
+          <h2 className="text-xl font-bold text-gray-900">Data We Collect</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {dataCategories.map((category) => (
+              <Card key={category.id} className="border-0 shadow-lg hover:shadow-xl transition-shadow">
+                <CardContent className="p-6">
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className={`w-10 h-10 bg-gradient-to-r ${category.color} rounded-lg flex items-center justify-center`}>
+                      <category.icon className="h-5 w-5 text-white" />
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-gray-900">{category.title}</h3>
+                      <p className="text-sm text-gray-500">{category.description}</p>
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-3">
+                    <div>
+                      <h4 className="font-medium text-gray-900 text-sm mb-2">Examples:</h4>
+                      <ul className="space-y-1">
+                        {category.examples.map((example, index) => (
+                          <li key={index} className="text-sm text-gray-600 flex items-center gap-2">
+                            <div className="w-1 h-1 bg-gray-400 rounded-full"></div>
+                            {example}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                    
+                    <div className="pt-3 border-t">
+                      <p className="text-xs text-gray-500">
+                        <strong>Retention:</strong> {category.retention}
+                      </p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
           </div>
         </div>
+
+        {/* Privacy Policy Sections */}
+        <div className="space-y-6">
+          <h2 className="text-xl font-bold text-gray-900">Privacy Policy</h2>
+          {privacyPolicies.map((policy) => (
+            <Card key={policy.id} className="border-0 shadow-lg">
+              <CardHeader 
+                className="cursor-pointer hover:bg-gray-50 transition-colors"
+                onClick={() => toggleSection(policy.id)}
+              >
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className={`w-10 h-10 bg-gradient-to-r ${policy.color} rounded-lg flex items-center justify-center`}>
+                      <policy.icon className="h-5 w-5 text-white" />
+                    </div>
+                    <CardTitle className="text-lg">{policy.title}</CardTitle>
+                  </div>
+                  {expandedSection === policy.id ? (
+                    <ChevronDown className="h-5 w-5 text-gray-400" />
+                  ) : (
+                    <ChevronRight className="h-5 w-5 text-gray-400" />
+                  )}
+                </div>
+              </CardHeader>
+              
+              {expandedSection === policy.id && (
+                <CardContent className="pt-0">
+                  <div className="space-y-6">
+                    {policy.content.map((section, index) => (
+                      <div key={index} className="space-y-3">
+                        <h4 className="font-semibold text-gray-900">{section.subtitle}</h4>
+                        <ul className="space-y-2">
+                          {section.items.map((item, itemIndex) => (
+                            <li key={itemIndex} className="flex items-start gap-2 text-sm text-gray-600">
+                              <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
+                              <span>{item}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              )}
+            </Card>
+          ))}
+        </div>
+
+        {/* Data Rights */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <Card className="border-0 shadow-lg bg-gradient-to-r from-blue-50 to-blue-100">
+            <CardContent className="p-6 text-center">
+              <div className="w-12 h-12 bg-blue-500 rounded-lg flex items-center justify-center mx-auto mb-4">
+                <Download className="h-6 w-6 text-white" />
+              </div>
+              <h3 className="font-semibold text-gray-900 mb-2">Download Policy</h3>
+              <p className="text-sm text-gray-600 mb-4">Get a copy of our privacy policy</p>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="w-full"
+                onClick={downloadPrivacyPolicy}
+              >
+                Download PDF
+              </Button>
+            </CardContent>
+          </Card>
+
+          <Card className="border-0 shadow-lg bg-gradient-to-r from-green-50 to-green-100">
+            <CardContent className="p-6 text-center">
+              <div className="w-12 h-12 bg-green-500 rounded-lg flex items-center justify-center mx-auto mb-4">
+                <RefreshCw className="h-6 w-6 text-white" />
+              </div>
+              <h3 className="font-semibold text-gray-900 mb-2">Export Data</h3>
+              <p className="text-sm text-gray-600 mb-4">Request a copy of your data</p>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="w-full"
+                onClick={requestDataExport}
+              >
+                Request Export
+              </Button>
+            </CardContent>
+          </Card>
+
+          <Card className="border-0 shadow-lg bg-gradient-to-r from-red-50 to-red-100">
+            <CardContent className="p-6 text-center">
+              <div className="w-12 h-12 bg-red-500 rounded-lg flex items-center justify-center mx-auto mb-4">
+                <Trash2 className="h-6 w-6 text-white" />
+              </div>
+              <h3 className="font-semibold text-gray-900 mb-2">Delete Account</h3>
+              <p className="text-sm text-gray-600 mb-4">Permanently delete your account</p>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="w-full text-red-600 border-red-300 hover:bg-red-50"
+                onClick={deleteAccount}
+              >
+                Delete Account
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Contact Information */}
+        <Card className="border-0 shadow-lg bg-gradient-to-r from-gray-50 to-gray-100">
+          <CardContent className="p-6">
+            <div className="text-center">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">Questions About Privacy?</h3>
+              <p className="text-gray-600 mb-6">
+                Our Data Protection Officer is here to help with any privacy concerns.
+              </p>
+              <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                <Button 
+                  className="bg-gradient-to-r from-blue-500 to-blue-600 hover:opacity-90"
+                >
+                  <Mail className="h-4 w-4 mr-2" />
+                  Contact DPO
+                </Button>
+                <Button 
+                  variant="outline"
+                >
+                  <FileText className="h-4 w-4 mr-2" />
+                  Privacy FAQ
+                </Button>
+                <Button 
+                  variant="outline"
+                >
+                  <ExternalLink className="h-4 w-4 mr-2" />
+                  Legal Portal
+                </Button>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       </div>
-    </div>
+    </DesktopLayout>
   );
 };
 

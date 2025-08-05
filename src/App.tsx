@@ -19,6 +19,7 @@ import Welcome from "./pages/Welcome";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import ForgotPassword from "./pages/ForgotPassword";
+import ResetPassword from "./pages/ResetPassword";
 import Terms from "./pages/Terms";
 import Privacy from "./pages/Privacy";
 import Onboarding from "./pages/Onboarding";
@@ -56,7 +57,6 @@ import ConvertAsset from "./pages/ConvertAsset";
 import BookRide from "./pages/BookRide";
 import UpgradeTier from "./pages/UpgradeTier";
 import TransactionHistory from "./pages/TransactionHistory";
-import Settings from "./pages/Settings";
 import HelpCenter from "./pages/HelpCenter";
 import Notifications from "./pages/Notifications";
 
@@ -65,6 +65,7 @@ import MobileDashboard from "./pages/mobile/Dashboard";
 import MobileLogin from "./pages/mobile/Login";
 import MobileSignup from "./pages/mobile/Signup";
 import MobileForgotPassword from "./pages/mobile/ForgotPassword";
+import MobileResetPassword from "./pages/mobile/ResetPassword";
 import MobileOnboarding from "./pages/mobile/Onboarding";
 import MobileWelcome from "./pages/mobile/Welcome";
 import MobileTransfer from "./pages/mobile/Transfer";
@@ -132,6 +133,7 @@ const AppRouter = () => {
         <Route path="/login" element={<MobileLogin />} />
         <Route path="/signup" element={<MobileSignup />} />
         <Route path="/forgot-password" element={<MobileForgotPassword />} />
+        <Route path="/reset-password" element={<MobileResetPassword />} />
         <Route path="/terms" element={<Terms />} />
         <Route path="/privacy" element={<Privacy />} />
         <Route path="/onboarding" element={<MobileOnboarding />} />
@@ -168,7 +170,6 @@ const AppRouter = () => {
                               <Route path="/convert-asset" element={<MobileConvertAsset />} />
                       <Route path="/book-ride" element={<MobileBookRide />} />
                       <Route path="/upgrade-tier" element={<UpgradeTier />} />
-                      <Route path="/settings" element={<Settings />} />
                       <Route path="/help-center" element={<HelpCenter />} />
                       <Route path="/notifications" element={<Notifications />} />
                       <Route path="*" element={<NotFound />} />
@@ -189,6 +190,7 @@ const AppRouter = () => {
         <Route path="/agent" element={<Agent />} />
       <Route path="/signup" element={<Signup />} />
       <Route path="/forgot-password" element={<ForgotPassword />} />
+      <Route path="/reset-password" element={<ResetPassword />} />
       <Route path="/terms" element={<Terms />} />
       <Route path="/privacy" element={<Privacy />} />
       <Route path="/onboarding" element={<Onboarding />} />
@@ -225,7 +227,6 @@ const AppRouter = () => {
                           <Route path="/convert-asset" element={<ConvertAsset />} />
                     <Route path="/book-ride" element={<BookRide />} />
                     <Route path="/upgrade-tier" element={<UpgradeTier />} />
-                    <Route path="/settings" element={<Settings />} />
                     <Route path="/help-center" element={<HelpCenter />} />
                     <Route path="/notifications" element={<Notifications />} />
                     <Route path="*" element={<NotFound />} />

@@ -107,6 +107,66 @@ export const authAPI = {
   logout: () => {
     localStorage.removeItem('authToken');
   },
+
+  // Password Reset Flow
+  forgotPassword: async (email: string) => {
+    console.log('🔍 Attempting forgot password request for:', email);
+    console.log('🔍 API URL:', `${AUTH_BASE_URL}/auth/forgot-password`);
+    
+    try {
+      const response = await fetch(`${AUTH_BASE_URL}/auth/forgot-password`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email }),
+      });
+      
+      console.log('🔍 Response status:', response.status);
+      console.log('🔍 Response headers:', response.headers);
+      
+      if (!response.ok) {
+        const error = await response.json().catch(() => ({ message: 'Failed to send reset email' }));
+        console.error('🔍 API Error:', error);
+        throw new Error(error.message || 'Failed to send reset email');
+      }
+      
+      const result = await response.json();
+      console.log('🔍 Success response:', result);
+      return result;
+    } catch (error) {
+      console.error('🔍 Network/Request error:', error);
+      throw error;
+    }
+  },
+
+  resetPassword: async (token: string, newPassword: string) => {
+    const response = await fetch(`${AUTH_BASE_URL}/auth/reset-password`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ token, newPassword }),
+    });
+    
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({ message: 'Failed to reset password' }));
+      throw new Error(error.message || 'Failed to reset password');
+    }
+    
+    return response.json();
+  },
+
+  verifyResetToken: async (token: string) => {
+    const response = await fetch(`${AUTH_BASE_URL}/auth/verify-reset-token`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ token }),
+    });
+    
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({ message: 'Invalid or expired token' }));
+      throw new Error(error.message || 'Invalid or expired token');
+    }
+    
+    return response.json();
+  },
 };
 
 // Transaction API

@@ -16,7 +16,6 @@ import {
   Gift, 
   User,
   ArrowUpDown,
-  Settings,
   HelpCircle,
   LogOut,
   Users,
@@ -53,7 +52,7 @@ const Navigation = () => {
 
 
   const accountItems = [
-    { icon: Settings, label: "Settings", href: "/settings", color: "from-slate-500 to-slate-600" },
+    
     { icon: HelpCircle, label: "Help & Support", href: "/help", color: "from-amber-500 to-amber-600" },
     { icon: Users, label: "Onboarding", href: "/onboarding", color: "from-emerald-500 to-emerald-600" },
   ];
