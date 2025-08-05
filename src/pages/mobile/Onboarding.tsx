@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,16 +8,33 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { Eye, EyeOff, User, Phone, MapPin, Briefcase, Shield, CheckCircle, CreditCard, Globe, Calendar, FileText, AlertCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { fetchCountries } from "@/services/api";
 
 type OnboardingStep = 1 | 2 | 3 | 4 | 5 | 6;
 
 const Onboarding = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  
+  // Helper function to calculate age from date of birth
+  const calculateAge = (dateOfBirth: string): number => {
+    const today = new Date();
+    const birthDate = new Date(dateOfBirth);
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const monthDiff = today.getMonth() - birthDate.getMonth();
+    
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+      age--;
+    }
+    
+    return age;
+  };
   const [currentStep, setCurrentStep] = useState<OnboardingStep>(1);
   const [loading, setLoading] = useState(false);
   const [showPin, setShowPin] = useState(false);
   const [showConfirmPin, setShowConfirmPin] = useState(false);
+  const [countries, setCountries] = useState<Array<{ name: string; code: string }>>([]);
+  const [loadingCountries, setLoadingCountries] = useState(false);
   const [formData, setFormData] = useState({
     // Step 1: Personal Information
     fullName: '',
@@ -74,6 +91,27 @@ const Onboarding = () => {
     agreeToDataProcessing: false
   });
 
+  // Load countries on component mount
+  useEffect(() => {
+    const loadCountries = async () => {
+      setLoadingCountries(true);
+      try {
+        const countriesData = await fetchCountries();
+        setCountries(countriesData);
+      } catch (error) {
+        toast({
+          title: "Error",
+          description: "Failed to load countries. Please try again.",
+          variant: "destructive",
+        });
+      } finally {
+        setLoadingCountries(false);
+      }
+    };
+
+    loadCountries();
+  }, [toast]);
+
   const handleNext = async () => {
     if (currentStep === 6) {
       setLoading(true);
@@ -105,6 +143,17 @@ const Onboarding = () => {
         toast({
           title: "Error",
           description: "Please fill in all required fields.",
+          variant: "destructive"
+        });
+        return;
+      }
+      
+      // Validate age - must be 18 or older
+      const age = calculateAge(formData.dateOfBirth);
+      if (age < 18) {
+        toast({
+          title: "Age Restriction",
+          description: "You must be 18 years or older to create an account.",
           variant: "destructive"
         });
         return;
@@ -243,7 +292,7 @@ const Onboarding = () => {
                   type="date"
                   value={formData.dateOfBirth}
                   onChange={(e) => setFormData(prev => ({ ...prev, dateOfBirth: e.target.value }))}
-                  className="py-3 border-gray-300 rounded-lg focus:border-[#0B63BC] focus:ring-1 focus:ring-[#0B63BC]"
+                  className="py-3 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
                   required
                 />
               </div>
@@ -340,15 +389,22 @@ const Onboarding = () => {
 
               <div className="space-y-2">
                 <Label htmlFor="idIssuingCountry">Issuing Country</Label>
-                <Input
-                  id="idIssuingCountry"
-                  type="text"
-                  placeholder="Country that issued the ID"
+                <Select
                   value={formData.idIssuingCountry}
-                  onChange={(e) => setFormData(prev => ({ ...prev, idIssuingCountry: e.target.value }))}
-                  className="py-3 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-                  required
-                />
+                  onValueChange={(value) => setFormData(prev => ({ ...prev, idIssuingCountry: value }))}
+                  disabled={loadingCountries}
+                >
+                  <SelectTrigger className="py-3 border-gray-300 rounded-lg focus:border-[#0B63BC] focus:ring-1 focus:ring-[#0B63BC]">
+                    <SelectValue placeholder={loadingCountries ? "Loading countries..." : "Select issuing country"} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {countries.map((country) => (
+                      <SelectItem key={country.code} value={country.name}>
+                        {country.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
 
               <div className="space-y-2">
@@ -460,15 +516,22 @@ const Onboarding = () => {
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="country">Country</Label>
-                  <Input
-                    id="country"
-                    type="text"
-                    placeholder="Country"
+                  <Select
                     value={formData.country}
-                    onChange={(e) => setFormData(prev => ({ ...prev, country: e.target.value }))}
-                    className="py-3 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-                    required
-                  />
+                    onValueChange={(value) => setFormData(prev => ({ ...prev, country: value }))}
+                    disabled={loadingCountries}
+                  >
+                    <SelectTrigger className="py-3 border-gray-300 rounded-lg focus:border-[#0B63BC] focus:ring-1 focus:ring-[#0B63BC]">
+                      <SelectValue placeholder={loadingCountries ? "Loading countries..." : "Select country"} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {countries.map((country) => (
+                        <SelectItem key={country.code} value={country.name}>
+                          {country.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
 
@@ -742,7 +805,13 @@ const Onboarding = () => {
                     type={showPin ? "text" : "password"}
                     placeholder="Enter 4-digit PIN"
                     value={formData.pin}
-                    onChange={(e) => setFormData(prev => ({ ...prev, pin: e.target.value }))}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      // Only allow numbers
+                      if (/^\d*$/.test(value) && value.length <= 4) {
+                        setFormData(prev => ({ ...prev, pin: value }));
+                      }
+                    }}
                     maxLength={4}
                     className="pl-10 pr-12 py-3 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
                     required
@@ -768,7 +837,13 @@ const Onboarding = () => {
                     type={showConfirmPin ? "text" : "password"}
                     placeholder="Confirm your PIN"
                     value={formData.confirmPin}
-                    onChange={(e) => setFormData(prev => ({ ...prev, confirmPin: e.target.value }))}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      // Only allow numbers
+                      if (/^\d*$/.test(value) && value.length <= 4) {
+                        setFormData(prev => ({ ...prev, confirmPin: value }));
+                      }
+                    }}
                     maxLength={4}
                     className="pl-10 pr-12 py-3 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
                     required

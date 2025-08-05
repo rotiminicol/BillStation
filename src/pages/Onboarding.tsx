@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -9,12 +9,17 @@ import { Eye, EyeOff, User, Phone, MapPin, Briefcase, Shield, CheckCircle, Arrow
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
+import { fetchCountries, fetchStates } from "@/services/api";
 
 const Onboarding = () => {
   const [currentStep, setCurrentStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [showPin, setShowPin] = useState(false);
   const [showConfirmPin, setShowConfirmPin] = useState(false);
+  const [countries, setCountries] = useState<Array<{name: string, code: string, code3: string}>>([]);
+  const [states, setStates] = useState<string[]>([]);
+  const [loadingCountries, setLoadingCountries] = useState(false);
+  const [loadingStates, setLoadingStates] = useState(false);
   const [formData, setFormData] = useState({
     // Step 1: Personal Information
     fullName: '',
@@ -73,6 +78,80 @@ const Onboarding = () => {
   
   const navigate = useNavigate();
   const { toast } = useToast();
+
+  // Helper function to calculate age from date of birth
+  const calculateAge = (dateOfBirth: string): number => {
+    const today = new Date();
+    const birthDate = new Date(dateOfBirth);
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const monthDiff = today.getMonth() - birthDate.getMonth();
+    
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+      age--;
+    }
+    
+    return age;
+  };
+
+  // Load countries on component mount
+  useEffect(() => {
+    const loadCountries = async () => {
+      setLoadingCountries(true);
+      try {
+        const countriesData = await fetchCountries();
+        setCountries(countriesData);
+      } catch (error) {
+        console.error('Error loading countries:', error);
+        toast({
+          title: "Error",
+          description: "Failed to load countries. Please refresh the page.",
+          variant: "destructive"
+        });
+      } finally {
+        setLoadingCountries(false);
+      }
+    };
+
+    loadCountries();
+  }, [toast]);
+
+  // Load states when nationality changes
+  useEffect(() => {
+    const loadStates = async () => {
+      if (!formData.nationality) {
+        setStates([]);
+        setFormData(prev => ({ ...prev, placeOfBirth: '' }));
+        return;
+      }
+
+      const selectedCountry = countries.find(country => country.name === formData.nationality);
+      if (!selectedCountry) {
+        setStates([]);
+        setFormData(prev => ({ ...prev, placeOfBirth: '' }));
+        return;
+      }
+
+      setLoadingStates(true);
+      try {
+        const statesData = await fetchStates(selectedCountry.code);
+        setStates(statesData);
+        // Clear place of birth when country changes
+        setFormData(prev => ({ ...prev, placeOfBirth: '' }));
+      } catch (error) {
+        console.error('Error loading states:', error);
+        setStates([]);
+        toast({
+          title: "Warning",
+          description: `Could not load states for ${formData.nationality}. You can enter your city manually.`,
+          variant: "default"
+        });
+      } finally {
+        setLoadingStates(false);
+      }
+    };
+
+    loadStates();
+  }, [formData.nationality, countries, toast]);
 
   const steps = [
     {
@@ -138,6 +217,27 @@ const Onboarding = () => {
         toast({
           title: "Error",
           description: "Please fill in all required fields.",
+          variant: "destructive"
+        });
+        return;
+      }
+      
+      // Validate age - must be 18 or older
+      const age = calculateAge(formData.dateOfBirth);
+      if (age < 18) {
+        toast({
+          title: "Age Restriction",
+          description: "You must be 18 years or older to create an account.",
+          variant: "destructive"
+        });
+        return;
+      }
+      
+      // Validate place of birth if states are available
+      if (states.length > 0 && !formData.placeOfBirth) {
+        toast({
+          title: "Error",
+          description: "Please select your place of birth (state/province).",
           variant: "destructive"
         });
         return;
@@ -279,27 +379,67 @@ const Onboarding = () => {
 
               <div className="space-y-2">
                 <Label htmlFor="nationality">Nationality</Label>
-                <Input
-                  id="nationality"
-                  type="text"
-                  placeholder="Enter your nationality"
-                  value={formData.nationality}
-                  onChange={(e) => setFormData(prev => ({ ...prev, nationality: e.target.value }))}
-                  className="py-3 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-                  required
-                />
+                <Select 
+                  value={formData.nationality} 
+                  onValueChange={(value) => setFormData(prev => ({ ...prev, nationality: value, placeOfBirth: '' }))}
+                  disabled={loadingCountries}
+                >
+                  <SelectTrigger className="py-3 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
+                    <SelectValue placeholder={loadingCountries ? "Loading countries..." : "Select your nationality"} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {!loadingCountries && countries.map((country) => (
+                      <SelectItem key={country.code} value={country.name}>
+                        {country.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="placeOfBirth">Place of Birth</Label>
-                <Input
-                  id="placeOfBirth"
-                  type="text"
-                  placeholder="City, Country"
-                  value={formData.placeOfBirth}
-                  onChange={(e) => setFormData(prev => ({ ...prev, placeOfBirth: e.target.value }))}
-                  className="py-3 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-                />
+                <Label htmlFor="placeOfBirth">Place of Birth (State/Province)</Label>
+                <Select 
+                  value={formData.placeOfBirth} 
+                  onValueChange={(value) => setFormData(prev => ({ ...prev, placeOfBirth: value }))}
+                  disabled={!formData.nationality || loadingStates}
+                >
+                  <SelectTrigger className="py-3 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
+                    <SelectValue 
+                      placeholder={
+                        !formData.nationality 
+                          ? "Select nationality first" 
+                          : loadingStates 
+                            ? "Loading states..." 
+                            : states.length === 0 
+                              ? "No states available for this country" 
+                              : "Select your state/province"
+                      } 
+                    />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {!loadingStates && states.map((state) => (
+                      <SelectItem key={state} value={state}>
+                        {state}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {formData.nationality && states.length === 0 && !loadingStates && (
+                  <>
+                    <p className="text-sm text-gray-500 mt-1">
+                      No states/provinces available for {formData.nationality}. Please enter your city manually.
+                    </p>
+                    <Input
+                      id="placeOfBirthManual"
+                      type="text"
+                      placeholder="Enter your city"
+                      value={formData.placeOfBirth}
+                      onChange={(e) => setFormData(prev => ({ ...prev, placeOfBirth: e.target.value }))}
+                      className="py-3 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-1 focus:ring-blue-500 mt-2"
+                    />
+                  </>
+                )}
               </div>
             </div>
           </div>
@@ -340,15 +480,22 @@ const Onboarding = () => {
 
               <div className="space-y-2">
                 <Label htmlFor="idIssuingCountry">Issuing Country</Label>
-                <Input
-                  id="idIssuingCountry"
-                  type="text"
-                  placeholder="Country that issued the ID"
+                <Select
                   value={formData.idIssuingCountry}
-                  onChange={(e) => setFormData(prev => ({ ...prev, idIssuingCountry: e.target.value }))}
-                  className="py-3 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-                  required
-                />
+                  onValueChange={(value) => setFormData(prev => ({ ...prev, idIssuingCountry: value }))}
+                  disabled={loadingCountries}
+                >
+                  <SelectTrigger className="py-3 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
+                    <SelectValue placeholder={loadingCountries ? "Loading countries..." : "Select issuing country"} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {countries.map((country) => (
+                      <SelectItem key={country.code} value={country.name}>
+                        {country.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
 
               <div className="space-y-2">
@@ -460,15 +607,22 @@ const Onboarding = () => {
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="country">Country</Label>
-                  <Input
-                    id="country"
-                    type="text"
-                    placeholder="Country"
+                  <Select
                     value={formData.country}
-                    onChange={(e) => setFormData(prev => ({ ...prev, country: e.target.value }))}
-                    className="py-3 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-                    required
-                  />
+                    onValueChange={(value) => setFormData(prev => ({ ...prev, country: value }))}
+                    disabled={loadingCountries}
+                  >
+                    <SelectTrigger className="py-3 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
+                      <SelectValue placeholder={loadingCountries ? "Loading countries..." : "Select country"} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {countries.map((country) => (
+                        <SelectItem key={country.code} value={country.name}>
+                          {country.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
 
@@ -742,7 +896,13 @@ const Onboarding = () => {
                     type={showPin ? "text" : "password"}
                     placeholder="Enter 4-digit PIN"
                     value={formData.pin}
-                    onChange={(e) => setFormData(prev => ({ ...prev, pin: e.target.value }))}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      // Only allow numbers
+                      if (/^\d*$/.test(value) && value.length <= 4) {
+                        setFormData(prev => ({ ...prev, pin: value }));
+                      }
+                    }}
                     maxLength={4}
                     className="pl-10 pr-12 py-3 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
                     required
@@ -768,7 +928,13 @@ const Onboarding = () => {
                     type={showConfirmPin ? "text" : "password"}
                     placeholder="Confirm your PIN"
                     value={formData.confirmPin}
-                    onChange={(e) => setFormData(prev => ({ ...prev, confirmPin: e.target.value }))}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      // Only allow numbers
+                      if (/^\d*$/.test(value) && value.length <= 4) {
+                        setFormData(prev => ({ ...prev, confirmPin: value }));
+                      }
+                    }}
                     maxLength={4}
                     className="pl-10 pr-12 py-3 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
                     required
