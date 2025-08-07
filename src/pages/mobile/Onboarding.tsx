@@ -8,88 +8,211 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { Eye, EyeOff, User, Phone, MapPin, Briefcase, Shield, CheckCircle, CreditCard, Globe, Calendar, FileText, AlertCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { fetchCountries } from "@/services/api";
+import { fetchCountries, fetchStates } from "@/services/api";
+import { useFormPersistence } from "@/hooks/useFormPersistence";
 
 type OnboardingStep = 1 | 2 | 3 | 4 | 5 | 6;
 
-const Onboarding = () => {
+interface Country {
+  name: string;
+  code: string;
+  code3: string;
+}
+
+interface OnboardingFormData {
+  // Step 1: Personal Information
+  fullName: string;
+  dateOfBirth: string;
+  gender: string;
+  maritalStatus: string;
+  nationality: string;
+  placeOfBirth: string;
+  
+  // Step 2: Identity Verification
+  idType: string;
+  idNumber: string;
+  idIssuingCountry: string;
+  idExpiryDate: string;
+  
+  // Step 3: Contact & Address
+  phoneNumber: string;
+  email: string;
+  address: string;
+  city: string;
+  state: string;
+  postalCode: string;
+  country: string;
+  emergencyContactName: string;
+  emergencyContactPhone: string;
+  emergencyContactRelationship: string;
+  
+  // Step 4: Employment & Income
+  occupation: string;
+  employerName: string;
+  employerAddress: string;
+  employmentType: string;
+  monthlyIncome: string;
+  sourceOfFunds: string;
+  additionalIncome: string;
+  
+  // Step 5: Financial Profile
+  bankAccountHistory: string;
+  creditHistory: string;
+  investmentExperience: string;
+  riskTolerance: string;
+  expectedMonthlyTransactions: string;
+  purposeOfAccount: string;
+  
+  // Step 6: Security & Terms
+  pin: string;
+  confirmPin: string;
+  securityQuestion1: string;
+  securityAnswer1: string;
+  securityQuestion2: string;
+  securityAnswer2: string;
+  agreeToTerms: boolean;
+  agreeToMarketing: boolean;
+  agreeToDataProcessing: boolean;
+  
+  // UI State
+  currentStep: OnboardingStep;
+  lastUpdated?: string;
+}
+
+const initialFormData: OnboardingFormData = {
+  // Step 1: Personal Information
+  fullName: '',
+  dateOfBirth: '',
+  gender: '',
+  maritalStatus: '',
+  nationality: '',
+  placeOfBirth: '',
+  
+  // Step 2: Identity Verification
+  idType: '',
+  idNumber: '',
+  idIssuingCountry: '',
+  idExpiryDate: '',
+  
+  // Step 3: Contact & Address
+  phoneNumber: '',
+  email: '',
+  address: '',
+  city: '',
+  state: '',
+  postalCode: '',
+  country: '',
+  emergencyContactName: '',
+  emergencyContactPhone: '',
+  emergencyContactRelationship: '',
+  
+  // Step 4: Employment & Income
+  occupation: '',
+  employerName: '',
+  employerAddress: '',
+  employmentType: '',
+  monthlyIncome: '',
+  sourceOfFunds: '',
+  additionalIncome: '',
+  
+  // Step 5: Financial Profile
+  bankAccountHistory: '',
+  creditHistory: '',
+  investmentExperience: '',
+  riskTolerance: '',
+  expectedMonthlyTransactions: '',
+  purposeOfAccount: '',
+  
+  // Step 6: Security & Terms
+  pin: '',
+  confirmPin: '',
+  securityQuestion1: '',
+  securityAnswer1: '',
+  securityQuestion2: '',
+  securityAnswer2: '',
+  agreeToTerms: false,
+  agreeToMarketing: false,
+  agreeToDataProcessing: false,
+  
+  // UI State
+  currentStep: 1,
+};
+
+const Onboarding: React.FC = () => {
+  // Initialize hooks
   const navigate = useNavigate();
   const { toast } = useToast();
   
-  // Helper function to calculate age from date of birth
-  const calculateAge = (dateOfBirth: string): number => {
-    const today = new Date();
-    const birthDate = new Date(dateOfBirth);
-    let age = today.getFullYear() - birthDate.getFullYear();
-    const monthDiff = today.getMonth() - birthDate.getMonth();
-    
-    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
-      age--;
-    }
-    
-    return age;
-  };
+  // State for UI and data
   const [currentStep, setCurrentStep] = useState<OnboardingStep>(1);
   const [loading, setLoading] = useState(false);
   const [showPin, setShowPin] = useState(false);
   const [showConfirmPin, setShowConfirmPin] = useState(false);
-  const [countries, setCountries] = useState<Array<{ name: string; code: string }>>([]);
+  const [countries, setCountries] = useState<Country[]>([]);
+  const [states, setStates] = useState<string[]>([]);
   const [loadingCountries, setLoadingCountries] = useState(false);
-  const [formData, setFormData] = useState({
-    // Step 1: Personal Information
-    fullName: '',
-    dateOfBirth: '',
-    gender: '',
-    maritalStatus: '',
-    nationality: '',
-    placeOfBirth: '',
-    
-    // Step 2: Identity Verification
-    idType: '',
-    idNumber: '',
-    idIssuingCountry: '',
-    idExpiryDate: '',
-    
-    // Step 3: Contact & Address
-    phoneNumber: '',
-    email: '',
-    address: '',
-    city: '',
-    state: '',
-    postalCode: '',
-    country: '',
-    emergencyContactName: '',
-    emergencyContactPhone: '',
-    emergencyContactRelationship: '',
-    
-    // Step 4: Employment & Income
-    occupation: '',
-    employerName: '',
-    employerAddress: '',
-    employmentType: '',
-    monthlyIncome: '',
-    sourceOfFunds: '',
-    additionalIncome: '',
-    
-    // Step 5: Financial Profile
-    bankAccountHistory: '',
-    creditHistory: '',
-    investmentExperience: '',
-    riskTolerance: '',
-    expectedMonthlyTransactions: '',
-    purposeOfAccount: '',
-    
-    // Step 6: Security & Terms
-    pin: '',
-    confirmPin: '',
-    securityQuestion1: '',
-    securityAnswer1: '',
-    securityQuestion2: '',
-    securityAnswer2: '',
-    agreeToTerms: false,
-    agreeToMarketing: false,
-    agreeToDataProcessing: false
-  });
+  const [loadingStates, setLoadingStates] = useState(false);
+  
+  // Form state
+  const [formData, setFormData] = useState<OnboardingFormData>(initialFormData);
+  
+  // Type guard for OnboardingStep
+  const isValidStep = (step: number): step is OnboardingStep => {
+    return [1, 2, 3, 4, 5, 6].includes(step);
+  };
+  
+  // Update form data with type safety
+  const updateFormData = <K extends keyof OnboardingFormData>(
+    updates: Pick<OnboardingFormData, K> | ((prev: OnboardingFormData) => OnboardingFormData)
+  ) => {
+    setFormData(prev => {
+      const newData = typeof updates === 'function' 
+        ? updates(prev) 
+        : { ...prev, ...updates };
+      return newData;
+    });
+  };
+
+  // Calculate age from date of birth
+  const calculateAge = (dateString: string): number => {
+    if (!dateString) return 0;
+    const today = new Date();
+    const birthDate = new Date(dateString);
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const monthDiff = today.getMonth() - birthDate.getMonth();
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+      age--;
+    }
+    return age;
+  };
+
+  // Load saved form data from localStorage on mount
+  useEffect(() => {
+    try {
+      const savedData = localStorage.getItem('onboarding');
+      if (savedData) {
+        const parsedData = JSON.parse(savedData);
+        setFormData(parsedData);
+        if (parsedData.currentStep) {
+          setCurrentStep(parsedData.currentStep);
+        }
+      }
+    } catch (error) {
+      console.error('Error loading saved form data:', error);
+    }
+  }, []);
+
+  // Save form data to localStorage when it changes
+  useEffect(() => {
+    try {
+      localStorage.setItem('onboarding', JSON.stringify({
+        ...formData,
+        currentStep // Always include current step in saved data
+      }));
+    } catch (error) {
+      console.error('Error saving form data:', error);
+    }
+  }, [formData, currentStep]);
 
   // Load countries on component mount
   useEffect(() => {
@@ -99,10 +222,11 @@ const Onboarding = () => {
         const countriesData = await fetchCountries();
         setCountries(countriesData);
       } catch (error) {
+        console.error('Failed to load countries:', error);
         toast({
-          title: "Error",
-          description: "Failed to load countries. Please try again.",
-          variant: "destructive",
+          title: 'Error',
+          description: 'Failed to load countries. Please try again later.',
+          variant: 'destructive',
         });
       } finally {
         setLoadingCountries(false);
@@ -112,38 +236,92 @@ const Onboarding = () => {
     loadCountries();
   }, [toast]);
 
-  const handleNext = async () => {
-    if (currentStep === 6) {
-      setLoading(true);
+  // Load states when nationality changes
+  useEffect(() => {
+    const loadStates = async () => {
+      if (!formData.nationality) {
+        setStates([]);
+        updateFormData({ placeOfBirth: '' });
+        return;
+      }
+
+      const selectedCountry = countries.find(country => country.name === formData.nationality);
+      if (!selectedCountry) {
+        setStates([]);
+        updateFormData({ placeOfBirth: '' });
+        return;
+      }
+
+      setLoadingStates(true);
       try {
-        // Simulate API call
-        await new Promise(resolve => setTimeout(resolve, 2000));
-        
-        toast({
-          title: "Account Setup Complete!",
-          description: "Welcome to Bill Station. Your account is ready to use.",
-        });
-        
-        navigate('/dashboard');
+        const statesData = await fetchStates(selectedCountry.code);
+        setStates(statesData);
+        // Clear place of birth when country changes
+        updateFormData({ placeOfBirth: '' });
       } catch (error) {
+        console.error('Error loading states:', error);
+        setStates([]);
         toast({
-          title: "Error",
-          description: "Failed to complete setup. Please try again.",
-          variant: "destructive",
+          title: "Warning",
+          description: `Could not load states for ${formData.nationality}. You can enter your city manually.`,
+          variant: "default"
         });
       } finally {
-        setLoading(false);
+        setLoadingStates(false);
       }
-      return;
-    }
+    };
 
-    // Validation for each step
+    loadStates();
+  }, [formData.nationality, countries, toast]);
+
+  // Handle input changes
+  // Update the handleInputChange function
+const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const { name, value, type } = e.target;
+  
+  // Type guard to ensure name is a key of OnboardingFormData
+  if (!(name in initialFormData)) {
+    console.warn(`Field ${name} not found in form data`);
+    return;
+  }
+
+  // Convert numeric fields to numbers if needed
+  let processedValue: string | number | boolean = value;
+  if (type === 'number') {
+    processedValue = parseFloat(value) || 0;
+  }
+
+  updateFormData(prev => ({
+    ...prev,
+    [name]: processedValue
+  }));
+};
+
+// Update the handleCheckboxChange function
+const handleCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const { name, checked } = e.target;
+  
+  // Type guard to ensure name is a key of OnboardingFormData
+  if (!(name in initialFormData)) {
+    console.warn(`Field ${name} not found in form data`);
+    return;
+  }
+
+  updateFormData(prev => ({
+    ...prev,
+    [name]: checked
+  }));
+};
+
+  // Handle next button click with validation
+  const handleNext = () => {
+    // Validate current step
     if (currentStep === 1) {
-      if (!formData.fullName || !formData.dateOfBirth || !formData.gender || !formData.nationality) {
+      if (!formData.fullName || !formData.dateOfBirth || !formData.gender || !formData.maritalStatus) {
         toast({
-          title: "Error",
-          description: "Please fill in all required fields.",
-          variant: "destructive"
+          title: "Validation Error",
+          description: "Please fill in all required fields",
+          variant: "destructive",
         });
         return;
       }
@@ -158,74 +336,82 @@ const Onboarding = () => {
         });
         return;
       }
-    } else if (currentStep === 2) {
-      if (!formData.idType || !formData.idNumber || !formData.idIssuingCountry || !formData.idExpiryDate) {
-        toast({
-          title: "Error",
-          description: "Please fill in all required fields.",
-          variant: "destructive"
-        });
-        return;
-      }
-    } else if (currentStep === 3) {
-      if (!formData.phoneNumber || !formData.address || !formData.city || !formData.state || !formData.country) {
-        toast({
-          title: "Error",
-          description: "Please fill in all required fields.",
-          variant: "destructive"
-        });
-        return;
-      }
-    } else if (currentStep === 4) {
-      if (!formData.occupation || !formData.employerName || !formData.monthlyIncome || !formData.sourceOfFunds) {
-        toast({
-          title: "Error",
-          description: "Please fill in all required fields.",
-          variant: "destructive"
-        });
-        return;
-      }
-    } else if (currentStep === 5) {
-      if (!formData.bankAccountHistory || !formData.creditHistory || !formData.riskTolerance || !formData.purposeOfAccount) {
-        toast({
-          title: "Error",
-          description: "Please fill in all required fields.",
-          variant: "destructive"
-        });
-        return;
-      }
-    } else if (currentStep === 6) {
-      if (formData.pin !== formData.confirmPin) {
-        toast({
-          title: "Error",
-          description: "PINs do not match.",
-          variant: "destructive"
-        });
-        return;
-      }
-      if (formData.pin.length !== 4) {
-        toast({
-          title: "Error",
-          description: "PIN must be exactly 4 digits.",
-          variant: "destructive"
-        });
-        return;
-      }
-      if (!formData.agreeToTerms) {
-        toast({
-          title: "Error",
-          description: "You must agree to the terms of service to continue.",
-          variant: "destructive"
-        });
-        return;
-      }
     }
-
-    setCurrentStep(prev => (prev + 1) as OnboardingStep);
+    
+    // Additional validations for other steps can be added here
+    
+    if (currentStep < 6) {
+      const nextStep = Math.min(currentStep + 1, 6) as OnboardingStep;
+      updateFormData({
+        currentStep: nextStep
+      });
+      setCurrentStep(nextStep);
+    }
   };
 
+  // Navigate to previous step
   const handleBack = () => {
-    setCurrentStep(prev => Math.max(1, prev - 1) as OnboardingStep);
+    if (currentStep > 1) {
+      const prevStep = Math.max(currentStep - 1, 1) as OnboardingStep;
+      updateFormData({
+        currentStep: prevStep
+      });
+      setCurrentStep(prevStep);
+    }
+  };
+
+  // Reset form data
+  const resetFormData = () => {
+    // Clear form data and reset to initial state
+    setFormData(initialFormData);
+    setCurrentStep(1);
+    
+    // Clear any stored data
+    localStorage.removeItem('onboarding');
+    
+    // Show success message
+    toast({
+      title: "Form Reset",
+      description: "All form data has been cleared.",
+    });
+  };
+
+  // Handle form submission
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    
+    try {
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
+      // Mark onboarding as completed
+      localStorage.setItem('onboardingCompleted', 'true');
+      localStorage.removeItem('onboarding');
+      
+      // Show success message
+      toast({
+        title: "Success!",
+        description: "Your account has been created successfully.",
+      });
+      
+      // Navigate to dashboard
+      navigate('/dashboard');
+      
+      toast({
+        title: "Account Setup Complete!",
+        description: "Welcome to Bill Station. Your account is ready to use.",
+      });
+    } catch (error) {
+      console.error('Form submission error:', error);
+      toast({
+        title: "Error",
+        description: "Failed to complete setup. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   const steps = [
@@ -278,7 +464,7 @@ const Onboarding = () => {
                     type="text"
                     placeholder="Enter your full name"
                     value={formData.fullName}
-                    onChange={(e) => setFormData(prev => ({ ...prev, fullName: e.target.value }))}
+                    onChange={(e) => updateFormData({ fullName: e.target.value })}
                     className="pl-10 py-3 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
                     required
                   />
@@ -291,7 +477,7 @@ const Onboarding = () => {
                   id="dateOfBirth"
                   type="date"
                   value={formData.dateOfBirth}
-                  onChange={(e) => setFormData(prev => ({ ...prev, dateOfBirth: e.target.value }))}
+                  onChange={(e) => updateFormData({ dateOfBirth: e.target.value })}
                   className="py-3 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
                   required
                 />
@@ -299,7 +485,7 @@ const Onboarding = () => {
 
               <div className="space-y-2">
                 <Label htmlFor="gender">Gender</Label>
-                <Select value={formData.gender} onValueChange={(value) => setFormData(prev => ({ ...prev, gender: value }))}>
+                <Select value={formData.gender} onValueChange={(value) => updateFormData({ gender: value })}>
                   <SelectTrigger className="py-3 border-gray-300 rounded-lg focus:border-[#0B63BC] focus:ring-1 focus:ring-[#0B63BC]">
                     <SelectValue placeholder="Select gender" />
                   </SelectTrigger>
@@ -313,7 +499,7 @@ const Onboarding = () => {
 
               <div className="space-y-2">
                 <Label htmlFor="maritalStatus">Marital Status</Label>
-                <Select value={formData.maritalStatus} onValueChange={(value) => setFormData(prev => ({ ...prev, maritalStatus: value }))}>
+                <Select value={formData.maritalStatus} onValueChange={(value) => updateFormData({ maritalStatus: value })}>
                   <SelectTrigger className="py-3 border-gray-300 rounded-lg focus:border-[#0B63BC] focus:ring-1 focus:ring-[#0B63BC]">
                     <SelectValue placeholder="Select marital status" />
                   </SelectTrigger>
@@ -328,27 +514,66 @@ const Onboarding = () => {
 
               <div className="space-y-2">
                 <Label htmlFor="nationality">Nationality</Label>
-                <Input
-                  id="nationality"
-                  type="text"
-                  placeholder="Enter your nationality"
+                <Select
                   value={formData.nationality}
-                  onChange={(e) => setFormData(prev => ({ ...prev, nationality: e.target.value }))}
-                  className="py-3 border-gray-300 rounded-lg focus:border-[#0B63BC] focus:ring-1 focus:ring-[#0B63BC]"
-                  required
-                />
+                  onValueChange={(value) => {
+                    updateFormData({ 
+                      nationality: value,
+                      placeOfBirth: '' // Clear place of birth when nationality changes
+                    });
+                  }}
+                  disabled={loadingCountries}
+                >
+                  <SelectTrigger className="py-3 border-gray-300 rounded-lg focus:border-[#0B63BC] focus:ring-1 focus:ring-[#0B63BC]">
+                    <SelectValue placeholder={loadingCountries ? "Loading countries..." : "Select nationality"} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {countries.map((country) => (
+                      <SelectItem key={country.code} value={country.name}>
+                        {country.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="placeOfBirth">Place of Birth</Label>
-                <Input
-                  id="placeOfBirth"
-                  type="text"
-                  placeholder="City, Country"
-                  value={formData.placeOfBirth}
-                  onChange={(e) => setFormData(prev => ({ ...prev, placeOfBirth: e.target.value }))}
-                  className="py-3 border-gray-300 rounded-lg focus:border-[#0B63BC] focus:ring-1 focus:ring-[#0B63BC]"
-                />
+                <Label htmlFor="placeOfBirth">Place of Birth (State/Province)</Label>
+                {states.length > 0 ? (
+                  <Select
+                    value={formData.placeOfBirth}
+                    onValueChange={(value) => updateFormData({ placeOfBirth: value })}
+                    disabled={!formData.nationality || loadingStates}
+                  >
+                    <SelectTrigger className="py-3 border-gray-300 rounded-lg focus:border-[#0B63BC] focus:ring-1 focus:ring-[#0B63BC]">
+                      <SelectValue 
+                        placeholder={
+                          !formData.nationality 
+                            ? "Select nationality first" 
+                            : loadingStates 
+                              ? "Loading states..." 
+                              : "Select your state/province"
+                        } 
+                      />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {!loadingStates && states.map((state) => (
+                        <SelectItem key={state} value={state}>
+                          {state}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                ) : (
+                  <Input
+                    id="placeOfBirth"
+                    type="text"
+                    placeholder="Enter your city/state"
+                    value={formData.placeOfBirth}
+                    onChange={(e) => updateFormData({ placeOfBirth: e.target.value })}
+                    className="py-3 border-gray-300 rounded-lg focus:border-[#0B63BC] focus:ring-1 focus:ring-[#0B63BC]"
+                  />
+                )}
               </div>
             </div>
           </div>
@@ -360,7 +585,7 @@ const Onboarding = () => {
             <div className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="idType">ID Type</Label>
-                <Select value={formData.idType} onValueChange={(value) => setFormData(prev => ({ ...prev, idType: value }))}>
+                <Select value={formData.idType} onValueChange={(value) => updateFormData({ idType: value })}>
                   <SelectTrigger className="py-3 border-gray-300 rounded-lg focus:border-[#0B63BC] focus:ring-1 focus:ring-[#0B63BC]">
                     <SelectValue placeholder="Select ID type" />
                   </SelectTrigger>
@@ -381,7 +606,7 @@ const Onboarding = () => {
                   type="text"
                   placeholder="Enter your ID number"
                   value={formData.idNumber}
-                  onChange={(e) => setFormData(prev => ({ ...prev, idNumber: e.target.value }))}
+                  onChange={(e) => updateFormData({ idNumber: e.target.value })}
                   className="py-3 border-gray-300 rounded-lg focus:border-[#0B63BC] focus:ring-1 focus:ring-[#0B63BC]"
                   required
                 />
@@ -391,7 +616,7 @@ const Onboarding = () => {
                 <Label htmlFor="idIssuingCountry">Issuing Country</Label>
                 <Select
                   value={formData.idIssuingCountry}
-                  onValueChange={(value) => setFormData(prev => ({ ...prev, idIssuingCountry: value }))}
+                  onValueChange={(value) => updateFormData({ idIssuingCountry: value })}
                   disabled={loadingCountries}
                 >
                   <SelectTrigger className="py-3 border-gray-300 rounded-lg focus:border-[#0B63BC] focus:ring-1 focus:ring-[#0B63BC]">
@@ -413,7 +638,7 @@ const Onboarding = () => {
                   id="idExpiryDate"
                   type="date"
                   value={formData.idExpiryDate}
-                  onChange={(e) => setFormData(prev => ({ ...prev, idExpiryDate: e.target.value }))}
+                  onChange={(e) => updateFormData({ idExpiryDate: e.target.value })}
                   className="py-3 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
                   required
                 />
@@ -443,7 +668,7 @@ const Onboarding = () => {
                     type="tel"
                     placeholder="+234 801 234 5678"
                     value={formData.phoneNumber}
-                    onChange={(e) => setFormData(prev => ({ ...prev, phoneNumber: e.target.value }))}
+                    onChange={(e) => updateFormData({ phoneNumber: e.target.value })}
                     className="pl-10 py-3 border-gray-300 rounded-lg focus:border-[#0B63BC] focus:ring-1 focus:ring-[#0B63BC]"
                     required
                   />
@@ -457,7 +682,7 @@ const Onboarding = () => {
                   type="email"
                   placeholder="your.email@example.com"
                   value={formData.email}
-                  onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
+                  onChange={(e) => updateFormData({ email: e.target.value })}
                   className="py-3 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
                 />
               </div>
@@ -468,7 +693,7 @@ const Onboarding = () => {
                   id="address"
                   placeholder="Enter your full residential address"
                   value={formData.address}
-                  onChange={(e) => setFormData(prev => ({ ...prev, address: e.target.value }))}
+                  onChange={(e) => updateFormData({ address: e.target.value })}
                   className="py-3 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
                   rows={3}
                   required
@@ -483,7 +708,7 @@ const Onboarding = () => {
                     type="text"
                     placeholder="City"
                     value={formData.city}
-                    onChange={(e) => setFormData(prev => ({ ...prev, city: e.target.value }))}
+                    onChange={(e) => updateFormData({ city: e.target.value })}
                     className="py-3 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
                     required
                   />
@@ -495,7 +720,7 @@ const Onboarding = () => {
                     type="text"
                     placeholder="State"
                     value={formData.state}
-                    onChange={(e) => setFormData(prev => ({ ...prev, state: e.target.value }))}
+                    onChange={(e) => updateFormData({ state: e.target.value })}
                     className="py-3 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
                     required
                   />
@@ -510,7 +735,7 @@ const Onboarding = () => {
                     type="text"
                     placeholder="Postal Code"
                     value={formData.postalCode}
-                    onChange={(e) => setFormData(prev => ({ ...prev, postalCode: e.target.value }))}
+                    onChange={(e) => updateFormData({ postalCode: e.target.value })}
                     className="py-3 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
                   />
                 </div>
@@ -518,7 +743,7 @@ const Onboarding = () => {
                   <Label htmlFor="country">Country</Label>
                   <Select
                     value={formData.country}
-                    onValueChange={(value) => setFormData(prev => ({ ...prev, country: value }))}
+                    onValueChange={(value) => updateFormData({ country: value })}
                     disabled={loadingCountries}
                   >
                     <SelectTrigger className="py-3 border-gray-300 rounded-lg focus:border-[#0B63BC] focus:ring-1 focus:ring-[#0B63BC]">
@@ -545,7 +770,7 @@ const Onboarding = () => {
                       type="text"
                       placeholder="Full name of emergency contact"
                       value={formData.emergencyContactName}
-                      onChange={(e) => setFormData(prev => ({ ...prev, emergencyContactName: e.target.value }))}
+                      onChange={(e) => updateFormData({ emergencyContactName: e.target.value })}
                       className="py-3 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
                     />
                   </div>
@@ -556,13 +781,13 @@ const Onboarding = () => {
                       type="tel"
                       placeholder="+234 801 234 5678"
                       value={formData.emergencyContactPhone}
-                      onChange={(e) => setFormData(prev => ({ ...prev, emergencyContactPhone: e.target.value }))}
+                      onChange={(e) => updateFormData({ emergencyContactPhone: e.target.value })}
                       className="py-3 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
                     />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="emergencyContactRelationship">Relationship</Label>
-                    <Select value={formData.emergencyContactRelationship} onValueChange={(value) => setFormData(prev => ({ ...prev, emergencyContactRelationship: value }))}>
+                    <Select value={formData.emergencyContactRelationship} onValueChange={(value) => updateFormData({ emergencyContactRelationship: value })}>
                       <SelectTrigger className="py-3 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
                         <SelectValue placeholder="Select relationship" />
                       </SelectTrigger>
@@ -592,7 +817,7 @@ const Onboarding = () => {
                   type="text"
                   placeholder="e.g., Software Engineer, Business Owner"
                   value={formData.occupation}
-                  onChange={(e) => setFormData(prev => ({ ...prev, occupation: e.target.value }))}
+                  onChange={(e) => updateFormData({ occupation: e.target.value })}
                   className="py-3 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
                   required
                 />
@@ -605,7 +830,7 @@ const Onboarding = () => {
                   type="text"
                   placeholder="Company or organization name"
                   value={formData.employerName}
-                  onChange={(e) => setFormData(prev => ({ ...prev, employerName: e.target.value }))}
+                  onChange={(e) => updateFormData({ employerName: e.target.value })}
                   className="py-3 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
                   required
                 />
@@ -617,7 +842,7 @@ const Onboarding = () => {
                   id="employerAddress"
                   placeholder="Employer's address"
                   value={formData.employerAddress}
-                  onChange={(e) => setFormData(prev => ({ ...prev, employerAddress: e.target.value }))}
+                  onChange={(e) => updateFormData({ employerAddress: e.target.value })}
                   className="py-3 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
                   rows={2}
                 />
@@ -625,7 +850,7 @@ const Onboarding = () => {
 
               <div className="space-y-2">
                 <Label htmlFor="employmentType">Employment Type</Label>
-                <Select value={formData.employmentType} onValueChange={(value) => setFormData(prev => ({ ...prev, employmentType: value }))}>
+                <Select value={formData.employmentType} onValueChange={(value) => updateFormData({ employmentType: value })}>
                   <SelectTrigger className="py-3 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
                     <SelectValue placeholder="Select employment type" />
                   </SelectTrigger>
@@ -643,7 +868,7 @@ const Onboarding = () => {
 
               <div className="space-y-2">
                 <Label htmlFor="monthlyIncome">Monthly Income</Label>
-                <Select value={formData.monthlyIncome} onValueChange={(value) => setFormData(prev => ({ ...prev, monthlyIncome: value }))}>
+                <Select value={formData.monthlyIncome} onValueChange={(value) => updateFormData({ monthlyIncome: value })}>
                   <SelectTrigger className="py-3 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
                     <SelectValue placeholder="Select income range" />
                   </SelectTrigger>
@@ -660,7 +885,7 @@ const Onboarding = () => {
 
               <div className="space-y-2">
                 <Label htmlFor="sourceOfFunds">Primary Source of Funds</Label>
-                <Select value={formData.sourceOfFunds} onValueChange={(value) => setFormData(prev => ({ ...prev, sourceOfFunds: value }))}>
+                <Select value={formData.sourceOfFunds} onValueChange={(value) => updateFormData({ sourceOfFunds: value })}>
                   <SelectTrigger className="py-3 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
                     <SelectValue placeholder="Select source of funds" />
                   </SelectTrigger>
@@ -681,7 +906,7 @@ const Onboarding = () => {
                   id="additionalIncome"
                   placeholder="Describe any additional income sources"
                   value={formData.additionalIncome}
-                  onChange={(e) => setFormData(prev => ({ ...prev, additionalIncome: e.target.value }))}
+                  onChange={(e) => updateFormData({ additionalIncome: e.target.value })}
                   className="py-3 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
                   rows={2}
                 />
@@ -696,7 +921,7 @@ const Onboarding = () => {
             <div className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="bankAccountHistory">Do you have existing bank accounts?</Label>
-                <Select value={formData.bankAccountHistory} onValueChange={(value) => setFormData(prev => ({ ...prev, bankAccountHistory: value }))}>
+                <Select value={formData.bankAccountHistory} onValueChange={(value) => updateFormData({ bankAccountHistory: value })}>
                   <SelectTrigger className="py-3 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
                     <SelectValue placeholder="Select option" />
                   </SelectTrigger>
@@ -711,7 +936,7 @@ const Onboarding = () => {
 
               <div className="space-y-2">
                 <Label htmlFor="creditHistory">Credit History</Label>
-                <Select value={formData.creditHistory} onValueChange={(value) => setFormData(prev => ({ ...prev, creditHistory: value }))}>
+                <Select value={formData.creditHistory} onValueChange={(value) => updateFormData({ creditHistory: value })}>
                   <SelectTrigger className="py-3 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
                     <SelectValue placeholder="Select your credit history" />
                   </SelectTrigger>
@@ -727,7 +952,7 @@ const Onboarding = () => {
 
               <div className="space-y-2">
                 <Label htmlFor="investmentExperience">Investment Experience</Label>
-                <Select value={formData.investmentExperience} onValueChange={(value) => setFormData(prev => ({ ...prev, investmentExperience: value }))}>
+                <Select value={formData.investmentExperience} onValueChange={(value) => updateFormData({ investmentExperience: value })}>
                   <SelectTrigger className="py-3 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
                     <SelectValue placeholder="Select your experience level" />
                   </SelectTrigger>
@@ -743,7 +968,7 @@ const Onboarding = () => {
 
               <div className="space-y-2">
                 <Label htmlFor="riskTolerance">Risk Tolerance</Label>
-                <Select value={formData.riskTolerance} onValueChange={(value) => setFormData(prev => ({ ...prev, riskTolerance: value }))}>
+                <Select value={formData.riskTolerance} onValueChange={(value) => updateFormData({ riskTolerance: value })}>
                   <SelectTrigger className="py-3 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
                     <SelectValue placeholder="Select your risk tolerance" />
                   </SelectTrigger>
@@ -757,7 +982,7 @@ const Onboarding = () => {
 
               <div className="space-y-2">
                 <Label htmlFor="expectedMonthlyTransactions">Expected Monthly Transactions</Label>
-                <Select value={formData.expectedMonthlyTransactions} onValueChange={(value) => setFormData(prev => ({ ...prev, expectedMonthlyTransactions: value }))}>
+                <Select value={formData.expectedMonthlyTransactions} onValueChange={(value) => updateFormData({ expectedMonthlyTransactions: value })}>
                   <SelectTrigger className="py-3 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
                     <SelectValue placeholder="Select expected volume" />
                   </SelectTrigger>
@@ -772,7 +997,7 @@ const Onboarding = () => {
 
               <div className="space-y-2">
                 <Label htmlFor="purposeOfAccount">Primary Purpose of Account</Label>
-                <Select value={formData.purposeOfAccount} onValueChange={(value) => setFormData(prev => ({ ...prev, purposeOfAccount: value }))}>
+                <Select value={formData.purposeOfAccount} onValueChange={(value) => updateFormData({ purposeOfAccount: value })}>
                   <SelectTrigger className="py-3 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
                     <SelectValue placeholder="Select primary purpose" />
                   </SelectTrigger>
@@ -809,7 +1034,7 @@ const Onboarding = () => {
                       const value = e.target.value;
                       // Only allow numbers
                       if (/^\d*$/.test(value) && value.length <= 4) {
-                        setFormData(prev => ({ ...prev, pin: value }));
+                        updateFormData({ pin: value });
                       }
                     }}
                     maxLength={4}
@@ -841,7 +1066,7 @@ const Onboarding = () => {
                       const value = e.target.value;
                       // Only allow numbers
                       if (/^\d*$/.test(value) && value.length <= 4) {
-                        setFormData(prev => ({ ...prev, confirmPin: value }));
+                        updateFormData({ confirmPin: value });
                       }
                     }}
                     maxLength={4}
@@ -860,7 +1085,7 @@ const Onboarding = () => {
 
               <div className="space-y-2">
                 <Label htmlFor="securityQuestion1">Security Question 1</Label>
-                <Select value={formData.securityQuestion1} onValueChange={(value) => setFormData(prev => ({ ...prev, securityQuestion1: value }))}>
+                <Select value={formData.securityQuestion1} onValueChange={(value) => updateFormData({ securityQuestion1: value })}>
                   <SelectTrigger className="py-3 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
                     <SelectValue placeholder="Select a security question" />
                   </SelectTrigger>
@@ -881,14 +1106,14 @@ const Onboarding = () => {
                   type="text"
                   placeholder="Enter your answer"
                   value={formData.securityAnswer1}
-                  onChange={(e) => setFormData(prev => ({ ...prev, securityAnswer1: e.target.value }))}
+                  onChange={(e) => updateFormData({ securityAnswer1: e.target.value })}
                   className="py-3 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
                 />
               </div>
 
               <div className="space-y-2">
                 <Label htmlFor="securityQuestion2">Security Question 2</Label>
-                <Select value={formData.securityQuestion2} onValueChange={(value) => setFormData(prev => ({ ...prev, securityQuestion2: value }))}>
+                <Select value={formData.securityQuestion2} onValueChange={(value) => updateFormData({ securityQuestion2: value })}>
                   <SelectTrigger className="py-3 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
                     <SelectValue placeholder="Select a security question" />
                   </SelectTrigger>
@@ -909,7 +1134,7 @@ const Onboarding = () => {
                   type="text"
                   placeholder="Enter your answer"
                   value={formData.securityAnswer2}
-                  onChange={(e) => setFormData(prev => ({ ...prev, securityAnswer2: e.target.value }))}
+                  onChange={(e) => updateFormData({ securityAnswer2: e.target.value })}
                   className="py-3 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
                 />
               </div>
@@ -926,7 +1151,7 @@ const Onboarding = () => {
                 <Checkbox
                   id="terms"
                   checked={formData.agreeToTerms}
-                  onCheckedChange={(checked) => setFormData(prev => ({ ...prev, agreeToTerms: checked as boolean }))}
+                  onCheckedChange={(checked) => updateFormData({ agreeToTerms: checked as boolean })}
                   className="mt-1"
                 />
                 <div className="space-y-1">
@@ -943,7 +1168,7 @@ const Onboarding = () => {
                 <Checkbox
                   id="marketing"
                   checked={formData.agreeToMarketing}
-                  onCheckedChange={(checked) => setFormData(prev => ({ ...prev, agreeToMarketing: checked as boolean }))}
+                  onCheckedChange={(checked) => updateFormData({ agreeToMarketing: checked as boolean })}
                   className="mt-1"
                 />
                 <div className="space-y-1">
@@ -960,7 +1185,7 @@ const Onboarding = () => {
                 <Checkbox
                   id="dataProcessing"
                   checked={formData.agreeToDataProcessing}
-                  onCheckedChange={(checked) => setFormData(prev => ({ ...prev, agreeToDataProcessing: checked as boolean }))}
+                  onCheckedChange={(checked) => updateFormData({ agreeToDataProcessing: checked as boolean })}
                   className="mt-1"
                 />
                 <div className="space-y-1">
@@ -1032,35 +1257,49 @@ const Onboarding = () => {
 
       {/* Navigation */}
       <div className="p-6 border-t border-gray-200">
-        <div className="max-w-md mx-auto flex justify-between items-center">
-          <Button
-            variant="outline"
-            onClick={handleBack}
-            disabled={currentStep === 1}
-            className="px-6 py-3"
-          >
-            Back
-          </Button>
+        <div className="max-w-md mx-auto space-y-4">
+          {/* Reset Button */}
+          <div className="flex justify-center">
+            <Button
+              variant="ghost"
+              onClick={resetFormData}
+              className="text-gray-500 hover:text-gray-700 text-sm"
+            >
+              Start Over
+            </Button>
+          </div>
           
-          <Button
-            onClick={handleNext}
-            disabled={loading}
-            className="px-6 py-3 bg-[#0B63BC] hover:bg-[#0B63BC]/90"
-          >
-            {loading ? (
-              <div className="flex items-center">
-                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
-                <span>Setting up...</span>
-              </div>
-            ) : currentStep === 6 ? (
-              <div className="flex items-center">
-                <CheckCircle className="w-4 h-4 mr-2" />
-                <span>Complete Setup</span>
-              </div>
-            ) : (
-              <span>Next</span>
-            )}
-          </Button>
+          {/* Main Navigation */}
+          <div className="flex justify-between items-center">
+            <Button
+              variant="outline"
+              onClick={handleBack}
+              disabled={currentStep === 1}
+              className="px-6 py-3"
+            >
+              Back
+            </Button>
+            
+            <Button
+              onClick={currentStep === 6 ? handleSubmit : handleNext}
+              disabled={loading}
+              className="px-6 py-3 bg-[#0B63BC] hover:bg-[#0B63BC]/90"
+            >
+              {loading ? (
+                <div className="flex items-center">
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
+                  <span>Setting up...</span>
+                </div>
+              ) : currentStep === 6 ? (
+                <div className="flex items-center">
+                  <CheckCircle className="w-4 h-4 mr-2" />
+                  <span>Complete Setup</span>
+                </div>
+              ) : (
+                <span>Next</span>
+              )}
+            </Button>
+          </div>
         </div>
       </div>
     </div>

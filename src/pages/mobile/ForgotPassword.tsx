@@ -1,18 +1,23 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Mail, CheckCircle, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { authAPI } from "@/services/api";
+import { useFormPersistence } from "@/hooks/useFormPersistence";
 
 const ForgotPassword = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const [email, setEmail] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [emailSent, setEmailSent] = useState(false);
   const [error, setError] = useState("");
+  const { formData, updateFormData, clearFormData } = useFormPersistence('forgotPassword', {
+    email: ""
+  });
+  
+  const { email } = formData;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -102,6 +107,7 @@ const ForgotPassword = () => {
                   onClick={() => {
                     setEmailSent(false);
                     setError('');
+                    clearFormData();
                   }}
                   className="w-full bg-[#0B63BC] hover:bg-[#0B63BC]/90 text-white py-3 rounded-lg font-medium"
                 >
@@ -123,6 +129,7 @@ const ForgotPassword = () => {
                   onClick={() => {
                     setEmailSent(false);
                     setError('');
+                    clearFormData();
                   }}
                   className="text-[#0B63BC] hover:text-[#0B63BC]/80 hover:underline font-medium"
                 >
@@ -190,7 +197,7 @@ const ForgotPassword = () => {
                     placeholder="Enter your email address"
                     className="pl-10 pr-4 py-3 border-gray-300 rounded-lg focus:border-[#0B63BC] focus:ring-1 focus:ring-[#0B63BC]"
                     value={email}
-                    onChange={(e) => setEmail(e.target.value)}
+                    onChange={(e) => updateFormData({ email: e.target.value })}
                     required
                     disabled={isLoading}
                   />

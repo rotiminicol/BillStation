@@ -4,9 +4,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Link, useNavigate } from "react-router-dom";
 import { ArrowLeft, Eye, EyeOff, Mail, Lock } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { authAPI } from "@/services/api";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useFormPersistence } from "@/hooks/useFormPersistence";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -15,13 +16,13 @@ const Login = () => {
   const [rememberMe, setRememberMe] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
-  const [formData, setFormData] = useState({
+  const { formData, updateFormData } = useFormPersistence('login', {
     email: '',
     password: ''
   });
 
   const handleInputChange = (field: string, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+    updateFormData({ [field]: value });
     setError('');
   };
 

@@ -5,8 +5,9 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Link, useNavigate } from "react-router-dom";
 import { ArrowLeft, Eye, EyeOff, Mail, Lock, User } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { authAPI } from "@/services/api";
+import { useFormPersistence } from "@/hooks/useFormPersistence";
 
 const Signup = () => {
   const navigate = useNavigate();
@@ -15,7 +16,7 @@ const Signup = () => {
   const [agreedToTerms, setAgreedToTerms] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
-  const [formData, setFormData] = useState({
+  const { formData, updateFormData, clearFormData } = useFormPersistence('signup', {
     fullName: '',
     email: '',
     password: '',
@@ -23,7 +24,7 @@ const Signup = () => {
   });
 
   const handleInputChange = (field: string, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+    updateFormData({ [field]: value });
     setError('');
   };
 
@@ -59,6 +60,8 @@ const Signup = () => {
 
       const response = await authAPI.signup(signupData);
       console.log('Signup successful:', response);
+      // Clear the form data after successful submission
+      clearFormData();
       navigate('/onboarding');
     } catch (err: unknown) {
       console.error('Signup error:', err);

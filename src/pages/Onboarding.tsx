@@ -20,60 +20,81 @@ const Onboarding = () => {
   const [states, setStates] = useState<string[]>([]);
   const [loadingCountries, setLoadingCountries] = useState(false);
   const [loadingStates, setLoadingStates] = useState(false);
-  const [formData, setFormData] = useState({
-    // Step 1: Personal Information
-    fullName: '',
-    dateOfBirth: '',
-    gender: '',
-    maritalStatus: '',
-    nationality: '',
-    placeOfBirth: '',
+  // Initialize form data from localStorage or default values
+  const [formData, setFormData] = useState(() => {
+    const savedData = localStorage.getItem('onboardingFormData');
+    const expiryTime = localStorage.getItem('onboardingFormDataExpiry');
     
-    // Step 2: Identity Verification
-    idType: '',
-    idNumber: '',
-    idIssuingCountry: '',
-    idExpiryDate: '',
+    // Check if data has expired (24 hours)
+    if (expiryTime && Date.now() > parseInt(expiryTime)) {
+      localStorage.removeItem('onboardingFormData');
+      localStorage.removeItem('onboardingFormDataExpiry');
+      return null;
+    }
     
-    // Step 3: Contact & Address
-    phoneNumber: '',
-    email: '',
-    address: '',
-    city: '',
-    state: '',
-    postalCode: '',
-    country: '',
-    emergencyContactName: '',
-    emergencyContactPhone: '',
-    emergencyContactRelationship: '',
+    if (savedData) {
+      try {
+        return JSON.parse(savedData);
+      } catch (error) {
+        console.error('Error parsing saved form data:', error);
+      }
+    }
     
-    // Step 4: Employment & Income
-    occupation: '',
-    employerName: '',
-    employerAddress: '',
-    employmentType: '',
-    monthlyIncome: '',
-    sourceOfFunds: '',
-    additionalIncome: '',
-    
-    // Step 5: Financial Profile
-    bankAccountHistory: '',
-    creditHistory: '',
-    investmentExperience: '',
-    riskTolerance: '',
-    expectedMonthlyTransactions: '',
-    purposeOfAccount: '',
-    
-    // Step 6: Security & Terms
-    pin: '',
-    confirmPin: '',
-    securityQuestion1: '',
-    securityAnswer1: '',
-    securityQuestion2: '',
-    securityAnswer2: '',
-    agreeToTerms: false,
-    agreeToMarketing: false,
-    agreeToDataProcessing: false
+    return {
+      // Step 1: Personal Information
+      fullName: '',
+      dateOfBirth: '',
+      gender: '',
+      maritalStatus: '',
+      nationality: '',
+      placeOfBirth: '',
+      
+      // Step 2: Identity Verification
+      idType: '',
+      idNumber: '',
+      idIssuingCountry: '',
+      idExpiryDate: '',
+      
+      // Step 3: Contact & Address
+      phoneNumber: '',
+      email: '',
+      address: '',
+      city: '',
+      state: '',
+      postalCode: '',
+      country: '',
+      emergencyContactName: '',
+      emergencyContactPhone: '',
+      emergencyContactRelationship: '',
+      
+      // Step 4: Employment & Income
+      occupation: '',
+      employerName: '',
+      employerAddress: '',
+      employmentType: '',
+      monthlyIncome: '',
+      sourceOfFunds: '',
+      additionalIncome: '',
+      
+      // Step 5: Financial Profile
+      bankAccountHistory: '',
+      creditHistory: '',
+      investmentExperience: '',
+      riskTolerance: '',
+      expectedMonthlyTransactions: '',
+      purposeOfAccount: '',
+      
+      // Step 6: Security & Terms
+      pin: '',
+      confirmPin: '',
+      securityQuestion1: '',
+      securityAnswer1: '',
+      securityQuestion2: '',
+      securityAnswer2: '',
+      agreeToTerms: false,
+      agreeToMarketing: false,
+      agreeToDataProcessing: false
+    };
   });
   
   const navigate = useNavigate();
@@ -115,6 +136,11 @@ const Onboarding = () => {
     loadCountries();
   }, [toast]);
 
+  // Save form data to localStorage whenever it changes
+  useEffect(() => {
+    localStorage.setItem('onboardingFormData', JSON.stringify(formData));
+  }, [formData]);
+
   // Load states when nationality changes
   useEffect(() => {
     const loadStates = async () => {
@@ -152,6 +178,70 @@ const Onboarding = () => {
 
     loadStates();
   }, [formData.nationality, countries, toast]);
+
+  // Cleanup function to clear localStorage when component unmounts
+  useEffect(() => {
+    return () => {
+      // Only clear if user navigates away without completing
+      const isCompleted = localStorage.getItem('onboardingCompleted');
+      if (!isCompleted) {
+        // Keep the data for 24 hours in case user comes back
+        const expiryTime = Date.now() + (24 * 60 * 60 * 1000); // 24 hours
+        localStorage.setItem('onboardingFormDataExpiry', expiryTime.toString());
+      }
+    };
+  }, []);
+
+  // Function to reset form data
+  const resetFormData = () => {
+    localStorage.removeItem('onboardingFormData');
+    localStorage.removeItem('onboardingFormDataExpiry');
+    setFormData({
+      fullName: '',
+      dateOfBirth: '',
+      gender: '',
+      maritalStatus: '',
+      nationality: '',
+      placeOfBirth: '',
+      idType: '',
+      idNumber: '',
+      idIssuingCountry: '',
+      idExpiryDate: '',
+      phoneNumber: '',
+      email: '',
+      address: '',
+      city: '',
+      state: '',
+      postalCode: '',
+      country: '',
+      emergencyContactName: '',
+      emergencyContactPhone: '',
+      emergencyContactRelationship: '',
+      occupation: '',
+      employerName: '',
+      employerAddress: '',
+      employmentType: '',
+      monthlyIncome: '',
+      sourceOfFunds: '',
+      additionalIncome: '',
+      bankAccountHistory: '',
+      creditHistory: '',
+      investmentExperience: '',
+      riskTolerance: '',
+      expectedMonthlyTransactions: '',
+      purposeOfAccount: '',
+      pin: '',
+      confirmPin: '',
+      securityQuestion1: '',
+      securityAnswer1: '',
+      securityQuestion2: '',
+      securityAnswer2: '',
+      agreeToTerms: false,
+      agreeToMarketing: false,
+      agreeToDataProcessing: false
+    });
+    setCurrentStep(1);
+  };
 
   const steps = [
     {
@@ -192,6 +282,11 @@ const Onboarding = () => {
       try {
         // Simulate API call
         await new Promise(resolve => setTimeout(resolve, 2000));
+        
+        // Clear localStorage after successful completion
+        localStorage.removeItem('onboardingFormData');
+        localStorage.removeItem('onboardingFormDataExpiry');
+        localStorage.setItem('onboardingCompleted', 'true');
         
         toast({
           title: "Account Setup Complete!",
@@ -1127,39 +1222,53 @@ const Onboarding = () => {
                 </div>
 
                 {/* Navigation */}
-                <div className="flex justify-between items-center pt-6 border-t border-gray-200">
-                  <Button
-                    variant="outline"
-                    onClick={handleBack}
-                    disabled={currentStep === 1}
-                    className="px-6 py-3"
-                  >
-                    <ArrowLeft className="h-5 w-5 mr-2" />
-                    Back
-                  </Button>
+                <div className="space-y-4">
+                  {/* Reset Button */}
+                  <div className="flex justify-center">
+                    <Button
+                      variant="ghost"
+                      onClick={resetFormData}
+                      className="text-gray-500 hover:text-gray-700 text-sm"
+                    >
+                      Start Over
+                    </Button>
+                  </div>
                   
-                  <Button
-                    onClick={handleNext}
-                    disabled={loading}
-                    className="px-6 py-3 bg-[#0B63BC] hover:bg-[#0B63BC]/90"
-                  >
-                    {loading ? (
-                      <div className="flex items-center">
-                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
-                        <span>Setting up...</span>
-                      </div>
-                    ) : currentStep === 6 ? (
-                      <div className="flex items-center">
-                        <CheckCircle className="w-4 h-4 mr-2" />
-                        <span>Complete Setup</span>
-                      </div>
-                    ) : (
-                      <div className="flex items-center">
-                        <span>Next</span>
-                        <ArrowRight className="h-5 w-5 ml-2" />
-                      </div>
-                    )}
-                  </Button>
+                  {/* Main Navigation */}
+                  <div className="flex justify-between items-center pt-6 border-t border-gray-200">
+                    <Button
+                      variant="outline"
+                      onClick={handleBack}
+                      disabled={currentStep === 1}
+                      className="px-6 py-3"
+                    >
+                      <ArrowLeft className="h-5 w-5 mr-2" />
+                      Back
+                    </Button>
+                    
+                    <Button
+                      onClick={handleNext}
+                      disabled={loading}
+                      className="px-6 py-3 bg-[#0B63BC] hover:bg-[#0B63BC]/90"
+                    >
+                      {loading ? (
+                        <div className="flex items-center">
+                          <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
+                          <span>Setting up...</span>
+                        </div>
+                      ) : currentStep === 6 ? (
+                        <div className="flex items-center">
+                          <CheckCircle className="w-4 h-4 mr-2" />
+                          <span>Complete Setup</span>
+                        </div>
+                      ) : (
+                        <div className="flex items-center">
+                          <span>Next</span>
+                          <ArrowRight className="h-5 w-5 ml-2" />
+                        </div>
+                      )}
+                    </Button>
+                  </div>
                 </div>
               </div>
             </div>
@@ -1237,39 +1346,53 @@ const Onboarding = () => {
               </div>
 
               {/* Navigation */}
-              <div className="flex justify-between items-center pt-4 border-t border-gray-200">
-                <Button
-                  variant="outline"
-                  onClick={handleBack}
-                  disabled={currentStep === 1}
-                  className="px-4 py-2 text-sm"
-                >
-                  <ArrowLeft className="h-4 w-4 mr-1" />
-                  Back
-                </Button>
+              <div className="space-y-3">
+                {/* Reset Button */}
+                <div className="flex justify-center">
+                  <Button
+                    variant="ghost"
+                    onClick={resetFormData}
+                    className="text-gray-500 hover:text-gray-700 text-xs"
+                  >
+                    Start Over
+                  </Button>
+                </div>
                 
-                <Button
-                  onClick={handleNext}
-                  disabled={loading}
-                  className="px-4 py-2 bg-[#0B63BC] hover:bg-[#0B63BC]/90 text-sm"
-                >
-                  {loading ? (
-                    <div className="flex items-center">
-                      <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin mr-1"></div>
-                      <span>Setting up...</span>
-                    </div>
-                  ) : currentStep === 6 ? (
-                    <div className="flex items-center">
-                      <CheckCircle className="w-3 h-3 mr-1" />
-                      <span>Complete</span>
-                    </div>
-                  ) : (
-                    <div className="flex items-center">
-                      <span>Next</span>
-                      <ArrowRight className="h-4 w-4 ml-1" />
-                    </div>
-                  )}
-                </Button>
+                {/* Main Navigation */}
+                <div className="flex justify-between items-center pt-4 border-t border-gray-200">
+                  <Button
+                    variant="outline"
+                    onClick={handleBack}
+                    disabled={currentStep === 1}
+                    className="px-4 py-2 text-sm"
+                  >
+                    <ArrowLeft className="h-4 w-4 mr-1" />
+                    Back
+                  </Button>
+                  
+                  <Button
+                    onClick={handleNext}
+                    disabled={loading}
+                    className="px-4 py-2 bg-[#0B63BC] hover:bg-[#0B63BC]/90 text-sm"
+                  >
+                    {loading ? (
+                      <div className="flex items-center">
+                        <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin mr-1"></div>
+                        <span>Setting up...</span>
+                      </div>
+                    ) : currentStep === 6 ? (
+                      <div className="flex items-center">
+                        <CheckCircle className="w-3 h-3 mr-1" />
+                        <span>Complete</span>
+                      </div>
+                    ) : (
+                      <div className="flex items-center">
+                        <span>Next</span>
+                        <ArrowRight className="h-4 w-4 ml-1" />
+                      </div>
+                    )}
+                  </Button>
+                </div>
               </div>
             </div>
           </div>

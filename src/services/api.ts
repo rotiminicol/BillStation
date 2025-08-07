@@ -455,7 +455,7 @@ export const fetchCountries = async () => {
       { name: 'East Timor', code: 'TL', code3: 'TLS' },
       { name: 'Papua New Guinea', code: 'PG', code3: 'PNG' },
       { name: 'Fiji', code: 'FJ', code3: 'FJI' },
-      { name: 'New Zealand', code: 'NZ', code: 'NZL' },
+      { name: 'New Zealand', code: 'NZ', code3: 'NZL' },
       { name: 'Vanuatu', code: 'VU', code3: 'VUT' },
       { name: 'New Caledonia', code: 'NC', code3: 'NCL' },
       { name: 'Solomon Islands', code: 'SB', code3: 'SLB' },

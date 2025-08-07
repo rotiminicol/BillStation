@@ -1,14 +1,15 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { AtSign, Lock, User, Eye, EyeOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
+import { useFormPersistence } from "@/hooks/useFormPersistence";
 
 const Signup = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const [formData, setFormData] = useState({
+  const { formData, updateFormData, clearFormData } = useFormPersistence('signup', {
     fullName: "",
     email: "",
     password: "",
@@ -20,10 +21,7 @@ const Signup = () => {
   
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
+    updateFormData({ [name]: value });
   };
   
   const handleSubmit = async (e: React.FormEvent) => {
@@ -58,6 +56,8 @@ const Signup = () => {
         description: "Account created successfully",
       });
       
+      // Clear the form data after successful submission
+      clearFormData();
       navigate("/onboarding");
     } catch (error) {
       console.error("Registration failed:", error);
