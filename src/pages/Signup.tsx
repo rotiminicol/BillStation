@@ -3,7 +3,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Link, useNavigate } from "react-router-dom";
-import { Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff, CreditCard, Users, Smartphone, Zap, BarChart3, Shield } from "lucide-react";
 import { useState } from "react";
 import { authAPI } from "@/services/api";
 import { useFormPersistence } from "@/hooks/useFormPersistence";
@@ -71,7 +71,6 @@ const Signup = () => {
     try {
       const [firstName, ...rest] = formData.fullName.trim().split(' ');
       const lastName = rest.join(' ');
-
       const response = await authAPI.signup({
         firstName: firstName || '',
         lastName: lastName || '',
@@ -97,6 +96,35 @@ const Signup = () => {
     return () => clearInterval(interval);
   }, []);
 
+  const FloatingIcon = ({ icon: Icon, className, delay = 0 }) => (
+    <div 
+      className={`absolute opacity-10 animate-pulse ${className}`}
+      style={{
+        animationDelay: `${delay}s`,
+        animationDuration: '3s'
+      }}
+    >
+      <Icon size={24} className="text-white" />
+    </div>
+  );
+
+  const GeometricShape = ({ type, className, delay = 0 }) => {
+    const baseClasses = "absolute opacity-10 animate-bounce";
+    const shapeClasses = type === 'circle' 
+      ? "rounded-full bg-white/20 w-4 h-4" 
+      : "bg-white/20 w-6 h-6 transform rotate-45";
+    
+    return (
+      <div 
+        className={`${baseClasses} ${shapeClasses} ${className}`}
+        style={{
+          animationDelay: `${delay}s`,
+          animationDuration: '4s'
+        }}
+      />
+    );
+  };
+
   return (
     <div className="h-screen overflow-hidden bg-white">
       <style>
@@ -108,25 +136,112 @@ const Signup = () => {
           .error-input { color: red !important; }
           .hide-scrollbar::-webkit-scrollbar { display: none; }
           .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+          
+          @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(180deg); }
+          }
+          
+          .floating-element {
+            animation: float 6s ease-in-out infinite;
+          }
+          
+          .bg-gradient-overlay {
+            background: linear-gradient(135deg, #3657A7 0%, #4a6bc7 50%, #3657A7 100%);
+          }
+
+          .slider-image {
+            max-height: 400px;
+            width: auto;
+            margin: 0 auto;
+            display: block;
+          }
+
+          .mobile-slider-image {
+            max-height: 200px;
+            width: auto;
+            margin: 0 auto;
+            display: block;
+          }
+
+          .slider-text-container {
+            min-height: 120px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            position: relative;
+          }
+
+          .mobile-slider-text-container {
+            min-height: 100px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            position: relative;
+          }
+
+          .slide-content {
+            position: absolute;
+            width: 100%;
+            opacity: 0;
+            transition: opacity 0.5s ease-in-out;
+          }
+
+          .slide-content.active {
+            opacity: 1;
+          }
         `}
       </style>
+
       <div className="hidden lg:flex h-full">
-        <div className="w-1/2 relative bg-[#3657A7] text-white">
+        <div className="w-1/2 relative bg-gradient-overlay text-white overflow-hidden">
           <img 
             src="/logo.png" 
             alt="Bill Station Logo" 
-            className="absolute top-4 left-4 w-12 h-12 object-contain"
+            className="absolute top-4 left-4 w-12 h-12 object-contain z-20"
           />
-          <div className="relative h-full flex items-center justify-center p-12">
-            <div className="max-w-md">
-              <img src="/auth.png" alt="Auth" className="w-full h-auto mb-8" />
-              <h2 className="text-2xl font-semibold slider-header">{slides[currentSlide].title}</h2>
-              <p className="text-white/90 mt-3 leading-relaxed slider-body">{slides[currentSlide].description}</p>
+          <div className="absolute inset-0 z-0">
+            <FloatingIcon icon={CreditCard} className="top-16 left-12 floating-element" delay={0} />
+            <FloatingIcon icon={Smartphone} className="top-32 right-20 floating-element" delay={1} />
+            <FloatingIcon icon={Users} className="top-48 left-8 floating-element" delay={2} />
+            <FloatingIcon icon={Zap} className="bottom-48 right-16 floating-element" delay={0.5} />
+            <FloatingIcon icon={BarChart3} className="bottom-32 left-16 floating-element" delay={1.5} />
+            <FloatingIcon icon={Shield} className="top-64 right-8 floating-element" delay={2.5} />
+            <FloatingIcon icon={CreditCard} className="bottom-64 right-32 floating-element" delay={3} />
+            <FloatingIcon icon={Smartphone} className="bottom-16 left-32 floating-element" delay={0.8} />
+            <GeometricShape type="circle" className="top-20 right-12" delay={0} />
+            <GeometricShape type="square" className="top-40 left-20" delay={1} />
+            <GeometricShape type="circle" className="bottom-40 right-8" delay={2} />
+            <GeometricShape type="square" className="bottom-20 right-24" delay={0.5} />
+            <GeometricShape type="circle" className="top-72 left-4" delay={1.5} />
+            <GeometricShape type="square" className="bottom-60 left-8" delay={2.5} />
+            <div className="absolute top-28 right-28 w-8 h-8 border-2 border-white/20 rounded-full animate-spin" style={{animationDuration: '8s'}} />
+            <div className="absolute bottom-28 left-20 w-6 h-6 border-2 border-white/20 animate-spin" style={{animationDuration: '6s'}} />
+            <div className="absolute top-56 left-32 w-4 h-4 bg-white/10 transform rotate-45 animate-pulse" />
+          </div>
+          <div className="relative h-full flex items-center justify-center p-12 z-10">
+            <div className="max-w-md text-center">
+              <img src="/auth.png" alt="Auth" className="slider-image" />
+              <div className="slider-text-container">
+                {slides.map((slide, index) => (
+                  <div
+                    key={index}
+                    className={`slide-content ${index === currentSlide ? 'active' : ''}`}
+                  >
+                    <h2 className="text-2xl font-semibold slider-header">{slide.title}</h2>
+                    <p className="text-white/90 mt-2 slider-body">{slide.description}</p>
+                  </div>
+                ))}
+              </div>
               <div className="mt-6 flex items-center justify-center gap-1">
                 {slides.map((_, index) => (
                   <span 
                     key={index} 
-                    className={`h-1.5 w-1.5 rounded-full ${index === currentSlide ? 'bg-white' : 'bg-white/60'}`}
+                    className={`h-1.5 w-1.5 rounded-full cursor-pointer transition-all ${index === currentSlide ? 'bg-white' : 'bg-white/60'}`}
                     onClick={() => setCurrentSlide(index)}
                   ></span>
                 ))}
@@ -293,17 +408,36 @@ const Signup = () => {
           </div>
         </div>
       </div>
-      <div className="lg:hidden h-full">
-        <div className="h-1/3 bg-[#3657A7] flex items-center justify-center px-6 relative">
+
+      <div className="lg:hidden h-screen">
+        <div className="h-1/3 bg-gradient-overlay flex items-center justify-center px-6 relative overflow-hidden">
           <img 
             src="/logo.png" 
             alt="Bill Station Logo" 
-            className="absolute top-4 left-4 w-12 h-12 object-contain"
+            className="absolute top-4 left-4 w-12 h-12 object-contain z-20"
           />
-          <div className="max-w-sm text-white text-center">
-            <img src="/auth.png" alt="Auth" className="w-full h-auto mb-6" />
-            <h2 className="text-xl font-semibold slider-header">{slides[currentSlide].title}</h2>
-            <p className="text-white/90 mt-2 slider-body">{slides[currentSlide].description}</p>
+          <div className="absolute inset-0 z-0">
+            <FloatingIcon icon={CreditCard} className="top-8 left-8 floating-element" delay={0} />
+            <FloatingIcon icon={Smartphone} className="top-16 right-8 floating-element" delay={1} />
+            <FloatingIcon icon={Users} className="bottom-16 left-12 floating-element" delay={2} />
+            <FloatingIcon icon={Zap} className="bottom-8 right-12 floating-element" delay={0.5} />
+            <GeometricShape type="circle" className="top-12 right-16" delay={0} />
+            <GeometricShape type="square" className="bottom-12 left-16" delay={1} />
+            <div className="absolute top-20 right-20 w-6 h-6 border-2 border-white/20 rounded-full animate-spin" style={{animationDuration: '6s'}} />
+          </div>
+          <div className="max-w-sm text-white text-center relative z-10">
+            <img src="/auth.png" alt="Auth" className="mobile-slider-image" />
+            <div className="mobile-slider-text-container">
+              {slides.map((slide, index) => (
+                <div
+                  key={index}
+                  className={`slide-content ${index === currentSlide ? 'active' : ''}`}
+                >
+                  <h2 className="text-xl font-semibold slider-header">{slide.title}</h2>
+                  <p className="text-white/90 mt-2 slider-body">{slide.description}</p>
+                </div>
+              ))}
+            </div>
             <div className="mt-4 flex items-center justify-center gap-1">
               {slides.map((_, index) => (
                 <span 
@@ -315,49 +449,56 @@ const Signup = () => {
             </div>
           </div>
         </div>
-        <div className="h-2/3 overflow-y-auto p-6 hide-scrollbar">
-          <div className="mb-4 text-center">
+        <div className="h-2/3 overflow-y-auto p-6">
+          <div className="mb-4">
             <h1 className="text-2xl font-bold text-[#3657A7]">Let's get you Started</h1>
-            <p className="text-sm text-gray-500">Create an Account</p>
+            <p className="text-sm text-gray-500 mt-1">Create an Account</p>
           </div>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="fullName-m">First & Last Name</Label>
-              <Input 
-                id="fullName-m" 
-                value={formData.fullName} 
-                onChange={(e) => handleInputChange('fullName', e.target.value)} 
-                placeholder="Enter your name" 
-                className={`h-12 border-gray-300 focus:border-[#3657A7] form-input ${error ? 'error-input' : ''}`} 
-                required 
-              />
-              {error && <p className="text-sm text-red-700 mt-1">{error}</p>}
+              <div className="relative">
+                <Input 
+                  id="fullName-m" 
+                  type="text" 
+                  placeholder="Enter your name" 
+                  value={formData.fullName} 
+                  onChange={(e) => handleInputChange('fullName', e.target.value)} 
+                  className={`h-12 border-gray-300 focus:border-[#3657A7] form-input ${error ? 'error-input' : ''}`} 
+                  required 
+                />
+                {error && <p className="text-sm text-red-700 mt-1">{error}</p>}
+              </div>
             </div>
             <div className="space-y-2">
               <Label htmlFor="email-m">Email Address</Label>
-              <Input 
-                id="email-m" 
-                type="email" 
-                value={formData.email} 
-                onChange={(e) => handleInputChange('email', e.target.value)} 
-                placeholder="Enter your email" 
-                className={`h-12 border-gray-300 focus:border-[#3657A7] form-input ${error ? 'error-input' : ''}`} 
-                required 
-              />
-              {error && <p className="text-sm text-red-700 mt-1">{error}</p>}
+              <div className="relative">
+                <Input 
+                  id="email-m" 
+                  type="email" 
+                  placeholder="Enter your email address" 
+                  value={formData.email} 
+                  onChange={(e) => handleInputChange('email', e.target.value)} 
+                  className={`h-12 border-gray-300 focus:border-[#3657A7] form-input ${error ? 'error-input' : ''}`} 
+                  required 
+                />
+                {error && <p className="text-sm text-red-700 mt-1">{error}</p>}
+              </div>
             </div>
             <div className="space-y-2">
               <Label htmlFor="phone-m">Phone Number</Label>
-              <Input 
-                id="phone-m" 
-                type="tel" 
-                value={formData.phone} 
-                onChange={(e) => handleInputChange('phone', e.target.value)} 
-                placeholder="Enter your phone number" 
-                className={`h-12 border-gray-300 focus:border-[#3657A7] form-input ${error ? 'error-input' : ''}`} 
-                required 
-              />
-              {error && <p className="text-sm text-red-700 mt-1">{error}</p>}
+              <div className="relative">
+                <Input 
+                  id="phone-m" 
+                  type="tel" 
+                  placeholder="Enter your phone number" 
+                  value={formData.phone} 
+                  onChange={(e) => handleInputChange('phone', e.target.value)} 
+                  className={`h-12 border-gray-300 focus:border-[#3657A7] form-input ${error ? 'error-input' : ''}`} 
+                  required 
+                />
+                {error && <p className="text-sm text-red-700 mt-1">{error}</p>}
+              </div>
             </div>
             <div className="space-y-2">
               <Label htmlFor="password-m">Password</Label>
@@ -365,9 +506,9 @@ const Signup = () => {
                 <Input 
                   id="password-m" 
                   type={showPassword ? 'text' : 'password'} 
+                  placeholder="Create a password" 
                   value={formData.password} 
                   onChange={(e) => handleInputChange('password', e.target.value)} 
-                  placeholder="Create a password" 
                   className={`h-12 pr-12 border-gray-300 focus:border-[#3657A7] form-input ${error ? 'error-input' : ''}`} 
                   required 
                 />
@@ -383,14 +524,14 @@ const Signup = () => {
               <p className="text-xs text-gray-500">Your password must have at least 8 characters</p>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="confirm-m">Confirm Password</Label>
+              <Label htmlFor="confirmPassword-m">Confirm Password</Label>
               <div className="relative">
                 <Input 
-                  id="confirm-m" 
+                  id="confirmPassword-m" 
                   type={showConfirmPassword ? 'text' : 'password'} 
+                  placeholder="Confirm your password" 
                   value={formData.confirmPassword} 
                   onChange={(e) => handleInputChange('confirmPassword', e.target.value)} 
-                  placeholder="Confirm your password" 
                   className={`h-12 pr-12 border-gray-300 focus:border-[#3657A7] form-input ${error ? 'error-input' : ''}`} 
                   required 
                 />
@@ -408,9 +549,10 @@ const Signup = () => {
               <Label htmlFor="ref-m">Referral Code (Optional)</Label>
               <Input 
                 id="ref-m" 
+                type="text" 
+                placeholder="Referral code (Optional)" 
                 value={formData.referralCode} 
                 onChange={(e) => handleInputChange('referralCode', e.target.value)} 
-                placeholder="Referral code (Optional)" 
                 className={`h-12 border-gray-300 focus:border-[#3657A7] form-input ${error ? 'error-input' : ''}`} 
               />
               {error && <p className="text-sm text-red-700 mt-1">{error}</p>}
@@ -433,13 +575,15 @@ const Signup = () => {
             >
               {isLoading ? 'Creating Account...' : 'Sign Up'}
             </Button>
+          </form>
+          <div className="mt-6">
             <div className="relative my-4">
               <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-gray-300" /></div>
               <div className="relative flex justify-center text-sm"><span className="px-4 bg-white text-gray-500">Or sign up with</span></div>
             </div>
             <div className="grid grid-cols-2 gap-4">
-              <Button variant="outline" className="w-full border border-gray-300 hover:bg-gray-50 rounded-xl py-2.5 transition-all duration-200 hover:shadow-md group">
-                <svg className="w-5 h-5 mr-2 group-hover:scale-110 transition-transform" viewBox="0 0 24 24">
+              <Button variant="outline" className="w-full border border-gray-300 hover:bg-gray-50 rounded-xl py-2.5">
+                <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24">
                   <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
                   <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
                   <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
@@ -447,17 +591,19 @@ const Signup = () => {
                 </svg>
                 Google
               </Button>
-              <Button variant="outline" className="w-full border border-gray-300 hover:bg-gray-50 rounded-xl py-2.5 transition-all duration-200 hover:shadow-md group">
-                <svg className="w-5 h-5 mr-2 group-hover:scale-110 transition-transform" viewBox="0 0 24 24">
+              <Button variant="outline" className="w-full border border-gray-300 hover:bg-gray-50 rounded-xl py-2.5">
+                <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24">
                   <path fill="#1877F2" d="M22 12.07C22 6.48 17.52 2 11.93 2S1.86 6.48 1.86 12.07c0 4.95 3.61 9.06 8.33 9.93v-7.02H7.9v-2.9h2.29V9.41c0-2.26 1.33-3.5 3.38-3.5.98 0 2 .17 2 .17v2.2h-1.13c-1.11 0-1.46.69-1.46 1.39v1.67h2.49l-.4 2.9h-2.09V22c4.72-.87 8.33-4.98 8.33-9.93z"/>
                 </svg>
                 Facebook
               </Button>
             </div>
-            <p className="mt-6 text-center text-sm text-gray-600">
-              Already have an account? <Link to="/login" className="text-[#3657A7] font-medium">Log In</Link>
-            </p>
-          </form>
+            <div className="mt-4">
+              <p className="text-sm text-gray-600">
+                Already have an account? <Link to="/login" className="text-[#3657A7]">Log In</Link>
+              </p>
+            </div>
+          </div>
         </div>
       </div>
     </div>

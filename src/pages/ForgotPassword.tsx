@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Link } from "react-router-dom";
-import { Mail, CheckCircle, AlertCircle } from "lucide-react";
+import { Mail, CheckCircle, AlertCircle, CreditCard, Users, Smartphone, Zap, BarChart3, Shield } from "lucide-react";
 import { useState } from "react";
 import { authAPI } from "@/services/api";
 import { useToast } from "@/hooks/use-toast";
@@ -34,7 +34,7 @@ const ForgotPassword = () => {
     e.preventDefault();
     setError('');
     setIsLoading(true);
-    
+
     try {
       await authAPI.forgotPassword(email);
       setIsSubmitted(true);
@@ -62,6 +62,37 @@ const ForgotPassword = () => {
     return () => clearInterval(interval);
   }, []);
 
+  // Floating background icons component
+  const FloatingIcon = ({ icon: Icon, className, delay = 0 }) => (
+    <div 
+      className={`absolute opacity-10 animate-pulse ${className}`}
+      style={{
+        animationDelay: `${delay}s`,
+        animationDuration: '3s'
+      }}
+    >
+      <Icon size={24} className="text-white" />
+    </div>
+  );
+
+  // Background geometric shapes component
+  const GeometricShape = ({ type, className, delay = 0 }) => {
+    const baseClasses = "absolute opacity-10 animate-bounce";
+    const shapeClasses = type === 'circle' 
+      ? "rounded-full bg-white/20 w-4 h-4" 
+      : "bg-white/20 w-6 h-6 transform rotate-45";
+    
+    return (
+      <div 
+        className={`${baseClasses} ${shapeClasses} ${className}`}
+        style={{
+          animationDelay: `${delay}s`,
+          animationDuration: '4s'
+        }}
+      />
+    );
+  };
+
   return (
     <div className="h-screen bg-white overflow-hidden">
       <style>
@@ -71,6 +102,71 @@ const ForgotPassword = () => {
           .slider-header { font-family: 'Inter', sans-serif; }
           .slider-body { font-family: 'Lato', sans-serif; }
           .error-input { color: red !important; }
+          
+          /* Custom floating animation */
+          @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(180deg); }
+          }
+          
+          .floating-element {
+            animation: float 6s ease-in-out infinite;
+          }
+          
+          /* Gradient overlay for depth */
+          .bg-gradient-overlay {
+            background: linear-gradient(135deg, #3657A7 0%, #4a6bc7 50%, #3657A7 100%);
+          }
+
+          /* Image styling for larger, centered display */
+          .slider-image {
+            max-height: 400px; /* Larger for desktop */
+            width: auto;
+            margin: 0 auto;
+            display: block;
+          }
+
+          /* Mobile image styling */
+          .mobile-slider-image {
+            max-height: 200px; /* Smaller for mobile */
+            width: auto;
+            margin: 0 auto;
+            display: block;
+          }
+
+          /* Fixed height for slider text container to prevent layout shifts */
+          .slider-text-container {
+            min-height: 120px; /* Adjust based on longest slide content */
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            position: relative;
+          }
+
+          /* Mobile slider text container */
+          .mobile-slider-text-container {
+            min-height: 100px; /* Smaller for mobile */
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            position: relative;
+          }
+
+          /* Smooth transition for slide content */
+          .slide-content {
+            position: absolute;
+            width: 100%;
+            opacity: 0;
+            transition: opacity 0.5s ease-in-out;
+          }
+
+          .slide-content.active {
+            opacity: 1;
+          }
         `}
       </style>
       <div className="hidden lg:flex h-screen flex-row-reverse">
@@ -144,21 +240,49 @@ const ForgotPassword = () => {
             </div>
           </div>
         </div>
-        <div className="w-1/2 relative bg-[#3657A7] text-white flex items-center justify-center p-12">
+        <div className="w-1/2 relative bg-gradient-overlay text-white flex items-center justify-center p-12 overflow-hidden">
           <img 
             src="/logo.png" 
             alt="Bill Station Logo" 
-            className="absolute top-4 left-4 w-12 h-12 object-contain"
+            className="absolute top-4 left-4 w-12 h-12 object-contain z-20"
           />
-          <div className="relative max-w-md text-center">
-            <img src="/fpass.png" alt="Forgot Password" className="w-full h-auto mb-6" />
-            <h2 className="text-2xl font-semibold slider-header">{slides[currentSlide].title}</h2>
-            <p className="text-white/90 mt-2 slider-body">{slides[currentSlide].description}</p>
+          <div className="absolute inset-0 z-0">
+            <FloatingIcon icon={CreditCard} className="top-16 left-12 floating-element" delay={0} />
+            <FloatingIcon icon={Smartphone} className="top-32 right-20 floating-element" delay={1} />
+            <FloatingIcon icon={Users} className="top-48 left-8 floating-element" delay={2} />
+            <FloatingIcon icon={Zap} className="bottom-48 right-16 floating-element" delay={0.5} />
+            <FloatingIcon icon={BarChart3} className="bottom-32 left-16 floating-element" delay={1.5} />
+            <FloatingIcon icon={Shield} className="top-64 right-8 floating-element" delay={2.5} />
+            <FloatingIcon icon={CreditCard} className="bottom-64 right-32 floating-element" delay={3} />
+            <FloatingIcon icon={Smartphone} className="bottom-16 left-32 floating-element" delay={0.8} />
+            <GeometricShape type="circle" className="top-20 right-12" delay={0} />
+            <GeometricShape type="square" className="top-40 left-20" delay={1} />
+            <GeometricShape type="circle" className="bottom-40 right-8" delay={2} />
+            <GeometricShape type="square" className="bottom-20 right-24" delay={0.5} />
+            <GeometricShape type="circle" className="top-72 left-4" delay={1.5} />
+            <GeometricShape type="square" className="bottom-60 left-8" delay={2.5} />
+            <div className="absolute top-28 right-28 w-8 h-8 border-2 border-white/20 rounded-full animate-spin" style={{animationDuration: '8s'}} />
+            <div className="absolute bottom-28 left-20 w-6 h-6 border-2 border-white/20 animate-spin" style={{animationDuration: '6s'}} />
+            <div className="absolute top-56 left-32 w-4 h-4 bg-white/10 transform rotate-45 animate-pulse" />
+          </div>
+          <div className="relative max-w-md text-center z-10">
+            <img src="/fpass.png" alt="Forgot Password" className="slider-image" />
+            <div className="slider-text-container">
+              {slides.map((slide, index) => (
+                <div
+                  key={index}
+                  className={`slide-content ${index === currentSlide ? 'active' : ''}`}
+                >
+                  <h2 className="text-2xl font-semibold slider-header">{slide.title}</h2>
+                  <p className="text-white/90 mt-2 slider-body">{slide.description}</p>
+                </div>
+              ))}
+            </div>
             <div className="mt-6 flex items-center justify-center gap-1">
               {slides.map((_, index) => (
                 <span 
                   key={index} 
-                  className={`h-1.5 w-1.5 rounded-full ${index === currentSlide ? 'bg-white' : 'bg-white/60'}`}
+                  className={`h-1.5 w-1.5 rounded-full cursor-pointer transition-all ${index === currentSlide ? 'bg-white' : 'bg-white/60'}`}
                   onClick={() => setCurrentSlide(index)}
                 ></span>
               ))}
@@ -167,16 +291,34 @@ const ForgotPassword = () => {
         </div>
       </div>
       <div className="lg:hidden h-screen">
-        <div className="h-1/3 bg-[#3657A7] flex items-center justify-center px-6 relative">
+        <div className="h-1/3 bg-gradient-overlay flex items-center justify-center px-6 relative overflow-hidden">
           <img 
             src="/logo.png" 
             alt="Bill Station Logo" 
-            className="absolute top-4 left-4 w-12 h-12 object-contain"
+            className="absolute top-4 left-4 w-12 h-12 object-contain z-20"
           />
-          <div className="max-w-sm text-white text-center">
-            <img src="/fpass.png" alt="Forgot Password" className="w-full h-auto mb-6" />
-            <h2 className="text-xl font-semibold slider-header">{slides[currentSlide].title}</h2>
-            <p className="text-white/90 mt-2 slider-body">{slides[currentSlide].description}</p>
+          <div className="absolute inset-0 z-0">
+            <FloatingIcon icon={CreditCard} className="top-8 left-8 floating-element" delay={0} />
+            <FloatingIcon icon={Smartphone} className="top-16 right-8 floating-element" delay={1} />
+            <FloatingIcon icon={Users} className="bottom-16 left-12 floating-element" delay={2} />
+            <FloatingIcon icon={Zap} className="bottom-8 right-12 floating-element" delay={0.5} />
+            <GeometricShape type="circle" className="top-12 right-16" delay={0} />
+            <GeometricShape type="square" className="bottom-12 left-16" delay={1} />
+            <div className="absolute top-20 right-20 w-6 h-6 border-2 border-white/20 rounded-full animate-spin" style={{animationDuration: '6s'}} />
+          </div>
+          <div className="max-w-sm text-white text-center relative z-10">
+            <img src="/fpass.png" alt="Forgot Password" className="mobile-slider-image" />
+            <div className="mobile-slider-text-container">
+              {slides.map((slide, index) => (
+                <div
+                  key={index}
+                  className={`slide-content ${index === currentSlide ? 'active' : ''}`}
+                >
+                  <h2 className="text-xl font-semibold slider-header">{slide.title}</h2>
+                  <p className="text-white/90 mt-2 slider-body">{slide.description}</p>
+                </div>
+              ))}
+            </div>
             <div className="mt-4 flex items-center justify-center gap-1">
               {slides.map((_, index) => (
                 <span 
