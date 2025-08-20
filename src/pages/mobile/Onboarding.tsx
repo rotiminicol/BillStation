@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { Eye, EyeOff, User, Phone, MapPin, Briefcase, Shield, CheckCircle, CreditCard, Globe, Calendar, FileText, AlertCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { fetchCountries, fetchStates } from "@/services/api";
+import { mockService } from "@/services/mockData";
 import { useFormPersistence } from "@/hooks/useFormPersistence";
 
 type OnboardingStep = 1 | 2 | 3 | 4 | 5 | 6;
@@ -219,7 +219,7 @@ const Onboarding: React.FC = () => {
     const loadCountries = async () => {
       setLoadingCountries(true);
       try {
-        const countriesData = await fetchCountries();
+        const countriesData = await mockService.getCountries();
         setCountries(countriesData);
       } catch (error) {
         console.error('Failed to load countries:', error);
@@ -254,7 +254,7 @@ const Onboarding: React.FC = () => {
 
       setLoadingStates(true);
       try {
-        const statesData = await fetchStates(selectedCountry.code);
+        const statesData = await mockService.getStates(selectedCountry.code);
         setStates(statesData);
         // Clear place of birth when country changes
         updateFormData({ placeOfBirth: '' });

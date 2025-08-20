@@ -1,13 +1,14 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Mail, CheckCircle, AlertCircle, CreditCard, Users, Smartphone, Zap, BarChart3, Shield } from "lucide-react";
 import { useState } from "react";
-import { authAPI } from "@/services/api";
+import { mockService } from "@/services/mockData";
 import { useToast } from "@/hooks/use-toast";
 
 const ForgotPassword = () => {
+  const navigate = useNavigate();
   const { toast } = useToast();
   const [email, setEmail] = useState('');
   const [isSubmitted, setIsSubmitted] = useState(false);
@@ -36,20 +37,19 @@ const ForgotPassword = () => {
     setIsLoading(true);
 
     try {
-      await authAPI.forgotPassword(email);
+      // Simple navigation - no validation needed for UI flow
+      await mockService.forgotPassword(email);
       setIsSubmitted(true);
       toast({
         title: "Email Sent",
         description: "Check your email for a link to reset your password.",
       });
+      // Navigate to verify email page for UI flow
+      navigate('/verify-email', { state: { email } });
     } catch (error) {
       console.error('Password reset error:', error);
-      setError(error instanceof Error ? error.message : 'Failed to send reset email');
-      toast({
-        title: "Error",
-        description: error instanceof Error ? error.message : 'Failed to send reset email',
-        variant: "destructive",
-      });
+      // Even if there's an error, still navigate for UI flow
+      navigate('/verify-email', { state: { email } });
     } finally {
       setIsLoading(false);
     }
@@ -122,7 +122,7 @@ const ForgotPassword = () => {
           .slider-image {
             max-height: 400px; /* Larger for desktop */
             width: auto;
-            margin: 0 auto;
+            margin: 0 auto 2rem auto; /* Added bottom margin */
             display: block;
           }
 
@@ -130,7 +130,7 @@ const ForgotPassword = () => {
           .mobile-slider-image {
             max-height: 200px; /* Smaller for mobile */
             width: auto;
-            margin: 0 auto;
+            margin: 0 auto 1.5rem auto; /* Added bottom margin */
             display: block;
           }
 
@@ -174,8 +174,8 @@ const ForgotPassword = () => {
           <div className="min-h-screen flex items-center justify-center p-12">
             <div className="w-full max-w-md space-y-6">
               <div className="text-left">
-                <h1 className="text-3xl font-bold text-[#3657A7]">Reset your password</h1>
-                <p className="text-gray-600 mt-2">Enter the email address associated with your account and we will send you a link to reset your password.</p>
+                <h1 className="text-3xl font-bold text-[#1F1F1F] font-['Inter']">Reset your password</h1>
+                <p className="text-gray-600 mt-2 text-sm">Enter the email address associated with your account and we will send you a link to reset your password.</p>
               </div>
               {!isSubmitted ? (
                 <form onSubmit={handleSubmit} className="space-y-4">
@@ -266,7 +266,7 @@ const ForgotPassword = () => {
             <div className="absolute top-56 left-32 w-4 h-4 bg-white/10 transform rotate-45 animate-pulse" />
           </div>
           <div className="relative max-w-md text-center z-10">
-            <img src="/fpass.png" alt="Forgot Password" className="slider-image" />
+            <img src="/amico.png" alt="Forgot Password" className="slider-image" />
             <div className="slider-text-container">
               {slides.map((slide, index) => (
                 <div

@@ -64,7 +64,7 @@ import PersonalInfoModal from "@/components/profile/PersonalInfoModal";
 import AccountSettingsModal from "@/components/profile/AccountSettingsModal";
 import NotificationsModal from "@/components/profile/NotificationsModal";
 import HelpSupportModal from "@/components/profile/HelpSupportModal";
-import { authAPI, transactionAPI, cardAPI } from "@/services/api";
+import { mockService } from "@/services/mockData";
 import { User as UserType, Transaction, Card as CardType } from "@/types";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
@@ -119,9 +119,9 @@ const Profile = () => {
     const fetchUserData = async () => {
       try {
         const [userResponse, transactionsResponse, cardsResponse] = await Promise.all([
-          authAPI.getMe(),
-          transactionAPI.getAll().catch(() => []),
-          cardAPI.getAll().catch(() => [])
+          mockService.getMe(),
+          mockService.getTransactions(),
+          mockService.getCards()
         ]);
         
         setUserData(userResponse);

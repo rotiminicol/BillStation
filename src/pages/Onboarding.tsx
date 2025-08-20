@@ -9,7 +9,7 @@ import { Eye, EyeOff, User, Phone, MapPin, Briefcase, Shield, CheckCircle, Arrow
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
-import { fetchCountries, fetchStates } from "@/services/api";
+import { mockService } from "@/services/mockData";
 
 const Onboarding = () => {
   const [currentStep, setCurrentStep] = useState(1);
@@ -119,7 +119,7 @@ const Onboarding = () => {
     const loadCountries = async () => {
       setLoadingCountries(true);
       try {
-        const countriesData = await fetchCountries();
+        const countriesData = await mockService.getCountries();
         setCountries(countriesData);
       } catch (error) {
         console.error('Error loading countries:', error);
@@ -159,7 +159,7 @@ const Onboarding = () => {
 
       setLoadingStates(true);
       try {
-        const statesData = await fetchStates(selectedCountry.code);
+        const statesData = await mockService.getStates(selectedCountry.code);
         setStates(statesData);
         // Clear place of birth when country changes
         setFormData(prev => ({ ...prev, placeOfBirth: '' }));

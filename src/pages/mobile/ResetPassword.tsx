@@ -3,7 +3,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Lock, Eye, EyeOff, CheckCircle, AlertCircle } from "lucide-react";
-import { authAPI } from "@/services/api";
+import { mockService } from "@/services/mockData";
 import { useToast } from "@/hooks/use-toast";
 
 const ResetPassword = () => {
@@ -65,7 +65,7 @@ const ResetPassword = () => {
     setIsLoading(true);
     
     try {
-      await authAPI.resetPassword(token, newPassword);
+      await mockService.resetPassword(token, newPassword);
       setIsSuccess(true);
       toast({
         title: "Password Reset Successfully",
@@ -131,10 +131,10 @@ const ResetPassword = () => {
               
               {/* Action Button */}
               <Button 
-                onClick={() => navigate('/login')}
+                onClick={() => navigate('/dashboard')}
                 className="w-full bg-[#0B63BC] hover:bg-[#0B63BC]/90 text-white py-3 rounded-lg font-medium"
               >
-                Continue to Login
+                Continue to Dashboard
               </Button>
             </div>
           </div>

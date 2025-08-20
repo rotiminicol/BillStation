@@ -7,7 +7,7 @@ import { MobileCard } from "@/components/ui/mobile-card";
 import { Button } from "@/components/ui/button";
 import ViewAllButton from "@/components/ui/view-all-button";
 import { useAuth } from "@/hooks/use-auth";
-import { authAPI, transactionAPI } from "@/services/api";
+import { mockService } from "@/services/mockData";
 import { useToast } from "@/hooks/use-toast";
 import Loader from "@/components/Loader";
 
@@ -34,8 +34,8 @@ const Dashboard = () => {
       try {
         // Simulate API calls
         const [userData, transactionsData] = await Promise.all([
-          authAPI.getMe(),
-          transactionAPI.getAll()
+          mockService.getMe(),
+          mockService.getTransactions()
         ]);
         
         setBalance(userData?.balance || 0);

@@ -8,7 +8,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import Navigation from "@/components/Navigation";
 import DesktopLayout from "@/components/DesktopLayout";
 import Loader from "@/components/Loader";
-import { authAPI, transactionAPI } from "@/services/api";
+import { mockService } from "@/services/mockData";
 import { useToast } from "@/hooks/use-toast";
 import { getBankLogo } from "@/lib/bankLogos";
 import { User, Transaction } from "@/types";
@@ -33,8 +33,8 @@ const Dashboard = () => {
     const fetchDashboardData = async () => {
       try {
         const [userResponse, transactionsResponse] = await Promise.all([
-          authAPI.getMe(),
-          transactionAPI.getAll().catch(() => [])
+          mockService.getMe(),
+          mockService.getTransactions()
         ]);
         
         setUserData(userResponse);

@@ -4,7 +4,7 @@ import { Mail, CheckCircle, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
-import { authAPI } from "@/services/api";
+import { mockService } from "@/services/mockData";
 import { useFormPersistence } from "@/hooks/useFormPersistence";
 
 const ForgotPassword = () => {
@@ -35,7 +35,7 @@ const ForgotPassword = () => {
     setError("");
     
     try {
-      await authAPI.forgotPassword(email);
+      await mockService.forgotPassword(email);
       setEmailSent(true);
       
       toast({
@@ -115,10 +115,10 @@ const ForgotPassword = () => {
                 </Button>
                 <Button 
                   variant="outline" 
-                  onClick={() => navigate('/login')}
+                  onClick={() => navigate('/verify-email')}
                   className="w-full py-3 rounded-lg font-medium border-gray-300 hover:border-gray-400"
                 >
-                  Back to Login
+                  Continue to Verify Email
                 </Button>
               </div>
               

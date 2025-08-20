@@ -2,6 +2,8 @@
 
 Bill Station is a comprehensive financial technology platform that provides users with a seamless digital banking experience. This application offers a wide range of financial services including money transfers, bill payments, virtual cards, cryptocurrency management, and more, all through an intuitive and user-friendly interface.
 
+**Note: This is a UI-only project designed for frontend development and prototyping. All data is mock data and no backend services are required.**
+
 ## ✨ Key Features
 
 - 💳 **Virtual Cards**: Create and manage virtual cards for secure online transactions
@@ -17,9 +19,9 @@ Bill Station is a comprehensive financial technology platform that provides user
 
 - ⚡ **Frontend**: React 18 with TypeScript
 - 🎨 **Styling**: Tailwind CSS with shadcn/ui components
-- 🔄 **State Management**: React Query for server state
+- 🔄 **State Management**: React hooks and context
 - 🛠 **Build Tool**: Vite
-- 🔐 **Authentication**: Clerk
+- 🔐 **Authentication**: Mock authentication system
 - 📱 **UI Components**: Radix UI Primitives
 - 📅 **Date Handling**: date-fns
 - 🎭 **Animation**: Framer Motion
@@ -46,11 +48,10 @@ Bill Station is a comprehensive financial technology platform that provides user
    yarn install
    ```
 
-3. Set up environment variables:
-   Create a `.env` file in the root directory and add the necessary environment variables:
+3. Set up environment variables (optional):
+   Create a `.env` file in the root directory if you need custom configurations:
    ```
-   VITE_CLERK_PUBLISHABLE_KEY=your_clerk_publishable_key
-   VITE_API_BASE_URL=your_api_base_url
+   # No environment variables required for UI-only development
    ```
 
 4. Start the development server:
@@ -70,7 +71,7 @@ src/
 ├── hooks/         # Custom React hooks
 ├── lib/           # Utility functions and configurations
 ├── pages/         # Application pages/routes
-├── services/      # API services and integrations
+├── services/      # Mock data services for UI development
 └── styles/        # Global styles and themes
 ```
 

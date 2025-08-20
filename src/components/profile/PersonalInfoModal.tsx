@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { X, Camera, User, Mail, Phone, MapPin, Calendar, Check } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { authAPI } from "@/services/api";
+import { mockService } from "@/services/mockData";
 
 interface PersonalInfoModalProps {
   isOpen: boolean;

@@ -1,22 +1,39 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Link, useNavigate } from "react-router-dom";
-import { Eye, EyeOff, CheckCircle, AlertCircle, CreditCard, Users, Smartphone, Zap, BarChart3, Shield } from "lucide-react";
-import { useState } from "react";
+import { Link, useNavigate, useLocation } from "react-router-dom";
+import { Mail, CheckCircle, AlertCircle, CreditCard, Users, Smartphone, Zap, BarChart3, Shield } from "lucide-react";
+import { useState, useEffect } from "react";
 import { mockService } from "@/services/mockData";
 import { useToast } from "@/hooks/use-toast";
 
-const ResetPassword = () => {
-  const navigate = useNavigate();
+const VerifyEmail = () => {
   const { toast } = useToast();
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
+  const navigate = useNavigate();
+  const location = useLocation();
+  const [code, setCode] = useState(['', '', '', '', '', '']);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [currentSlide, setCurrentSlide] = useState(0);
+  const [resendTimer, setResendTimer] = useState(30);
+  const [canResend, setCanResend] = useState(false);
+  
+  // Initialize the resend timer on component mount
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setResendTimer(prev => {
+        if (prev <= 1) {
+          clearInterval(timer);
+          setCanResend(true);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+    
+    return () => clearInterval(timer);
+  }, []);
 
   const slides = [
     {
@@ -33,37 +50,88 @@ const ResetPassword = () => {
     }
   ];
 
+  const handlePinChange = (index, value) => {
+    if (value === '' || /^[0-9]$/.test(value)) {
+      const newCode = [...code];
+      newCode[index] = value;
+      setCode(newCode);
+      
+      // Move to next input
+      if (value !== '' && index < 5) {
+        const nextInput = document.getElementById(`pin-${index + 1}`);
+        if (nextInput) nextInput.focus();
+      }
+    }
+  };
+
+  const handleKeyDown = (e, index) => {
+    if (e.key === 'Backspace' && !code[index] && index > 0) {
+      const prevInput = document.getElementById(`pin-${index - 1}`);
+      if (prevInput) prevInput.focus();
+    }
+  };
+
+  const handleResendCode = async () => {
+    if (!canResend) return;
+    
+    setResendTimer(30);
+    setCanResend(false);
+    
+    // Start countdown
+    const timer = setInterval(() => {
+      setResendTimer(prev => {
+        if (prev <= 1) {
+          clearInterval(timer);
+          setCanResend(true);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+    
+    try {
+      // Call your API to resend the code here
+      // await authAPI.resendVerificationCode(email);
+      toast({
+        title: "Code Sent",
+        description: "A new verification code has been sent to your email.",
+      });
+    } catch (error) {
+      console.error('Error resending code:', error);
+      toast({
+        title: "Error",
+        description: "Failed to resend verification code. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+    
+    // Validate if all digits are entered
+    if (code.some(digit => digit === '')) {
+      setError('Please enter the 6-digit verification code');
+      return;
+    }
+    
     setIsLoading(true);
 
-    if (password.length < 8) {
-      setError('Password must be at least 8 characters long');
-      setIsLoading(false);
-      return;
-    }
-
-    if (password !== confirmPassword) {
-      setError('Passwords do not match');
-      setIsLoading(false);
-      return;
-    }
-
     try {
+      const verificationCode = code.join('');
       // Simple navigation - no validation needed for UI flow
-      await mockService.resetPassword('mock-token', password);
       setIsSubmitted(true);
       toast({
-        title: "Password Reset",
-        description: "Your password has been successfully reset.",
+        title: "Success",
+        description: "Your email has been verified successfully!",
       });
-      // Navigate to dashboard for UI flow
-      navigate('/dashboard');
+      // Navigate to reset password page for UI flow
+      navigate('/reset-password', { state: { email: location.state?.email } });
     } catch (error) {
-      console.error('Password reset error:', error);
+      console.error('Verification error:', error);
       // Even if there's an error, still navigate for UI flow
-      navigate('/dashboard');
+      navigate('/reset-password', { state: { email: location.state?.email } });
     } finally {
       setIsLoading(false);
     }
@@ -188,57 +256,43 @@ const ResetPassword = () => {
           <div className="min-h-screen flex items-center justify-center p-12">
             <div className="w-full max-w-md space-y-6">
               <div className="text-left">
-                <h1 className="text-3xl font-bold text-[#1F1F1F] font-['Inter']">Reset your password</h1>
-                <p className="text-gray-600 mt-2 text-sm">Enter the new password for your account.</p>
+                <h1 className="text-3xl font-bold text-[#1F1F1F] font-['Inter']">Verify your Email</h1>
+                <p className="text-gray-600 mt-2 text-sm">A verification code has been sent to your email. Enter the code from the email in the field below.</p>
               </div>
               {!isSubmitted ? (
                 <form onSubmit={handleSubmit} className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="password">New Password</Label>
-                    <div className="relative">
-                      <Input
-                        id="password"
-                        type={showPassword ? "text" : "password"}
-                        placeholder="Enter your new password"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        className={`h-12 border-2 border-gray-200 focus:border-[#3657A7] transition-colors duration-300 form-input ${error ? 'error-input' : ''}`}
-                        required
-                        disabled={isLoading}
-                      />
-                      <button
-                        type="button"
-                        onClick={() => setShowPassword(!showPassword)}
-                        className="absolute right-3 top-1/2 transform -translate-y-1/2"
-                      >
-                        {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-                      </button>
+                    <Label>Verification Code</Label>
+                    <div className="flex justify-between space-x-2">
+                      {[0, 1, 2, 3, 4, 5].map((index) => (
+                        <Input
+                          key={index}
+                          id={`pin-${index}`}
+                          type="text"
+                          maxLength={1}
+                          value={code[index]}
+                          onChange={(e) => handlePinChange(index, e.target.value)}
+                          onKeyDown={(e) => handleKeyDown(e, index)}
+                          className={`h-14 w-14 text-center text-2xl border-2 ${
+                            error ? 'border-red-500' : 'border-gray-200 focus:border-[#3657A7]'
+                          } transition-colors duration-300 form-input`}
+                          required
+                          disabled={isLoading}
+                        />
+                      ))}
                     </div>
-                    <p className="text-sm text-gray-600">Your password must have at least 8 characters</p>
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="confirm-password">Confirm Password</Label>
-                    <div className="relative">
-                      <Input
-                        id="confirm-password"
-                        type={showPassword ? "text" : "password"}
-                        placeholder="Confirm your new password"
-                        value={confirmPassword}
-                        onChange={(e) => setConfirmPassword(e.target.value)}
-                        className={`h-12 border-2 border-gray-200 focus:border-[#3657A7] transition-colors duration-300 form-input ${error ? 'error-input' : ''}`}
-                        required
-                        disabled={isLoading}
-                      />
+                    {error && <p className="text-sm text-red-700 mt-1">{error}</p>}
+                    <div className="text-right mt-2">
                       <button
                         type="button"
-                        onClick={() => setShowPassword(!showPassword)}
-                        className="absolute right-3 top-1/2 transform -translate-y-1/2"
+                        onClick={handleResendCode}
+                        className={`text-sm ${canResend ? 'text-[#3657A7] font-medium' : 'text-gray-400'} hover:underline`}
+                        disabled={!canResend}
                       >
-                        {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                        {canResend ? 'Resend code' : `Resend in ${resendTimer}s`}
                       </button>
                     </div>
                   </div>
-                  {error && <p className="text-sm text-red-700 mt-1">{error}</p>}
                   <Button 
                     type="submit" 
                     className="w-full h-12 bg-[#3657A7] hover:bg-[#2f4d93] text-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-300"
@@ -247,10 +301,10 @@ const ResetPassword = () => {
                     {isLoading ? (
                       <div className="flex items-center justify-center">
                         <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
-                        <span>Processing...</span>
+                        <span>Sending...</span>
                       </div>
                     ) : (
-                      <span>Done</span>
+                      <span>Verify Account</span>
                     )}
                   </Button>
                 </form>
@@ -260,24 +314,23 @@ const ResetPassword = () => {
                     <div className="flex items-start space-x-3">
                       <CheckCircle className="h-5 w-5 text-green-600 mt-0.5" />
                       <div className="space-y-2">
-                        <h4 className="text-lg font-medium text-green-900">Password Reset</h4>
+                        <h4 className="text-lg font-medium text-green-900">Email Verified Successfully!</h4>
                         <p className="text-sm text-green-700">
-                          Your password has been successfully reset. You can now sign in with your new password.
+                          Your email has been verified. You can now proceed to set a new password.
                         </p>
                       </div>
                     </div>
                   </div>
-                  <div className="text-sm text-gray-600">
-                    <Link to="/login" className="text-[#3657A7] font-medium">Back to Sign In</Link>
-                  </div>
                 </div>
               )}
               <div className="text-center">
-                <p className="text-gray-600">
-                  <Link to="/login" className="text-[#0B63BC] hover:text-[#0B63BC]/80 font-semibold transition-colors">
-                    Back to Sign In
-                  </Link>
-                </p>
+                <button 
+                  onClick={handleResendCode}
+                  className={`text-sm ${canResend ? 'text-[#0B63BC]' : 'text-gray-400'} font-medium hover:underline`}
+                  disabled={!canResend}
+                >
+                  {canResend ? "Didn't get the code? Resend" : `Resend in ${resendTimer}s`}
+                </button>
               </div>
             </div>
           </div>
@@ -308,7 +361,7 @@ const ResetPassword = () => {
             <div className="absolute top-56 left-32 w-4 h-4 bg-white/10 transform rotate-45 animate-pulse" />
           </div>
           <div className="relative max-w-md text-center z-10">
-            <img src="/amico.png" alt="Reset Password" className="slider-image" />
+            <img src="/amico.png" alt="Verification" className="slider-image" />
             <div className="slider-text-container">
               {slides.map((slide, index) => (
                 <div
@@ -349,7 +402,7 @@ const ResetPassword = () => {
             <div className="absolute top-20 right-20 w-6 h-6 border-2 border-white/20 rounded-full animate-spin" style={{animationDuration: '6s'}} />
           </div>
           <div className="max-w-sm text-white text-center relative z-10">
-            <img src="/amico.png" alt="Reset Password" className="mobile-slider-image" />
+            <img src="/amico.png" alt="Verification" className="mobile-slider-image" />
             <div className="mobile-slider-text-container">
               {slides.map((slide, index) => (
                 <div
@@ -374,79 +427,71 @@ const ResetPassword = () => {
         </div>
         <div className="h-2/3 overflow-y-auto p-6">
           <div className="mb-4">
-            <h1 className="text-2xl font-bold text-[#3657A7]">Reset your password</h1>
-            <p className="text-sm text-gray-500">Enter the new password for your account.</p>
+            <h1 className="text-2xl font-bold text-[#3657A7]">Verify your Email</h1>
+            <p className="text-sm text-gray-500">Enter the 6-digit verification code sent to your email.</p>
           </div>
           {!isSubmitted ? (
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="password-m">New Password</Label>
-                <div className="relative">
-                  <Input 
-                    id="password-m" 
-                    type={showPassword ? "text" : "password"} 
-                    placeholder="Enter your new password" 
-                    value={password} 
-                    onChange={(e) => setPassword(e.target.value)} 
-                    className={`h-12 border-gray-300 focus:border-[#3657A7] form-input ${error ? 'error-input' : ''}`} 
-                    required 
-                    disabled={isLoading} 
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 transform -translate-y-1/2"
-                  >
-                    {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-                  </button>
+                <Label>Verification Code</Label>
+                <div className="grid grid-cols-6 gap-2 mb-2">
+                  {[0, 1, 2, 3, 4, 5].map((index) => (
+                    <Input
+                      key={index}
+                      id={`pin-m-${index}`}
+                      type="text"
+                      maxLength={1}
+                      value={code[index]}
+                      onChange={(e) => handlePinChange(index, e.target.value)}
+                      onKeyDown={(e) => handleKeyDown(e, index)}
+                      className={`h-14 w-full text-center text-2xl border-2 ${
+                        error ? 'border-red-500' : 'border-gray-200 focus:border-[#3657A7]'
+                      } transition-colors duration-300 form-input`}
+                      required
+                      disabled={isLoading}
+                    />
+                  ))}
                 </div>
-                <p className="text-sm text-gray-600">Your password must have at least 8 characters</p>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="confirm-password-m">Confirm Password</Label>
-                <div className="relative">
-                  <Input 
-                    id="confirm-password-m" 
-                    type={showPassword ? "text" : "password"} 
-                    placeholder="Confirm your new password" 
-                    value={confirmPassword} 
-                    onChange={(e) => setConfirmPassword(e.target.value)} 
-                    className={`h-12 border-gray-300 focus:border-[#3657A7] form-input ${error ? 'error-input' : ''}`} 
-                    required 
-                    disabled={isLoading} 
-                  />
+                {error && <p className="text-sm text-red-700 -mt-2 mb-2">{error}</p>}
+                <div className="text-right">
                   <button
                     type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 transform -translate-y-1/2"
+                    onClick={handleResendCode}
+                    className={`text-sm ${canResend ? 'text-[#3657A7] font-medium' : 'text-gray-400'} hover:underline`}
+                    disabled={!canResend}
                   >
-                    {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                    {canResend ? 'Resend code' : `Resend in ${resendTimer}s`}
                   </button>
                 </div>
               </div>
-              {error && <p className="text-sm text-red-700 mt-1">{error}</p>}
               <Button 
                 type="submit" 
                 className="w-full h-12 bg-[#3657A7] hover:bg-[#2f4d93]" 
                 disabled={isLoading}
               >
-                {isLoading ? 'Processing...' : 'Done'}
+                {isLoading ? 'Verifying...' : 'Verify Account'}
               </Button>
             </form>
           ) : (
             <div className="space-y-4">
               <div className="bg-green-50 border border-green-200 rounded-lg p-3">
-                <p className="text-sm text-green-700">
-                  Your password has been successfully reset.
-                </p>
-              </div>
-              <div className="text-sm text-gray-600">
-                <Link to="/login" className="text-[#3657A7] font-medium">Back to Sign In</Link>
+                <div className="flex items-start space-x-3">
+                  <CheckCircle className="h-5 w-5 text-green-600 mt-0.5 flex-shrink-0" />
+                  <p className="text-sm text-green-700">
+                    Your email has been verified successfully!
+                  </p>
+                </div>
               </div>
             </div>
           )}
-          <div className="mt-4">
-            <Link to="/login" className="text-sm text-[#3657A7]">Back to Sign In</Link>
+          <div className="mt-4 text-center">
+            <button 
+              onClick={handleResendCode}
+              className={`text-sm ${canResend ? 'text-[#3657A7]' : 'text-gray-400'} font-medium`}
+              disabled={!canResend}
+            >
+              {canResend ? "Didn't get the code? Resend" : `Resend in ${resendTimer}s`}
+            </button>
           </div>
         </div>
       </div>
@@ -454,4 +499,4 @@ const ResetPassword = () => {
   );
 };
 
-export default ResetPassword;
+export default VerifyEmail;

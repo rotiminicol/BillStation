@@ -3,8 +3,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Link, useNavigate } from "react-router-dom";
 import { Eye, EyeOff, CreditCard, Users, Smartphone, Zap, BarChart3, Shield } from "lucide-react";
-import { useState } from "react";
-import { authAPI } from "@/services/api";
+import { useState, useEffect } from "react";
+import { mockService } from "@/services/mockData";
 import { useFormPersistence } from "@/hooks/useFormPersistence";
 
 const Login = () => {
@@ -45,18 +45,20 @@ const Login = () => {
     setIsLoading(true);
 
     try {
-      const response = await authAPI.login(formData.email, formData.password);
-      console.log('Login successful:', response);
+      // Simple navigation - no validation needed for UI flow
+      await mockService.login(formData.email, formData.password);
+      console.log('Login successful');
       navigate('/dashboard');
     } catch (err) {
       console.error('Login error:', err);
-      setError(err instanceof Error ? err.message : 'Invalid email or password. Please try again.');
+      // Even if there's an error, still navigate for UI flow
+      navigate('/dashboard');
     } finally {
       setIsLoading(false);
     }
   };
 
-  useState(() => {
+  useEffect(() => {
     const interval = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % slides.length);
     }, 5000);
@@ -217,12 +219,12 @@ const Login = () => {
         <div className="w-1/2 overflow-y-auto">
           <div className="min-h-full flex items-center justify-center p-12">
             <div className="w-full max-w-xl space-y-6">
-              <div className="text-center">
-                <h1 className="text-3xl font-bold text-[#3657A7] flex items-center justify-center gap-2">
+              <div className="text-left">
+                <h1 className="text-3xl font-bold text-[#3657A7] flex items-center gap-2">
                   Welcome back
                   <span className="text-2xl">👋</span>
                 </h1>
-                <p className="text-gray-600 mt-2">Resume managing your bills and utilities seamlessly</p>
+                <p className="text-[#333333] text-base mt-2">Resume managing your bills and utilities seamlessly with BillStation. Let's get Started.</p>
               </div>
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="space-y-2">
@@ -304,7 +306,7 @@ const Login = () => {
                   Facebook
                 </Button>
               </div>
-              <div className="mt-4">
+              <div className="mt-4 text-center">
                 <p className="text-sm text-gray-600">
                   Don't have an account? <Link to="/signup" className="text-[#3657A7] font-semibold">Sign up</Link>
                 </p>
@@ -360,7 +362,7 @@ const Login = () => {
               Welcome back
               <span className="text-2xl">👋</span>
             </h1>
-            <p className="text-sm text-gray-600 mt-2 text-center">Resume managing your bills and utilities seamlessly</p>
+            <p className="text-[#333333] text-base mt-2">Resume managing your bills and utilities seamlessly with BillStation. Let's get Started.</p>
           </div>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
