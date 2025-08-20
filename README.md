@@ -1,73 +1,87 @@
-# Welcome to your Lovable project
+# Bill Station - Modern Fintech Platform
 
-## Project info
+Bill Station is a comprehensive financial technology platform that provides users with a seamless digital banking experience. This application offers a wide range of financial services including money transfers, bill payments, virtual cards, cryptocurrency management, and more, all through an intuitive and user-friendly interface.
 
-**URL**: https://lovable.dev/projects/1e010961-0cde-4f04-988d-a7db7c8ade26
+## ✨ Key Features
 
-## How can I edit this code?
+- 💳 **Virtual Cards**: Create and manage virtual cards for secure online transactions
+- 💱 **Crypto Management**: Buy, sell, and manage cryptocurrencies
+- ✈️ **Travel Services**: Book flights, hotels, and private charters
+- 🏦 **Bank Transfers**: Send and receive money with ease
+- 📱 **Mobile Top-ups**: Recharge airtime and data for all major networks
+- 🎁 **Gift Cards**: Purchase and manage digital gift cards
+- 🔒 **Secure Authentication**: Powered by Clerk for robust user authentication
+- 📊 **Transaction History**: Track all your financial activities in one place
 
-There are several ways of editing your application.
+## 🚀 Technologies Used
 
-**Use Lovable**
+- ⚡ **Frontend**: React 18 with TypeScript
+- 🎨 **Styling**: Tailwind CSS with shadcn/ui components
+- 🔄 **State Management**: React Query for server state
+- 🛠 **Build Tool**: Vite
+- 🔐 **Authentication**: Clerk
+- 📱 **UI Components**: Radix UI Primitives
+- 📅 **Date Handling**: date-fns
+- 🎭 **Animation**: Framer Motion
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/1e010961-0cde-4f04-988d-a7db7c8ade26) and start prompting.
+## 🛠 Getting Started
 
-Changes made via Lovable will be committed automatically to this repo.
+### Prerequisites
 
-**Use your preferred IDE**
+- Node.js 16+ (Recommended: Latest LTS version)
+- npm or yarn package manager
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+### Installation
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+1. Clone the repository:
+   ```sh
+   git clone <repository-url>
+   cd bill-station-frontend
+   ```
 
-Follow these steps:
+2. Install dependencies:
+   ```sh
+   npm install
+   # or
+   yarn install
+   ```
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+3. Set up environment variables:
+   Create a `.env` file in the root directory and add the necessary environment variables:
+   ```
+   VITE_CLERK_PUBLISHABLE_KEY=your_clerk_publishable_key
+   VITE_API_BASE_URL=your_api_base_url
+   ```
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+4. Start the development server:
+   ```sh
+   npm run dev
+   # or
+   yarn dev
+   ```
 
-# Step 3: Install the necessary dependencies.
-npm i
+5. Open [http://localhost:5173](http://localhost:5173) in your browser.
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
+## 🏗 Project Structure
+
+```
+src/
+├── components/     # Reusable UI components
+├── hooks/         # Custom React hooks
+├── lib/           # Utility functions and configurations
+├── pages/         # Application pages/routes
+├── services/      # API services and integrations
+└── styles/        # Global styles and themes
 ```
 
-**Edit a file directly in GitHub**
+## 📝 License
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-**Use GitHub Codespaces**
+## 🤝 Contributing
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+Contributions are welcome! Please feel free to submit a Pull Request.
 
-## What technologies are used for this project?
+## 📧 Contact
 
-This project is built with:
-
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
-
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/1e010961-0cde-4f04-988d-a7db7c8ade26) and click on Share -> Publish.
-
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+For any inquiries or support, please contact our team at support@billstation.com
