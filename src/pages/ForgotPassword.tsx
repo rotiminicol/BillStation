@@ -3,7 +3,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Link, useNavigate } from "react-router-dom";
 import { Mail, CheckCircle, AlertCircle, CreditCard, Users, Smartphone, Zap, BarChart3, Shield } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { mockService } from "@/services/mockData";
 import { useToast } from "@/hooks/use-toast";
 
@@ -17,18 +17,9 @@ const ForgotPassword = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
 
   const slides = [
-    {
-      title: "Instant Access to Essential Services",
-      description: "Top up your phone, pay bills, and even indulge in some leisure activities, all from one app."
-    },
-    {
-      title: "Cash in on Unused Airtime Credits",
-      description: "Convert your unused airtime credits into cash quickly and easily."
-    },
-    {
-      title: "Buy and Sell Gift Cards for Quick Cash",
-      description: "Trade gift cards for instant cash or purchase new ones with ease."
-    }
+    { image: '/AUTH5.png', title: 'Reset your password easily', description: 'Receive a secure link to reset your account password in minutes.' },
+    { image: '/AUTH6.png', title: 'Protect your account', description: 'We use strong security measures to keep your account safe.' },
+    { image: '/AUTH7.png', title: 'We’ve got your back', description: 'Fast support to help you get back into your account.' },
   ];
 
   const handleSubmit = async (e) => {
@@ -55,7 +46,7 @@ const ForgotPassword = () => {
     }
   };
 
-  useState(() => {
+  useEffect(() => {
     const interval = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % slides.length);
     }, 5000);
@@ -266,7 +257,7 @@ const ForgotPassword = () => {
             <div className="absolute top-56 left-32 w-4 h-4 bg-white/10 transform rotate-45 animate-pulse" />
           </div>
           <div className="relative max-w-md text-center z-10">
-            <img src="/amico.png" alt="Forgot Password" className="slider-image" />
+            <img src={slides[currentSlide].image} onError={(e) => { (e.currentTarget as HTMLImageElement).src = '/amico.png'; }} alt="Forgot Password" className="slider-image" />
             <div className="slider-text-container">
               {slides.map((slide, index) => (
                 <div
@@ -307,7 +298,7 @@ const ForgotPassword = () => {
             <div className="absolute top-20 right-20 w-6 h-6 border-2 border-white/20 rounded-full animate-spin" style={{animationDuration: '6s'}} />
           </div>
           <div className="max-w-sm text-white text-center relative z-10">
-            <img src="/fpass.png" alt="Forgot Password" className="mobile-slider-image" />
+            <img src={slides[currentSlide].image} onError={(e) => { (e.currentTarget as HTMLImageElement).src = '/fpass.png'; }} alt="Forgot Password" className="mobile-slider-image" />
             <div className="mobile-slider-text-container">
               {slides.map((slide, index) => (
                 <div

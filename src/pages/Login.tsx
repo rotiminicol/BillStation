@@ -20,18 +20,10 @@ const Login = () => {
   });
 
   const slides = [
-    {
-      title: "Instant Access to Essential Services",
-      description: "Top up your phone, pay bills, and even indulge in some leisure activities, all from one app."
-    },
-    {
-      title: "Cash in on Unused Airtime Credits",
-      description: "Convert your unused airtime credits into cash quickly and easily."
-    },
-    {
-      title: "Buy and Sell Gift Cards for Quick Cash",
-      description: "Trade gift cards for instant cash or purchase new ones with ease."
-    }
+    { image: '/AUTH1.png', title: 'Instant Access to Essential Services', description: 'Top up your phone, pay bills, and even indulge in some leisure activities, all from one app.' },
+    { image: '/AUTH2.png', title: 'Cash in on Unused Airtime Credits', description: 'Convert your unused airtime credits into cash quickly and easily.' },
+    { image: '/AUTH3.png', title: 'Buy and Sell Gift Cards for Quick Cash', description: 'Trade gift cards for instant cash or purchase new ones with ease.' },
+    { image: '/AUTH4.png', title: 'Secure and Reliable Platform', description: 'Your transactions are protected with top-tier security measures.' }
   ];
 
   const handleInputChange = (field, value) => {
@@ -63,7 +55,7 @@ const Login = () => {
       setCurrentSlide((prev) => (prev + 1) % slides.length);
     }, 5000);
     return () => clearInterval(interval);
-  }, []);
+  }, [slides.length]);
 
   const FloatingIcon = ({ icon: Icon, className, delay = 0 }) => (
     <div 
@@ -192,7 +184,7 @@ const Login = () => {
           </div>
           <div className="relative h-full flex items-center justify-center p-12 z-10">
             <div className="max-w-md text-center">
-              <img src="/auth.png" alt="Auth" className="slider-image" />
+              <img src={slides[currentSlide].image} onError={(e) => { (e.currentTarget as HTMLImageElement).src = '/auth.png'; }} alt="Auth" className="slider-image" />
               <div className="slider-text-container">
                 {slides.map((slide, index) => (
                   <div
@@ -333,7 +325,7 @@ const Login = () => {
             <div className="absolute top-20 right-20 w-6 h-6 border-2 border-white/20 rounded-full animate-spin" style={{animationDuration: '6s'}} />
           </div>
           <div className="max-w-sm text-white text-center relative z-10">
-            <img src="/auth.png" alt="Auth" className="mobile-slider-image" />
+            <img src={slides[currentSlide].image} onError={(e) => { (e.currentTarget as HTMLImageElement).src = '/auth.png'; }} alt="Auth" className="mobile-slider-image" />
             <div className="mobile-slider-text-container">
               {slides.map((slide, index) => (
                 <div

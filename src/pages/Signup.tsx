@@ -4,9 +4,10 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Link, useNavigate } from "react-router-dom";
 import { Eye, EyeOff, CreditCard, Users, Smartphone, Zap, BarChart3, Shield } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { mockService } from "@/services/mockData";
 import { useFormPersistence } from "@/hooks/useFormPersistence";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 const Signup = () => {
   const navigate = useNavigate();
@@ -14,7 +15,14 @@ const Signup = () => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [agreedToTerms, setAgreedToTerms] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [errors, setErrors] = useState({
+    fullName: '',
+    email: '',
+    phone: '',
+    password: '',
+    confirmPassword: '',
+    terms: ''
+  });
   const [currentSlide, setCurrentSlide] = useState(0);
   const { formData, updateFormData, clearFormData } = useFormPersistence('signup', {
     fullName: '',
@@ -22,8 +30,22 @@ const Signup = () => {
     phone: '',
     password: '',
     confirmPassword: '',
-    referralCode: ''
+    referralCode: '',
+    country: 'NG'
   });
+
+  const countries = [
+    { name: 'Nigeria', code: 'NG', dialCode: '+234', flag: '🇳🇬' },
+    { name: 'Canada', code: 'CA', dialCode: '+1', flag: '🇨🇦' },
+    { name: 'United States', code: 'US', dialCode: '+1', flag: '🇺🇸' },
+    { name: 'United Kingdom', code: 'GB', dialCode: '+44', flag: '🇬🇧' },
+    { name: 'Ghana', code: 'GH', dialCode: '+233', flag: '🇬🇭' },
+    { name: 'China', code: 'CN', dialCode: '+86', flag: '🇨🇳' },
+    { name: 'South Africa', code: 'ZA', dialCode: '+27', flag: '🇿🇦' },
+    { name: 'Egypt', code: 'EG', dialCode: '+20', flag: '🇪🇬' },
+  ];
+
+  const selectedCountry = countries.find(c => c.code === (formData.country || 'NG')) || countries[0];
 
   const slides = [
     {
@@ -40,33 +62,78 @@ const Signup = () => {
     }
   ];
 
+  const authImages = [
+    '/AUTH1.png',
+    '/AUTH2.png',
+    '/AUTH3.png',
+    '/AUTH4.png',
+  ];
+
+  const validateField = (field, value) => {
+    switch (field) {
+      case 'fullName': {
+        if (!value.trim()) return 'Full name is required';
+        if (value.trim().split(' ').length < 2) return 'Please enter your first and last name';
+        return '';
+      }
+      case 'email': {
+        if (!value.trim()) return 'Email address is required';
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(value)) return 'Please enter a valid email address';
+        return '';
+      }
+      case 'phone': {
+        const digits = String(value || '').replace(/\D/g, '');
+        if (!digits) return 'Phone number is required';
+        if (digits.length < 6) return 'Please enter a valid phone number';
+        return '';
+      }
+      case 'password': {
+        if (!value) return 'Password is required';
+        if (value.length < 8) return 'Password must be at least 8 characters long';
+        return '';
+      }
+      case 'confirmPassword': {
+        if (!value) return 'Please confirm your password';
+        if (value !== formData.password) return 'Passwords do not match';
+        return '';
+      }
+      default:
+        return '';
+    }
+  };
+
   const handleInputChange = (field, value) => {
     updateFormData({ [field]: value });
-    setError('');
+    // Clear error for this field when user starts typing
+    setErrors(prev => ({ ...prev, [field]: '' }));
+    if (field === 'country') {
+      setErrors(prev => ({ ...prev, phone: '' }));
+    }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
+    
+    // Validate all fields
+    const newErrors = {
+      fullName: validateField('fullName', formData.fullName),
+      email: validateField('email', formData.email),
+      phone: validateField('phone', formData.phone),
+      password: validateField('password', formData.password),
+      confirmPassword: validateField('confirmPassword', formData.confirmPassword),
+      terms: agreedToTerms ? '' : 'Please agree to the Terms of Service and Privacy Policy'
+    };
+
+    setErrors(newErrors);
+
+    // Check if there are any errors
+    const hasErrors = Object.values(newErrors).some(error => error !== '');
+    if (hasErrors) {
+      return;
+    }
+
     setIsLoading(true);
-
-    if (!agreedToTerms) {
-      setError('Please agree to the Terms of Service and Privacy Policy');
-      setIsLoading(false);
-      return;
-    }
-
-    if (formData.password !== formData.confirmPassword) {
-      setError('Passwords do not match');
-      setIsLoading(false);
-      return;
-    }
-
-    if (formData.password.length < 8) {
-      setError('Password must be at least 8 characters long');
-      setIsLoading(false);
-      return;
-    }
 
     try {
       const [firstName, ...rest] = formData.fullName.trim().split(' ');
@@ -76,7 +143,9 @@ const Signup = () => {
         firstName: firstName || '',
         lastName: lastName || '',
         email: formData.email,
-        phone: formData.phone,
+        phone: `${selectedCountry.dialCode}${String(formData.phone || '')
+          .replace(/\D/g, '')
+          .replace(/^0+/, '')}`,
         password: formData.password,
       });
       console.log('Signup successful');
@@ -91,12 +160,7 @@ const Signup = () => {
     }
   };
 
-  useState(() => {
-    const interval = setInterval(() => {
-      setCurrentSlide((prev) => (prev + 1) % slides.length);
-    }, 5000);
-    return () => clearInterval(interval);
-  }, []);
+  // Auto-advance disabled to avoid hook typing issues; dots remain clickable
 
   const FloatingIcon = ({ icon: Icon, className, delay = 0 }) => (
     <div 
@@ -227,7 +291,7 @@ const Signup = () => {
           </div>
           <div className="relative h-full flex items-center justify-center p-12 z-10">
             <div className="max-w-md text-center">
-              <img src="/auth.png" alt="Auth" className="slider-image" />
+              <img src={authImages[currentSlide]} onError={(e) => { (e.currentTarget as HTMLImageElement).src = '/auth.png'; }} alt="Auth" className="slider-image" />
               <div className="slider-text-container">
                 {slides.map((slide, index) => (
                   <div
@@ -240,7 +304,7 @@ const Signup = () => {
                 ))}
               </div>
               <div className="mt-6 flex items-center justify-center gap-1">
-                {slides.map((_, index) => (
+                {authImages.map((_, index) => (
                   <span 
                     key={index} 
                     className={`h-1.5 w-1.5 rounded-full cursor-pointer transition-all ${index === currentSlide ? 'bg-white' : 'bg-white/60'}`}
@@ -268,10 +332,10 @@ const Signup = () => {
                       placeholder="Enter your name" 
                       value={formData.fullName} 
                       onChange={(e) => handleInputChange('fullName', e.target.value)} 
-                      className={`h-12 border-gray-300 focus:border-[#3657A7] form-input ${error ? 'error-input' : ''}`} 
+                      className={`h-12 border-gray-300 focus:border-[#3657A7] form-input ${errors.fullName ? 'error-input' : ''}`} 
                       required 
                     />
-                    {error && <p className="text-sm text-red-700 mt-1">{error}</p>}
+                    {errors.fullName && <p className="text-sm text-red-700 mt-1">{errors.fullName}</p>}
                   </div>
                 </div>
                 <div className="space-y-2">
@@ -283,25 +347,39 @@ const Signup = () => {
                       placeholder="Enter your email address" 
                       value={formData.email} 
                       onChange={(e) => handleInputChange('email', e.target.value)} 
-                      className={`h-12 border-gray-300 focus:border-[#3657A7] form-input ${error ? 'error-input' : ''}`} 
+                      className={`h-12 border-gray-300 focus:border-[#3657A7] form-input ${errors.email ? 'error-input' : ''}`} 
                       required 
                     />
-                    {error && <p className="text-sm text-red-700 mt-1">{error}</p>}
+                    {errors.email && <p className="text-sm text-red-700 mt-1">{errors.email}</p>}
                   </div>
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="phone">Phone Number</Label>
                   <div className="relative">
-                    <Input 
-                      id="phone" 
-                      type="tel" 
-                      placeholder="Enter your phone number" 
-                      value={formData.phone} 
-                      onChange={(e) => handleInputChange('phone', e.target.value)} 
-                      className={`h-12 border-gray-300 focus:border-[#3657A7] form-input ${error ? 'error-input' : ''}`} 
-                      required 
-                    />
-                    {error && <p className="text-sm text-red-700 mt-1">{error}</p>}
+                    <div className="flex gap-2">
+                      <Select value={formData.country || 'NG'} onValueChange={(v) => handleInputChange('country', v)}>
+                        <SelectTrigger className="h-12 w-40">
+                          <SelectValue placeholder="Select country">
+                            {selectedCountry ? `${selectedCountry.flag} ${selectedCountry.name} (${selectedCountry.dialCode})` : 'Select country'}
+                          </SelectValue>
+                        </SelectTrigger>
+                        <SelectContent>
+                          {countries.map((c) => (
+                            <SelectItem key={c.code} value={c.code}>{`${c.flag} ${c.name} (${c.dialCode})`}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <Input 
+                        id="phone" 
+                        type="tel" 
+                        placeholder={`${selectedCountry.dialCode} phone number`} 
+                        value={formData.phone} 
+                        onChange={(e) => handleInputChange('phone', e.target.value)} 
+                        className={`h-12 border-gray-300 focus:border-[#3657A7] form-input ${errors.phone ? 'error-input' : ''}`} 
+                        required 
+                      />
+                    </div>
+                    {errors.phone && <p className="text-sm text-red-700 mt-1">{errors.phone}</p>}
                   </div>
                 </div>
                 <div className="space-y-2">
@@ -313,7 +391,7 @@ const Signup = () => {
                       placeholder="Create a password" 
                       value={formData.password} 
                       onChange={(e) => handleInputChange('password', e.target.value)} 
-                      className={`h-12 pr-12 border-gray-300 focus:border-[#3657A7] form-input ${error ? 'error-input' : ''}`} 
+                      className={`h-12 pr-12 border-gray-300 focus:border-[#3657A7] form-input ${errors.password ? 'error-input' : ''}`} 
                       required 
                     />
                     <button 
@@ -323,7 +401,7 @@ const Signup = () => {
                     >
                       {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                     </button>
-                    {error && <p className="text-sm text-red-700 mt-1">{error}</p>}
+                    {errors.password && <p className="text-sm text-red-700 mt-1">{errors.password}</p>}
                   </div>
                   <p className="text-xs text-gray-500">Your password must have at least 8 characters</p>
                 </div>
@@ -336,7 +414,7 @@ const Signup = () => {
                       placeholder="Confirm your password" 
                       value={formData.confirmPassword} 
                       onChange={(e) => handleInputChange('confirmPassword', e.target.value)} 
-                      className={`h-12 pr-12 border-gray-300 focus:border-[#3657A7] form-input ${error ? 'error-input' : ''}`} 
+                      className={`h-12 pr-12 border-gray-300 focus:border-[#3657A7] form-input ${errors.confirmPassword ? 'error-input' : ''}`} 
                       required 
                     />
                     <button 
@@ -346,7 +424,7 @@ const Signup = () => {
                     >
                       {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                     </button>
-                    {error && <p className="text-sm text-red-700 mt-1">{error}</p>}
+                    {errors.confirmPassword && <p className="text-sm text-red-700 mt-1">{errors.confirmPassword}</p>}
                   </div>
                 </div>
                 <div className="space-y-2">
@@ -357,21 +435,27 @@ const Signup = () => {
                     placeholder="Referral code (Optional)" 
                     value={formData.referralCode} 
                     onChange={(e) => handleInputChange('referralCode', e.target.value)} 
-                    className={`h-12 border-gray-300 focus:border-[#3657A7] form-input ${error ? 'error-input' : ''}`} 
+                    className={`h-12 border-gray-300 focus:border-[#3657A7] form-input`} 
                   />
-                  {error && <p className="text-sm text-red-700 mt-1">{error}</p>}
                 </div>
                 <div className="flex items-start gap-3">
                   <Checkbox 
                     id="terms" 
                     checked={agreedToTerms} 
-                    onCheckedChange={(checked) => setAgreedToTerms(checked)} 
+                    onCheckedChange={(checked) => {
+                      const isChecked = checked === true;
+                      setAgreedToTerms(isChecked);
+                      if (isChecked) {
+                        setErrors(prev => ({ ...prev, terms: '' }));
+                      }
+                    }} 
                     className="mt-1" 
                   />
                   <Label htmlFor="terms" className="text-sm text-gray-600">
                     By creating an account you agree to the <Link to="/terms" className="text-[#3657A7] underline">Terms & Conditions</Link> and our <Link to="/privacy" className="text-[#3657A7] underline">Privacy Policy</Link>
                   </Label>
                 </div>
+                {errors.terms && <p className="text-sm text-red-700 mt-1">{errors.terms}</p>}
                 <Button 
                   type="submit" 
                   disabled={isLoading} 
@@ -411,7 +495,7 @@ const Signup = () => {
         </div>
       </div>
 
-      <div className="lg:hidden h-screen">
+      <div className="lg:hidden h-screen overflow-hidden">
         <div className="h-1/3 bg-gradient-overlay flex items-center justify-center px-6 relative overflow-hidden">
           <img 
             src="/logo.png" 
@@ -428,7 +512,7 @@ const Signup = () => {
             <div className="absolute top-20 right-20 w-6 h-6 border-2 border-white/20 rounded-full animate-spin" style={{animationDuration: '6s'}} />
           </div>
           <div className="max-w-sm text-white text-center relative z-10">
-            <img src="/auth.png" alt="Auth" className="mobile-slider-image" />
+            <img src={authImages[currentSlide]} onError={(e) => { (e.currentTarget as HTMLImageElement).src = '/auth.png'; }} alt="Auth" className="mobile-slider-image" />
             <div className="mobile-slider-text-container">
               {slides.map((slide, index) => (
                 <div
@@ -441,7 +525,7 @@ const Signup = () => {
               ))}
             </div>
             <div className="mt-4 flex items-center justify-center gap-1">
-              {slides.map((_, index) => (
+              {authImages.map((_, index) => (
                 <span 
                   key={index} 
                   className={`h-1.5 w-1.5 rounded-full ${index === currentSlide ? 'bg-white' : 'bg-white/60'}`}
@@ -466,10 +550,10 @@ const Signup = () => {
                   placeholder="Enter your name" 
                   value={formData.fullName} 
                   onChange={(e) => handleInputChange('fullName', e.target.value)} 
-                  className={`h-12 border-gray-300 focus:border-[#3657A7] form-input ${error ? 'error-input' : ''}`} 
+                  className={`h-12 border-gray-300 focus:border-[#3657A7] form-input ${errors.fullName ? 'error-input' : ''}`} 
                   required 
                 />
-                {error && <p className="text-sm text-red-700 mt-1">{error}</p>}
+                {errors.fullName && <p className="text-sm text-red-700 mt-1">{errors.fullName}</p>}
               </div>
             </div>
             <div className="space-y-2">
@@ -481,25 +565,39 @@ const Signup = () => {
                   placeholder="Enter your email address" 
                   value={formData.email} 
                   onChange={(e) => handleInputChange('email', e.target.value)} 
-                  className={`h-12 border-gray-300 focus:border-[#3657A7] form-input ${error ? 'error-input' : ''}`} 
+                  className={`h-12 border-gray-300 focus:border-[#3657A7] form-input ${errors.email ? 'error-input' : ''}`} 
                   required 
                 />
-                {error && <p className="text-sm text-red-700 mt-1">{error}</p>}
+                {errors.email && <p className="text-sm text-red-700 mt-1">{errors.email}</p>}
               </div>
             </div>
             <div className="space-y-2">
               <Label htmlFor="phone-m">Phone Number</Label>
               <div className="relative">
-                <Input 
-                  id="phone-m" 
-                  type="tel" 
-                  placeholder="Enter your phone number" 
-                  value={formData.phone} 
-                  onChange={(e) => handleInputChange('phone', e.target.value)} 
-                  className={`h-12 border-gray-300 focus:border-[#3657A7] form-input ${error ? 'error-input' : ''}`} 
-                  required 
-                />
-                {error && <p className="text-sm text-red-700 mt-1">{error}</p>}
+                <div className="flex gap-2">
+                  <Select value={formData.country || 'NG'} onValueChange={(v) => handleInputChange('country', v)}>
+                    <SelectTrigger className="h-12 w-40">
+                      <SelectValue placeholder="Select country">
+                        {selectedCountry ? `${selectedCountry.flag} ${selectedCountry.name} (${selectedCountry.dialCode})` : 'Select country'}
+                      </SelectValue>
+                    </SelectTrigger>
+                    <SelectContent>
+                      {countries.map((c) => (
+                        <SelectItem key={c.code} value={c.code}>{`${c.flag} ${c.name} (${c.dialCode})`}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <Input 
+                    id="phone-m" 
+                    type="tel" 
+                    placeholder={`${selectedCountry.dialCode} phone number`} 
+                    value={formData.phone} 
+                    onChange={(e) => handleInputChange('phone', e.target.value)} 
+                    className={`h-12 border-gray-300 focus:border-[#3657A7] form-input ${errors.phone ? 'error-input' : ''}`} 
+                    required 
+                  />
+                </div>
+                {errors.phone && <p className="text-sm text-red-700 mt-1">{errors.phone}</p>}
               </div>
             </div>
             <div className="space-y-2">
@@ -511,7 +609,7 @@ const Signup = () => {
                   placeholder="Create a password" 
                   value={formData.password} 
                   onChange={(e) => handleInputChange('password', e.target.value)} 
-                  className={`h-12 pr-12 border-gray-300 focus:border-[#3657A7] form-input ${error ? 'error-input' : ''}`} 
+                  className={`h-12 pr-12 border-gray-300 focus:border-[#3657A7] form-input ${errors.password ? 'error-input' : ''}`} 
                   required 
                 />
                 <button 
@@ -521,7 +619,7 @@ const Signup = () => {
                 >
                   {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>
-                {error && <p className="text-sm text-red-700 mt-1">{error}</p>}
+                {errors.password && <p className="text-sm text-red-700 mt-1">{errors.password}</p>}
               </div>
               <p className="text-xs text-gray-500">Your password must have at least 8 characters</p>
             </div>
@@ -534,7 +632,7 @@ const Signup = () => {
                   placeholder="Confirm your password" 
                   value={formData.confirmPassword} 
                   onChange={(e) => handleInputChange('confirmPassword', e.target.value)} 
-                  className={`h-12 pr-12 border-gray-300 focus:border-[#3657A7] form-input ${error ? 'error-input' : ''}`} 
+                  className={`h-12 pr-12 border-gray-300 focus:border-[#3657A7] form-input ${errors.confirmPassword ? 'error-input' : ''}`} 
                   required 
                 />
                 <button 
@@ -544,7 +642,7 @@ const Signup = () => {
                 >
                   {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>
-                {error && <p className="text-sm text-red-700 mt-1">{error}</p>}
+                {errors.confirmPassword && <p className="text-sm text-red-700 mt-1">{errors.confirmPassword}</p>}
               </div>
             </div>
             <div className="space-y-2">
@@ -555,21 +653,27 @@ const Signup = () => {
                 placeholder="Referral code (Optional)" 
                 value={formData.referralCode} 
                 onChange={(e) => handleInputChange('referralCode', e.target.value)} 
-                className={`h-12 border-gray-300 focus:border-[#3657A7] form-input ${error ? 'error-input' : ''}`} 
+                className={`h-12 border-gray-300 focus:border-[#3657A7] form-input`} 
               />
-              {error && <p className="text-sm text-red-700 mt-1">{error}</p>}
             </div>
             <div className="flex items-start gap-3">
               <Checkbox 
                 id="terms-m" 
                 checked={agreedToTerms} 
-                onCheckedChange={(checked) => setAgreedToTerms(checked)} 
+                onCheckedChange={(checked) => {
+                  const isChecked = checked === true;
+                  setAgreedToTerms(isChecked);
+                  if (isChecked) {
+                    setErrors(prev => ({ ...prev, terms: '' }));
+                  }
+                }} 
                 className="mt-1" 
               />
               <Label htmlFor="terms-m" className="text-sm text-gray-600">
                 By creating an account you agree to the <Link to="/terms" className="text-[#3657A7] underline">Terms & Conditions</Link> and our <Link to="/privacy" className="text-[#3657A7] underline">Privacy Policy</Link>
               </Label>
             </div>
+            {errors.terms && <p className="text-sm text-red-700 mt-1">{errors.terms}</p>}
             <Button 
               type="submit" 
               disabled={isLoading} 
