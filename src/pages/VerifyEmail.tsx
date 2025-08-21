@@ -2,8 +2,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Link, useNavigate, useLocation } from "react-router-dom";
-import { Mail, CheckCircle, AlertCircle, CreditCard, Users, Smartphone, Zap, BarChart3, Shield } from "lucide-react";
-import { useState, useEffect } from "react";
+import { Mail, CheckCircle, CreditCard, Users, Smartphone, Zap, BarChart3, Shield } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
 import { mockService } from "@/services/mockData";
 import { useToast } from "@/hooks/use-toast";
 
@@ -18,8 +18,9 @@ const VerifyEmail = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [resendTimer, setResendTimer] = useState(30);
   const [canResend, setCanResend] = useState(false);
-  
-  // Initialize the resend timer on component mount
+  const [isTransitioning, setIsTransitioning] = useState(false);
+  const sliderRef = useRef(null);
+
   useEffect(() => {
     const timer = setInterval(() => {
       setResendTimer(prev => {
@@ -31,9 +32,31 @@ const VerifyEmail = () => {
         return prev - 1;
       });
     }, 1000);
-    
     return () => clearInterval(timer);
   }, []);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      if (!isTransitioning) {
+        goToNextSlide();
+      }
+    }, 5000);
+    return () => clearInterval(timer);
+  }, [currentSlide, isTransitioning]);
+
+  const goToSlide = (index) => {
+    if (index === currentSlide || isTransitioning) return;
+    setIsTransitioning(true);
+    setCurrentSlide(index);
+    setTimeout(() => {
+      setIsTransitioning(false);
+    }, 800);
+  };
+
+  const goToNextSlide = () => {
+    const nextSlide = (currentSlide + 1) % slides.length;
+    goToSlide(nextSlide);
+  };
 
   const slides = [
     { image: '/AUTH5.png', title: 'Verify your email', description: 'Enter the code sent to your email to continue.' },
@@ -46,8 +69,6 @@ const VerifyEmail = () => {
       const newCode = [...code];
       newCode[index] = value;
       setCode(newCode);
-      
-      // Move to next input
       if (value !== '' && index < 5) {
         const nextInput = document.getElementById(`pin-${index + 1}`);
         if (nextInput) nextInput.focus();
@@ -68,7 +89,6 @@ const VerifyEmail = () => {
     setResendTimer(30);
     setCanResend(false);
     
-    // Start countdown
     const timer = setInterval(() => {
       setResendTimer(prev => {
         if (prev <= 1) {
@@ -81,8 +101,6 @@ const VerifyEmail = () => {
     }, 1000);
     
     try {
-      // Call your API to resend the code here
-      // await authAPI.resendVerificationCode(email);
       toast({
         title: "Code Sent",
         description: "A new verification code has been sent to your email.",
@@ -101,7 +119,6 @@ const VerifyEmail = () => {
     e.preventDefault();
     setError('');
     
-    // Validate if all digits are entered
     if (code.some(digit => digit === '')) {
       setError('Please enter the 6-digit verification code');
       return;
@@ -111,31 +128,20 @@ const VerifyEmail = () => {
 
     try {
       const verificationCode = code.join('');
-      // Simple navigation - no validation needed for UI flow
       setIsSubmitted(true);
       toast({
         title: "Success",
         description: "Your email has been verified successfully!",
       });
-      // Navigate to reset password page for UI flow
       navigate('/reset-password', { state: { email: location.state?.email } });
     } catch (error) {
       console.error('Verification error:', error);
-      // Even if there's an error, still navigate for UI flow
       navigate('/reset-password', { state: { email: location.state?.email } });
     } finally {
       setIsLoading(false);
     }
   };
 
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentSlide((prev) => (prev + 1) % slides.length);
-    }, 5000);
-    return () => clearInterval(interval);
-  }, [slides.length]);
-
-  // Floating background icons component
   const FloatingIcon = ({ icon: Icon, className, delay = 0 }) => (
     <div 
       className={`absolute opacity-10 animate-pulse ${className}`}
@@ -148,7 +154,6 @@ const VerifyEmail = () => {
     </div>
   );
 
-  // Background geometric shapes component
   const GeometricShape = ({ type, className, delay = 0 }) => {
     const baseClasses = "absolute opacity-10 animate-bounce";
     const shapeClasses = type === 'circle' 
@@ -167,16 +172,53 @@ const VerifyEmail = () => {
   };
 
   return (
-    <div className="h-screen bg-white overflow-hidden">
+    <div className="h-screen overflow-hidden bg-white">
       <style>
         {`
-          @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400&family=Inter:wght@600&family=Lato:wght@400&display=swap');
-          .form-input { font-family: 'Roboto', sans-serif; }
-          .slider-header { font-family: 'Inter', sans-serif; }
-          .slider-body { font-family: 'Lato', sans-serif; }
-          .error-input { color: red !important; }
+          @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
           
-          /* Custom floating animation */
+          * {
+            font-family: 'Inter', sans-serif;
+          }
+          
+          .form-input { 
+            border-radius: 10px;
+            padding: 0.875rem 1rem;
+            font-size: 0.9375rem;
+            transition: all 0.2s ease;
+          }
+          
+          .form-input:focus {
+            box-shadow: 0 0 0 3px rgba(54, 87, 167, 0.15);
+            border-color: #3657A7;
+          }
+          
+          .slider-header { 
+            font-weight: 600;
+            font-size: 1.5rem;
+            line-height: 1.3;
+          }
+          
+          .slider-body { 
+            font-weight: 400;
+            font-size: 1rem;
+            line-height: 1.5;
+          }
+          
+          .error-input { 
+            border-color: #ef4444 !important;
+            box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.15);
+          }
+          
+          .hide-scrollbar::-webkit-scrollbar { 
+            display: none; 
+          }
+          
+          .hide-scrollbar { 
+            -ms-overflow-style: none; 
+            scrollbar-width: none; 
+          }
+          
           @keyframes float {
             0%, 100% { transform: translateY(0px) rotate(0deg); }
             50% { transform: translateY(-20px) rotate(180deg); }
@@ -186,69 +228,202 @@ const VerifyEmail = () => {
             animation: float 6s ease-in-out infinite;
           }
           
-          /* Gradient overlay for depth */
           .bg-gradient-overlay {
             background: linear-gradient(135deg, #3657A7 0%, #4a6bc7 50%, #3657A7 100%);
           }
 
-          /* Image styling for larger, centered display */
-          .slider-image {
-            max-height: 400px; /* Larger for desktop */
-            width: auto;
-            margin: 0 auto 2rem auto; /* Added bottom margin */
-            display: block;
-          }
-
-          /* Mobile image styling */
-          .mobile-slider-image {
-            max-height: 200px; /* Smaller for mobile */
-            width: auto;
-            margin: 0 auto 1.5rem auto; /* Added bottom margin */
-            display: block;
-          }
-
-          /* Fixed height for slider text container to prevent layout shifts */
-          .slider-text-container {
-            min-height: 120px; /* Adjust based on longest slide content */
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            text-align: center;
+          .slider-container {
             position: relative;
-          }
-
-          /* Mobile slider text container */
-          .mobile-slider-text-container {
-            min-height: 100px; /* Smaller for mobile */
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            text-align: center;
-            position: relative;
-          }
-
-          /* Smooth transition for slide content */
-          .slide-content {
-            position: absolute;
             width: 100%;
-            opacity: 0;
-            transition: opacity 0.5s ease-in-out;
+            height: 100%;
+            overflow: hidden;
           }
 
-          .slide-content.active {
-            opacity: 1;
+          .slider-track {
+            display: flex;
+            transition: transform 0.8s cubic-bezier(0.23, 1, 0.32, 1);
+            height: 100%;
+          }
+
+          .slider-slide {
+            flex: 0 0 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+          }
+
+          .slider-image-container {
+            width: 100%;
+            height: 400px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+          }
+
+          .slider-image {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            transition: opacity 0.8s ease-in-out;
+          }
+
+          .slider-text-container {
+            min-height: 120px;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            position: relative;
+            padding: 0 2rem;
+          }
+
+          .mobile-slider-image-container {
+            width: 100%;
+            height: 200px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+          }
+
+          .mobile-slider-image {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+          }
+
+          .mobile-slider-text-container {
+            min-height: 100px;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            position: relative;
+            padding: 0 1rem;
+          }
+
+          .slider-dots {
+            position: absolute;
+            bottom: 30px;
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            z-index: 10;
+          }
+
+          .slider-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background-color: rgba(255, 255, 255, 0.5);
+            cursor: pointer;
+            transition: all 0.3s ease;
+          }
+
+          .slider-dot.active {
+            background-color: white;
+            transform: scale(1.2);
+          }
+
+          .slider-dot:hover {
+            background-color: rgba(255, 255, 255, 0.8);
+          }
+
+          @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+          }
+
+          .slide-text {
+            animation: fadeIn 0.8s ease-out forwards;
+          }
+
+          @keyframes glow {
+            0%, 100% { box-shadow: 0 0 5px rgba(255, 255, 255, 0.5); }
+            50% { box-shadow: 0 0 20px rgba(255, 255, 255, 0.8); }
+          }
+
+          .glowing-dot {
+            animation: glow 2s infinite;
           }
         `}
       </style>
-      <div className="hidden lg:flex h-screen flex-row-reverse">
-        <div className="w-1/2 bg-white overflow-y-auto">
-          <div className="min-h-screen flex items-center justify-center p-12">
+      <div className="hidden lg:flex h-full">
+        <div className="w-1/2 relative bg-gradient-overlay text-white overflow-hidden">
+          <img 
+            src="/logo.png" 
+            alt="Bill Station Logo" 
+            className="absolute top-6 left-6 w-14 h-14 object-contain z-20"
+          />
+          <div className="absolute inset-0 z-0">
+            <FloatingIcon icon={CreditCard} className="top-16 left-12 floating-element" delay={0} />
+            <FloatingIcon icon={Smartphone} className="top-32 right-20 floating-element" delay={1} />
+            <FloatingIcon icon={Users} className="top-48 left-8 floating-element" delay={2} />
+            <FloatingIcon icon={Zap} className="bottom-48 right-16 floating-element" delay={0.5} />
+            <FloatingIcon icon={BarChart3} className="bottom-32 left-16 floating-element" delay={1.5} />
+            <FloatingIcon icon={Shield} className="top-64 right-8 floating-element" delay={2.5} />
+            <FloatingIcon icon={CreditCard} className="bottom-64 right-32 floating-element" delay={3} />
+            <FloatingIcon icon={Smartphone} className="bottom-16 left-32 floating-element" delay={0.8} />
+            <GeometricShape type="circle" className="top-20 right-12" delay={0} />
+            <GeometricShape type="square" className="top-40 left-20" delay={1} />
+            <GeometricShape type="circle" className="bottom-40 right-8" delay={2} />
+            <GeometricShape type="square" className="bottom-20 right-24" delay={0.5} />
+            <GeometricShape type="circle" className="top-72 left-4" delay={1.5} />
+            <GeometricShape type="square" className="bottom-60 left-8" delay={2.5} />
+            <div className="absolute top-28 right-28 w-8 h-8 border-2 border-white/20 rounded-full animate-spin" style={{animationDuration: '8s'}} />
+            <div className="absolute bottom-28 left-20 w-6 h-6 border-2 border-white/20 animate-spin" style={{animationDuration: '6s'}} />
+            <div className="absolute top-56 left-32 w-4 h-4 bg-white/10 transform rotate-45 animate-pulse" />
+          </div>
+          <div className="slider-container">
+            <div 
+              className="slider-track" 
+              ref={sliderRef}
+              style={{ transform: `translateX(-${currentSlide * 100}%)` }}
+            >
+              {slides.map((slide, index) => (
+                <div key={index} className="slider-slide">
+                  <div className="slider-image-container">
+                    <img 
+                      src={slide.image} 
+                      onError={(e) => { e.currentTarget.src = '/amico.png'; }} 
+                      alt={`Slide ${index + 1}`} 
+                      className="slider-image" 
+                    />
+                  </div>
+                  <div className="slider-text-container">
+                    <div className="slide-text">
+                      <h2 className="text-2xl font-semibold slider-header">{slide.title}</h2>
+                      <p className="text-white/90 mt-2 slider-body">{slide.description}</p>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <div className="slider-dots">
+              {slides.map((_, index) => (
+                <div
+                  key={index}
+                  className={`slider-dot ${index === currentSlide ? 'active glowing-dot' : ''}`}
+                  onClick={() => goToSlide(index)}
+                ></div>
+              ))}
+            </div>
+          </div>
+        </div>
+        <div className="w-1/2 overflow-y-auto hide-scrollbar bg-gray-50">
+          <div className="min-h-full flex items-center justify-center p-8">
             <div className="w-full max-w-md space-y-6">
               <div className="text-left">
-                <h1 className="text-3xl font-bold text-[#1F1F1F] font-['Inter']">Verify your Email</h1>
-                <p className="text-gray-600 mt-2 text-sm">A verification code has been sent to your email. Enter the code from the email in the field below.</p>
+                <h1 className="text-3xl font-bold text-gray-900">Verify your Email</h1>
+                <p className="text-gray-500 mt-2 text-sm">A verification code has been sent to your email. Enter the code from the email in the field below.</p>
               </div>
               {!isSubmitted ? (
                 <form onSubmit={handleSubmit} className="space-y-4">
@@ -264,20 +439,18 @@ const VerifyEmail = () => {
                           value={code[index]}
                           onChange={(e) => handlePinChange(index, e.target.value)}
                           onKeyDown={(e) => handleKeyDown(e, index)}
-                          className={`h-14 w-14 text-center text-2xl border-2 ${
-                            error ? 'border-red-500' : 'border-gray-200 focus:border-[#3657A7]'
-                          } transition-colors duration-300 form-input`}
+                          className={`form-input h-14 w-14 text-center text-2xl ${error ? 'error-input' : 'border-gray-300 focus:border-[#3657A7]'}`}
                           required
                           disabled={isLoading}
                         />
                       ))}
                     </div>
-                    {error && <p className="text-sm text-red-700 mt-1">{error}</p>}
+                    {error && <p className="text-sm text-red-600 mt-1">{error}</p>}
                     <div className="text-right mt-2">
                       <button
                         type="button"
                         onClick={handleResendCode}
-                        className={`text-sm ${canResend ? 'text-[#3657A7] font-medium' : 'text-gray-400'} hover:underline`}
+                        className={`text-sm ${canResend ? 'text-[#3657A7] font-medium hover:text-[#2e4a8c]' : 'text-gray-400'}`}
                         disabled={!canResend}
                       >
                         {canResend ? 'Resend code' : `Resend in ${resendTimer}s`}
@@ -286,14 +459,14 @@ const VerifyEmail = () => {
                   </div>
                   <Button 
                     type="submit" 
-                    className="w-full h-12 bg-[#3657A7] hover:bg-[#2f4d93] text-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-300"
+                    className="w-full h-12 bg-[#3657A7] hover:bg-[#2e4a8c] text-white rounded-xl font-medium text-base transition-all duration-200 shadow-md hover:shadow-lg"
                     disabled={isLoading}
                   >
                     {isLoading ? (
-                      <div className="flex items-center justify-center">
-                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
-                        <span>Sending...</span>
-                      </div>
+                      <span className="flex items-center justify-center">
+                        <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
+                        Verifying...
+                      </span>
                     ) : (
                       <span>Verify Account</span>
                     )}
@@ -317,7 +490,7 @@ const VerifyEmail = () => {
               <div className="text-center">
                 <button 
                   onClick={handleResendCode}
-                  className={`text-sm ${canResend ? 'text-[#0B63BC]' : 'text-gray-400'} font-medium hover:underline`}
+                  className={`text-sm ${canResend ? 'text-[#3657A7] font-medium hover:text-[#2e4a8c]' : 'text-gray-400'}`}
                   disabled={!canResend}
                 >
                   {canResend ? "Didn't get the code? Resend" : `Resend in ${resendTimer}s`}
@@ -326,62 +499,13 @@ const VerifyEmail = () => {
             </div>
           </div>
         </div>
-        <div className="w-1/2 relative bg-gradient-overlay text-white flex items-center justify-center p-12 overflow-hidden">
-          <img 
-            src="/logo.png" 
-            alt="Bill Station Logo" 
-            className="absolute top-4 left-4 w-12 h-12 object-contain z-20"
-          />
-          <div className="absolute inset-0 z-0">
-            <FloatingIcon icon={CreditCard} className="top-16 left-12 floating-element" delay={0} />
-            <FloatingIcon icon={Smartphone} className="top-32 right-20 floating-element" delay={1} />
-            <FloatingIcon icon={Users} className="top-48 left-8 floating-element" delay={2} />
-            <FloatingIcon icon={Zap} className="bottom-48 right-16 floating-element" delay={0.5} />
-            <FloatingIcon icon={BarChart3} className="bottom-32 left-16 floating-element" delay={1.5} />
-            <FloatingIcon icon={Shield} className="top-64 right-8 floating-element" delay={2.5} />
-            <FloatingIcon icon={CreditCard} className="bottom-64 right-32 floating-element" delay={3} />
-            <FloatingIcon icon={Smartphone} className="bottom-16 left-32 floating-element" delay={0.8} />
-            <GeometricShape type="circle" className="top-20 right-12" delay={0} />
-            <GeometricShape type="square" className="top-40 left-20" delay={1} />
-            <GeometricShape type="circle" className="bottom-40 right-8" delay={2} />
-            <GeometricShape type="square" className="bottom-20 right-24" delay={0.5} />
-            <GeometricShape type="circle" className="top-72 left-4" delay={1.5} />
-            <GeometricShape type="square" className="bottom-60 left-8" delay={2.5} />
-            <div className="absolute top-28 right-28 w-8 h-8 border-2 border-white/20 rounded-full animate-spin" style={{animationDuration: '8s'}} />
-            <div className="absolute bottom-28 left-20 w-6 h-6 border-2 border-white/20 animate-spin" style={{animationDuration: '6s'}} />
-            <div className="absolute top-56 left-32 w-4 h-4 bg-white/10 transform rotate-45 animate-pulse" />
-          </div>
-          <div className="relative max-w-md text-center z-10">
-            <img src={slides[currentSlide].image} onError={(e) => { (e.currentTarget as HTMLImageElement).src = '/amico.png'; }} alt="Verification" className="slider-image" />
-            <div className="slider-text-container">
-              {slides.map((slide, index) => (
-                <div
-                  key={index}
-                  className={`slide-content ${index === currentSlide ? 'active' : ''}`}
-                >
-                  <h2 className="text-2xl font-semibold slider-header">{slide.title}</h2>
-                  <p className="text-white/90 mt-2 slider-body">{slide.description}</p>
-                </div>
-              ))}
-            </div>
-            <div className="mt-6 flex items-center justify-center gap-1">
-              {slides.map((_, index) => (
-                <span 
-                  key={index} 
-                  className={`h-1.5 w-1.5 rounded-full cursor-pointer transition-all ${index === currentSlide ? 'bg-white' : 'bg-white/60'}`}
-                  onClick={() => setCurrentSlide(index)}
-                ></span>
-              ))}
-            </div>
-          </div>
-        </div>
       </div>
-      <div className="lg:hidden h-screen">
-        <div className="h-1/3 bg-gradient-overlay flex items-center justify-center px-6 relative overflow-hidden">
+      <div className="lg:hidden h-screen overflow-hidden flex flex-col">
+        <div className="h-2/5 bg-gradient-overlay flex items-center justify-center px-6 relative overflow-hidden">
           <img 
             src="/logo.png" 
             alt="Bill Station Logo" 
-            className="absolute top-4 left-4 w-12 h-12 object-contain z-20"
+            className="absolute top-4 left-4 w-10 h-10 object-contain z-20"
           />
           <div className="absolute inset-0 z-0">
             <FloatingIcon icon={CreditCard} className="top-8 left-8 floating-element" delay={0} />
@@ -392,93 +516,96 @@ const VerifyEmail = () => {
             <GeometricShape type="square" className="bottom-12 left-16" delay={1} />
             <div className="absolute top-20 right-20 w-6 h-6 border-2 border-white/20 rounded-full animate-spin" style={{animationDuration: '6s'}} />
           </div>
-          <div className="max-w-sm text-white text-center relative z-10">
-            <img src={slides[currentSlide].image} onError={(e) => { (e.currentTarget as HTMLImageElement).src = '/amico.png'; }} alt="Verification" className="mobile-slider-image" />
-            <div className="mobile-slider-text-container">
+          <div className="slider-container" style={{height: '100%'}}>
+            <div 
+              className="slider-track" 
+              style={{ transform: `translateX(-${currentSlide * 100}%)`, height: '100%' }}
+            >
               {slides.map((slide, index) => (
-                <div
-                  key={index}
-                  className={`slide-content ${index === currentSlide ? 'active' : ''}`}
-                >
-                  <h2 className="text-xl font-semibold slider-header">{slide.title}</h2>
-                  <p className="text-white/90 mt-2 slider-body">{slide.description}</p>
+                <div key={index} className="slider-slide" style={{padding: '0 1rem'}}>
+                  <div className="mobile-slider-image-container">
+                    <img 
+                      src={slide.image} 
+                      onError={(e) => { e.currentTarget.src = '/amico.png'; }} 
+                      alt={`Slide ${index + 1}`} 
+                      className="mobile-slider-image" 
+                    />
+                  </div>
+                  <div className="mobile-slider-text-container">
+                    <div className="slide-text">
+                      <h2 className="text-xl font-semibold slider-header">{slide.title}</h2>
+                      <p className="text-white/90 mt-2 slider-body text-sm">{slide.description}</p>
+                    </div>
+                  </div>
                 </div>
               ))}
             </div>
-            <div className="mt-4 flex items-center justify-center gap-1">
+            <div className="slider-dots">
               {slides.map((_, index) => (
-                <span 
-                  key={index} 
-                  className={`h-1.5 w-1.5 rounded-full ${index === currentSlide ? 'bg-white' : 'bg-white/60'}`}
-                  onClick={() => setCurrentSlide(index)}
-                ></span>
+                <div
+                  key={index}
+                  className={`slider-dot ${index === currentSlide ? 'active glowing-dot' : ''}`}
+                  onClick={() => goToSlide(index)}
+                ></div>
               ))}
             </div>
           </div>
         </div>
-        <div className="h-2/3 overflow-y-auto p-6">
+        <div className="h-3/5 overflow-y-auto p-5 bg-gray-50">
           <div className="mb-4">
-            <h1 className="text-2xl font-bold text-[#3657A7]">Verify your Email</h1>
-            <p className="text-sm text-gray-500">Enter the 6-digit verification code sent to your email.</p>
+            <h1 className="text-2xl font-bold text-gray-900">Verify your Email</h1>
+            <p className="text-sm text-gray-500 mt-1">Enter the 6-digit verification code sent to your email.</p>
           </div>
-          {!isSubmitted ? (
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="space-y-2">
-                <Label>Verification Code</Label>
-                <div className="grid grid-cols-6 gap-2 mb-2">
-                  {[0, 1, 2, 3, 4, 5].map((index) => (
-                    <Input
-                      key={index}
-                      id={`pin-m-${index}`}
-                      type="text"
-                      maxLength={1}
-                      value={code[index]}
-                      onChange={(e) => handlePinChange(index, e.target.value)}
-                      onKeyDown={(e) => handleKeyDown(e, index)}
-                      className={`h-14 w-full text-center text-2xl border-2 ${
-                        error ? 'border-red-500' : 'border-gray-200 focus:border-[#3657A7]'
-                      } transition-colors duration-300 form-input`}
-                      required
-                      disabled={isLoading}
-                    />
-                  ))}
-                </div>
-                {error && <p className="text-sm text-red-700 -mt-2 mb-2">{error}</p>}
-                <div className="text-right">
-                  <button
-                    type="button"
-                    onClick={handleResendCode}
-                    className={`text-sm ${canResend ? 'text-[#3657A7] font-medium' : 'text-gray-400'} hover:underline`}
-                    disabled={!canResend}
-                  >
-                    {canResend ? 'Resend code' : `Resend in ${resendTimer}s`}
-                  </button>
-                </div>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="space-y-2">
+              <Label>Verification Code</Label>
+              <div className="grid grid-cols-6 gap-2 mb-2">
+                {[0, 1, 2, 3, 4, 5].map((index) => (
+                  <Input
+                    key={index}
+                    id={`pin-m-${index}`}
+                    type="text"
+                    maxLength={1}
+                    value={code[index]}
+                    onChange={(e) => handlePinChange(index, e.target.value)}
+                    onKeyDown={(e) => handleKeyDown(e, index)}
+                    className={`form-input h-14 w-full text-center text-2xl ${error ? 'error-input' : 'border-gray-300 focus:border-[#3657A7]'}`}
+                    required
+                    disabled={isLoading}
+                  />
+                ))}
               </div>
-              <Button 
-                type="submit" 
-                className="w-full h-12 bg-[#3657A7] hover:bg-[#2f4d93]" 
-                disabled={isLoading}
-              >
-                {isLoading ? 'Verifying...' : 'Verify Account'}
-              </Button>
-            </form>
-          ) : (
-            <div className="space-y-4">
-              <div className="bg-green-50 border border-green-200 rounded-lg p-3">
-                <div className="flex items-start space-x-3">
-                  <CheckCircle className="h-5 w-5 text-green-600 mt-0.5 flex-shrink-0" />
-                  <p className="text-sm text-green-700">
-                    Your email has been verified successfully!
-                  </p>
-                </div>
+              {error && <p className="text-sm text-red-600 -mt-2 mb-2">{error}</p>}
+              <div className="text-right">
+                <button
+                  type="button"
+                  onClick={handleResendCode}
+                  className={`text-sm ${canResend ? 'text-[#3657A7] font-medium hover:text-[#2e4a8c]' : 'text-gray-400'}`}
+                  disabled={!canResend}
+                >
+                  {canResend ? 'Resend code' : `Resend in ${resendTimer}s`}
+                </button>
               </div>
             </div>
-          )}
+            <Button 
+              type="submit" 
+              className="w-full h-12 bg-[#3657A7] hover:bg-[#2e4a8c] text-white rounded-xl font-medium mt-2"
+              disabled={isLoading}
+            >
+              {isLoading ? (
+                <span className="flex items-center justify-center">
+                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
+                  Verifying...
+                </span>
+              ) : (
+                <span>Verify Account</span>
+              )}
+            </Button>
+          </form>
           <div className="mt-4 text-center">
             <button 
               onClick={handleResendCode}
-              className={`text-sm ${canResend ? 'text-[#3657A7]' : 'text-gray-400'} font-medium`}
+              className={`text-sm ${canResend ? 'text-[#3657A7] font-medium hover:text-[#2e4a8c]' : 'text-gray-400'}`}
               disabled={!canResend}
             >
               {canResend ? "Didn't get the code? Resend" : `Resend in ${resendTimer}s`}

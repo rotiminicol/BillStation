@@ -3,8 +3,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Link, useNavigate } from "react-router-dom";
-import { Eye, EyeOff, CreditCard, Users, Smartphone, Zap, BarChart3, Shield } from "lucide-react";
-import { useState, useEffect } from "react";
+import { Eye, EyeOff, CreditCard, Users, Smartphone, Zap, BarChart3, Shield, ArrowRight } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
 import { mockService } from "@/services/mockData";
 import { useFormPersistence } from "@/hooks/useFormPersistence";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -24,6 +24,8 @@ const Signup = () => {
     terms: ''
   });
   const [currentSlide, setCurrentSlide] = useState(0);
+  const [isTransitioning, setIsTransitioning] = useState(false);
+  const sliderRef = useRef(null);
   const { formData, updateFormData, clearFormData } = useFormPersistence('signup', {
     fullName: '',
     email: '',
@@ -68,6 +70,17 @@ const Signup = () => {
     '/AUTH3.png',
     '/AUTH4.png',
   ];
+
+  // Auto-advance the slider
+  useEffect(() => {
+    const timer = setInterval(() => {
+      if (!isTransitioning) {
+        goToNextSlide();
+      }
+    }, 5000);
+    
+    return () => clearInterval(timer);
+  }, [currentSlide, isTransitioning]);
 
   const validateField = (field, value) => {
     switch (field) {
@@ -160,7 +173,22 @@ const Signup = () => {
     }
   };
 
-  // Auto-advance disabled to avoid hook typing issues; dots remain clickable
+  const goToSlide = (index) => {
+    if (index === currentSlide || isTransitioning) return;
+    
+    setIsTransitioning(true);
+    setCurrentSlide(index);
+    
+    // Reset transitioning state after animation completes
+    setTimeout(() => {
+      setIsTransitioning(false);
+    }, 800);
+  };
+
+  const goToNextSlide = () => {
+    const nextSlide = (currentSlide + 1) % authImages.length;
+    goToSlide(nextSlide);
+  };
 
   const FloatingIcon = ({ icon: Icon, className, delay = 0 }) => (
     <div 
@@ -195,13 +223,48 @@ const Signup = () => {
     <div className="h-screen overflow-hidden bg-white">
       <style>
         {`
-          @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400&family=Inter:wght@600&family=Lato:wght@400&display=swap');
-          .form-input { font-family: 'Roboto', sans-serif; }
-          .slider-header { font-family: 'Inter', sans-serif; }
-          .slider-body { font-family: 'Lato', sans-serif; }
-          .error-input { color: red !important; }
-          .hide-scrollbar::-webkit-scrollbar { display: none; }
-          .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+          @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+          
+          * {
+            font-family: 'Inter', sans-serif;
+          }
+          
+          .form-input { 
+            border-radius: 10px;
+            padding: 0.875rem 1rem;
+            font-size: 0.9375rem;
+            transition: all 0.2s ease;
+          }
+          
+          .form-input:focus {
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+          }
+          
+          .slider-header { 
+            font-weight: 600;
+            font-size: 1.5rem;
+            line-height: 1.3;
+          }
+          
+          .slider-body { 
+            font-weight: 400;
+            font-size: 1rem;
+            line-height: 1.5;
+          }
+          
+          .error-input { 
+            border-color: #ef4444 !important;
+            box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.15);
+          }
+          
+          .hide-scrollbar::-webkit-scrollbar { 
+            display: none; 
+          }
+          
+          .hide-scrollbar { 
+            -ms-overflow-style: none; 
+            scrollbar-width: none; 
+          }
           
           @keyframes float {
             0%, 100% { transform: translateY(0px) rotate(0deg); }
@@ -216,59 +279,163 @@ const Signup = () => {
             background: linear-gradient(135deg, #3657A7 0%, #4a6bc7 50%, #3657A7 100%);
           }
 
-          .slider-image {
-            max-height: 400px;
-            width: auto;
-            margin: 0 auto;
-            display: block;
+          .slider-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
           }
 
-          .mobile-slider-image {
-            max-height: 200px;
-            width: auto;
-            margin: 0 auto;
-            display: block;
+          .slider-track {
+            display: flex;
+            transition: transform 0.8s cubic-bezier(0.23, 1, 0.32, 1);
+            height: 100%;
+          }
+
+          .slider-slide {
+            flex: 0 0 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+          }
+
+          .slider-image-container {
+            width: 100%;
+            height: 400px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+          }
+
+          .slider-image {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            transition: opacity 0.8s ease-in-out;
           }
 
           .slider-text-container {
             min-height: 120px;
+            width: 100%;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
             text-align: center;
             position: relative;
+            padding: 0 2rem;
+          }
+
+          .mobile-slider-image-container {
+            width: 100%;
+            height: 200px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+          }
+
+          .mobile-slider-image {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
           }
 
           .mobile-slider-text-container {
             min-height: 100px;
+            width: 100%;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
             text-align: center;
             position: relative;
+            padding: 0 1rem;
           }
 
-          .slide-content {
+          .slider-dots {
             position: absolute;
-            width: 100%;
-            opacity: 0;
-            transition: opacity 0.5s ease-in-out;
+            bottom: 30px;
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            z-index: 10;
           }
 
-          .slide-content.active {
-            opacity: 1;
+          .slider-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background-color: rgba(255, 255, 255, 0.5);
+            cursor: pointer;
+            transition: all 0.3s ease;
+          }
+
+          .slider-dot.active {
+            background-color: white;
+            transform: scale(1.2);
+          }
+
+          .slider-dot:hover {
+            background-color: rgba(255, 255, 255, 0.8);
+          }
+
+          @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+          }
+
+          .slide-text {
+            animation: fadeIn 0.8s ease-out forwards;
+          }
+
+          @keyframes glow {
+            0%, 100% { box-shadow: 0 0 5px rgba(255, 255, 255, 0.5); }
+            50% { box-shadow: 0 0 20px rgba(255, 255, 255, 0.8); }
+          }
+
+          .glowing-dot {
+            animation: glow 2s infinite;
+          }
+          
+          .custom-checkbox {
+            border-radius: 6px;
+          }
+          
+          .custom-checkbox[data-state="checked"] {
+            background-color: #3657A7;
+            border-color: #3657A7;
+          }
+          
+          .country-select {
+            border-radius: 10px;
+            padding: 0.875rem 1rem;
+          }
+          
+          .social-button {
+            border-radius: 10px;
+            padding: 0.75rem 1rem;
+            transition: all 0.2s ease;
+          }
+          
+          .social-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
           }
         `}
       </style>
 
       <div className="hidden lg:flex h-full">
+        {/* Left Side - Slider */}
         <div className="w-1/2 relative bg-gradient-overlay text-white overflow-hidden">
           <img 
             src="/logo.png" 
             alt="Bill Station Logo" 
-            className="absolute top-4 left-4 w-12 h-12 object-contain z-20"
+            className="absolute top-6 left-6 w-14 h-14 object-contain z-20"
           />
           <div className="absolute inset-0 z-0">
             <FloatingIcon icon={CreditCard} className="top-16 left-12 floating-element" delay={0} />
@@ -289,124 +456,138 @@ const Signup = () => {
             <div className="absolute bottom-28 left-20 w-6 h-6 border-2 border-white/20 animate-spin" style={{animationDuration: '6s'}} />
             <div className="absolute top-56 left-32 w-4 h-4 bg-white/10 transform rotate-45 animate-pulse" />
           </div>
-          <div className="relative h-full flex items-center justify-center p-12 z-10">
-            <div className="max-w-md text-center">
-              <img src={authImages[currentSlide]} onError={(e) => { (e.currentTarget as HTMLImageElement).src = '/auth.png'; }} alt="Auth" className="slider-image" />
-              <div className="slider-text-container">
-                {slides.map((slide, index) => (
-                  <div
-                    key={index}
-                    className={`slide-content ${index === currentSlide ? 'active' : ''}`}
-                  >
-                    <h2 className="text-2xl font-semibold slider-header">{slide.title}</h2>
-                    <p className="text-white/90 mt-2 slider-body">{slide.description}</p>
+          
+          {/* Enhanced Slider */}
+          <div className="slider-container">
+            <div 
+              className="slider-track" 
+              ref={sliderRef}
+              style={{ transform: `translateX(-${currentSlide * 100}%)` }}
+            >
+              {authImages.map((image, index) => (
+                <div key={index} className="slider-slide">
+                  <div className="slider-image-container">
+                    <img 
+                      src={image} 
+                      onError={(e) => { (e.currentTarget as HTMLImageElement).src = '/auth.png'; }} 
+                      alt={`Slide ${index + 1}`} 
+                      className="slider-image" 
+                    />
                   </div>
-                ))}
-              </div>
-              <div className="mt-6 flex items-center justify-center gap-1">
-                {authImages.map((_, index) => (
-                  <span 
-                    key={index} 
-                    className={`h-1.5 w-1.5 rounded-full cursor-pointer transition-all ${index === currentSlide ? 'bg-white' : 'bg-white/60'}`}
-                    onClick={() => setCurrentSlide(index)}
-                  ></span>
-                ))}
-              </div>
+                  <div className="slider-text-container">
+                    <div className="slide-text">
+                      <h2 className="text-2xl font-semibold slider-header">{slides[index % slides.length]?.title}</h2>
+                      <p className="text-white/90 mt-2 slider-body">{slides[index % slides.length]?.description}</p>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+            
+            <div className="slider-dots">
+              {authImages.map((_, index) => (
+                <div
+                  key={index}
+                  className={`slider-dot ${index === currentSlide ? 'active glowing-dot' : ''}`}
+                  onClick={() => goToSlide(index)}
+                ></div>
+              ))}
             </div>
           </div>
         </div>
-        <div className="w-1/2 overflow-y-auto hide-scrollbar">
-          <div className="min-h-full flex items-center justify-center p-12">
-            <div className="w-full max-w-xl">
-              <div className="mb-6">
-                <h1 className="text-[36px] font-bold text-[#3657A7] text-center">Let's get you Started</h1>
-                <p className="text-[15px] text-[#333333] mt-1 text-center">Create an Account</p>
+        
+        {/* Right Side - Clean Form Design */}
+        <div className="w-1/2 overflow-y-auto hide-scrollbar bg-gray-50">
+          <div className="min-h-full flex items-center justify-center p-8">
+            <div className="w-full max-w-md">
+              <div className="mb-8 text-center">
+                <h1 className="text-3xl font-bold text-gray-900">Create Your Account</h1>
+                <p className="text-gray-500 mt-2">Join thousands of users managing their bills efficiently</p>
               </div>
-              <form onSubmit={handleSubmit} className="space-y-4">
+              
+              <form onSubmit={handleSubmit} className="space-y-5">
                 <div className="space-y-2">
-                  <Label htmlFor="fullName">First & Last Name</Label>
-                  <div className="relative">
+                  <Label htmlFor="fullName" className="text-sm font-medium text-gray-700">Full Name</Label>
+                  <Input 
+                    id="fullName" 
+                    type="text" 
+                    placeholder="Enter your first and last name" 
+                    value={formData.fullName} 
+                    onChange={(e) => handleInputChange('fullName', e.target.value)} 
+                    className={`form-input ${errors.fullName ? 'error-input' : 'border-gray-300 focus:border-blue-500'}`} 
+                    required 
+                  />
+                  {errors.fullName && <p className="text-sm text-red-600 mt-1">{errors.fullName}</p>}
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="email" className="text-sm font-medium text-gray-700">Email Address</Label>
+                  <Input 
+                    id="email" 
+                    type="email" 
+                    placeholder="Enter your email address" 
+                    value={formData.email} 
+                    onChange={(e) => handleInputChange('email', e.target.value)} 
+                    className={`form-input ${errors.email ? 'error-input' : 'border-gray-300 focus:border-blue-500'}`} 
+                    required 
+                  />
+                  {errors.email && <p className="text-sm text-red-600 mt-1">{errors.email}</p>}
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="phone" className="text-sm font-medium text-gray-700">Phone Number</Label>
+                  <div className="flex gap-3">
+                    <Select value={formData.country || 'NG'} onValueChange={(v) => handleInputChange('country', v)}>
+                      <SelectTrigger className="country-select w-28 h-12">
+                        <SelectValue placeholder="Select country">
+                          {selectedCountry ? `${selectedCountry.flag}` : 'Select country'}
+                        </SelectValue>
+                      </SelectTrigger>
+                      <SelectContent>
+                        {countries.map((c) => (
+                          <SelectItem key={c.code} value={c.code}>{`${c.flag} ${c.name} (${c.dialCode})`}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                     <Input 
-                      id="fullName" 
-                      type="text" 
-                      placeholder="Enter your name" 
-                      value={formData.fullName} 
-                      onChange={(e) => handleInputChange('fullName', e.target.value)} 
-                      className={`h-12 border-gray-300 focus:border-[#3657A7] form-input ${errors.fullName ? 'error-input' : ''}`} 
+                      id="phone" 
+                      type="tel" 
+                      placeholder="Phone number" 
+                      value={formData.phone} 
+                      onChange={(e) => handleInputChange('phone', e.target.value)} 
+                      className={`form-input flex-1 ${errors.phone ? 'error-input' : 'border-gray-300 focus:border-blue-500'}`} 
                       required 
                     />
-                    {errors.fullName && <p className="text-sm text-red-700 mt-1">{errors.fullName}</p>}
                   </div>
+                  {errors.phone && <p className="text-sm text-red-600 mt-1">{errors.phone}</p>}
                 </div>
+                
                 <div className="space-y-2">
-                  <Label htmlFor="email">Email Address</Label>
-                  <div className="relative">
-                    <Input 
-                      id="email" 
-                      type="email" 
-                      placeholder="Enter your email address" 
-                      value={formData.email} 
-                      onChange={(e) => handleInputChange('email', e.target.value)} 
-                      className={`h-12 border-gray-300 focus:border-[#3657A7] form-input ${errors.email ? 'error-input' : ''}`} 
-                      required 
-                    />
-                    {errors.email && <p className="text-sm text-red-700 mt-1">{errors.email}</p>}
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="phone">Phone Number</Label>
-                  <div className="relative">
-                    <div className="flex gap-2">
-                      <Select value={formData.country || 'NG'} onValueChange={(v) => handleInputChange('country', v)}>
-                        <SelectTrigger className="h-12 w-40">
-                          <SelectValue placeholder="Select country">
-                            {selectedCountry ? `${selectedCountry.flag} ${selectedCountry.name} (${selectedCountry.dialCode})` : 'Select country'}
-                          </SelectValue>
-                        </SelectTrigger>
-                        <SelectContent>
-                          {countries.map((c) => (
-                            <SelectItem key={c.code} value={c.code}>{`${c.flag} ${c.name} (${c.dialCode})`}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <Input 
-                        id="phone" 
-                        type="tel" 
-                        placeholder={`${selectedCountry.dialCode} phone number`} 
-                        value={formData.phone} 
-                        onChange={(e) => handleInputChange('phone', e.target.value)} 
-                        className={`h-12 border-gray-300 focus:border-[#3657A7] form-input ${errors.phone ? 'error-input' : ''}`} 
-                        required 
-                      />
-                    </div>
-                    {errors.phone && <p className="text-sm text-red-700 mt-1">{errors.phone}</p>}
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="password">Password</Label>
+                  <Label htmlFor="password" className="text-sm font-medium text-gray-700">Password</Label>
                   <div className="relative">
                     <Input 
                       id="password" 
                       type={showPassword ? 'text' : 'password'} 
-                      placeholder="Create a password" 
+                      placeholder="Create a secure password" 
                       value={formData.password} 
                       onChange={(e) => handleInputChange('password', e.target.value)} 
-                      className={`h-12 pr-12 border-gray-300 focus:border-[#3657A7] form-input ${errors.password ? 'error-input' : ''}`} 
+                      className={`form-input pr-12 ${errors.password ? 'error-input' : 'border-gray-300 focus:border-blue-500'}`} 
                       required 
                     />
                     <button 
                       type="button" 
                       onClick={() => setShowPassword(!showPassword)} 
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500"
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
                     >
-                      {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                      {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                     </button>
-                    {errors.password && <p className="text-sm text-red-700 mt-1">{errors.password}</p>}
                   </div>
-                  <p className="text-xs text-gray-500">Your password must have at least 8 characters</p>
+                  {errors.password && <p className="text-sm text-red-600 mt-1">{errors.password}</p>}
+                  <p className="text-xs text-gray-500 mt-1">Must be at least 8 characters long</p>
                 </div>
+                
                 <div className="space-y-2">
-                  <Label htmlFor="confirmPassword">Confirm Password</Label>
+                  <Label htmlFor="confirmPassword" className="text-sm font-medium text-gray-700">Confirm Password</Label>
                   <div className="relative">
                     <Input 
                       id="confirmPassword" 
@@ -414,31 +595,33 @@ const Signup = () => {
                       placeholder="Confirm your password" 
                       value={formData.confirmPassword} 
                       onChange={(e) => handleInputChange('confirmPassword', e.target.value)} 
-                      className={`h-12 pr-12 border-gray-300 focus:border-[#3657A7] form-input ${errors.confirmPassword ? 'error-input' : ''}`} 
+                      className={`form-input pr-12 ${errors.confirmPassword ? 'error-input' : 'border-gray-300 focus:border-blue-500'}`} 
                       required 
                     />
                     <button 
                       type="button" 
                       onClick={() => setShowConfirmPassword(!showConfirmPassword)} 
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500"
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
                     >
-                      {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                      {showConfirmPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                     </button>
-                    {errors.confirmPassword && <p className="text-sm text-red-700 mt-1">{errors.confirmPassword}</p>}
                   </div>
+                  {errors.confirmPassword && <p className="text-sm text-red-600 mt-1">{errors.confirmPassword}</p>}
                 </div>
+                
                 <div className="space-y-2">
-                  <Label htmlFor="ref">Referral Code (Optional)</Label>
+                  <Label htmlFor="ref" className="text-sm font-medium text-gray-700">Referral Code (Optional)</Label>
                   <Input 
                     id="ref" 
                     type="text" 
-                    placeholder="Referral code (Optional)" 
+                    placeholder="Enter referral code if you have one" 
                     value={formData.referralCode} 
                     onChange={(e) => handleInputChange('referralCode', e.target.value)} 
-                    className={`h-12 border-gray-300 focus:border-[#3657A7] form-input`} 
+                    className="form-input border-gray-300 focus:border-blue-500" 
                   />
                 </div>
-                <div className="flex items-start gap-3">
+                
+                <div className="flex items-start gap-3 pt-2">
                   <Checkbox 
                     id="terms" 
                     checked={agreedToTerms} 
@@ -449,29 +632,45 @@ const Signup = () => {
                         setErrors(prev => ({ ...prev, terms: '' }));
                       }
                     }} 
-                    className="mt-1" 
+                    className="custom-checkbox mt-0.5 border-gray-300" 
                   />
-                  <Label htmlFor="terms" className="text-sm text-gray-600">
-                    By creating an account you agree to the <Link to="/terms" className="text-[#3657A7] underline">Terms & Conditions</Link> and our <Link to="/privacy" className="text-[#3657A7] underline">Privacy Policy</Link>
+                  <Label htmlFor="terms" className="text-sm text-gray-600 leading-tight">
+                    I agree to the <Link to="/terms" className="text-blue-600 hover:underline font-medium">Terms of Service</Link> and <Link to="/privacy" className="text-blue-600 hover:underline font-medium">Privacy Policy</Link>
                   </Label>
                 </div>
-                {errors.terms && <p className="text-sm text-red-700 mt-1">{errors.terms}</p>}
+                {errors.terms && <p className="text-sm text-red-600 mt-1">{errors.terms}</p>}
+                
                 <Button 
                   type="submit" 
                   disabled={isLoading} 
-                  className="w-full h-12 bg-[#3657A7] hover:bg-[#2f4d93] text-white rounded-md"
+                  className="w-full h-12 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-medium text-base transition-all duration-200 shadow-md hover:shadow-lg"
                 >
-                  {isLoading ? 'Creating Account...' : 'Sign Up'}
+                  {isLoading ? (
+                    <span className="flex items-center justify-center">
+                      <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
+                      Creating Account...
+                    </span>
+                  ) : (
+                    <span className="flex items-center justify-center">
+                      Create Account <ArrowRight className="ml-2 h-5 w-5" />
+                    </span>
+                  )}
                 </Button>
               </form>
-              <div className="mt-6">
-                <div className="relative my-4">
-                  <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-gray-300" /></div>
-                  <div className="relative flex justify-center text-sm"><span className="px-4 bg-white text-gray-500">Or sign up with</span></div>
+              
+              <div className="mt-8">
+                <div className="relative my-6">
+                  <div className="absolute inset-0 flex items-center">
+                    <div className="w-full border-t border-gray-300" />
+                  </div>
+                  <div className="relative flex justify-center text-sm">
+                    <span className="px-3 bg-gray-50 text-gray-500">Or continue with</span>
+                  </div>
                 </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <Button variant="outline" className="w-full border border-gray-300 hover:bg-gray-50 rounded-xl py-2.5 transition-all duration-200 hover:shadow-md group">
-                    <svg className="w-5 h-5 mr-2 group-hover:scale-110 transition-transform" viewBox="0 0 24 24">
+                
+                <div className="grid grid-cols-2 gap-3">
+                  <Button variant="outline" className="social-button h-11 border-gray-300 bg-white text-gray-700 hover:bg-gray-50">
+                    <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24">
                       <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
                       <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
                       <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
@@ -479,15 +678,20 @@ const Signup = () => {
                     </svg>
                     Google
                   </Button>
-                  <Button variant="outline" className="w-full border border-gray-300 hover:bg-gray-50 rounded-xl py-2.5 transition-all duration-200 hover:shadow-md group">
-                    <svg className="w-5 h-5 mr-2 group-hover:scale-110 transition-transform" viewBox="0 0 24 24">
-                      <path fill="#1877F2" d="M22 12.07C22 6.48 17.52 2 11.93 2S1.86 6.48 1.86 12.07c0 4.95 3.61 9.06 8.33 9.93v-7.02H7.9v-2.9h2.29V9.41c0-2.26 1.33-3.5 3.38-3.5.98 0 2 .17 2 .17v2.2h-1.13c-1.11 0-1.46.69-1.46 1.39v1.67h2.49l-.4 2.9h-2.09V22c4.72-.87 8.33-4.98 8.33-9.93z"/>
+                  
+                  <Button variant="outline" className="social-button h-11 border-gray-300 bg-white text-gray-700 hover:bg-gray-50">
+                    <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24">
+                      <path fill="#1877F2" d="M22 12.07C22 6.48 17.52 2 11.93 2S1.86 6.48 1.86 12.07c0 4.95 3.61 9.06 8.33 9.93v-7.02H7.9v-2.9h2.29V9.41c0-2.26 1.33-3.50 3.38-3.50.98 0 2 .17 2 .17v2.20h-1.13c-1.11 0-1.46.69-1.46 1.39v1.67h2.49l-.4 2.90h-2.09V22c4.72-.87 8.33-4.98 8.33-9.93z"/>
                     </svg>
                     Facebook
                   </Button>
                 </div>
+                
                 <p className="mt-6 text-center text-sm text-gray-600">
-                  Already have an account? <Link to="/login" className="text-[#3657A7] font-medium">Log In</Link>
+                  Already have an account?{" "}
+                  <Link to="/login" className="text-blue-600 font-medium hover:underline">
+                    Sign in here
+                  </Link>
                 </p>
               </div>
             </div>
@@ -495,12 +699,13 @@ const Signup = () => {
         </div>
       </div>
 
-      <div className="lg:hidden h-screen overflow-hidden">
-        <div className="h-1/3 bg-gradient-overlay flex items-center justify-center px-6 relative overflow-hidden">
+      {/* Mobile View */}
+      <div className="lg:hidden h-screen overflow-hidden flex flex-col">
+        <div className="h-2/5 bg-gradient-overlay flex items-center justify-center px-6 relative overflow-hidden">
           <img 
             src="/logo.png" 
             alt="Bill Station Logo" 
-            className="absolute top-4 left-4 w-12 h-12 object-contain z-20"
+            className="absolute top-4 left-4 w-10 h-10 object-contain z-20"
           />
           <div className="absolute inset-0 z-0">
             <FloatingIcon icon={CreditCard} className="top-8 left-8 floating-element" delay={0} />
@@ -511,105 +716,119 @@ const Signup = () => {
             <GeometricShape type="square" className="bottom-12 left-16" delay={1} />
             <div className="absolute top-20 right-20 w-6 h-6 border-2 border-white/20 rounded-full animate-spin" style={{animationDuration: '6s'}} />
           </div>
-          <div className="max-w-sm text-white text-center relative z-10">
-            <img src={authImages[currentSlide]} onError={(e) => { (e.currentTarget as HTMLImageElement).src = '/auth.png'; }} alt="Auth" className="mobile-slider-image" />
-            <div className="mobile-slider-text-container">
-              {slides.map((slide, index) => (
-                <div
-                  key={index}
-                  className={`slide-content ${index === currentSlide ? 'active' : ''}`}
-                >
-                  <h2 className="text-xl font-semibold slider-header">{slide.title}</h2>
-                  <p className="text-white/90 mt-2 slider-body">{slide.description}</p>
+          
+          {/* Mobile Slider */}
+          <div className="slider-container" style={{height: '100%'}}>
+            <div 
+              className="slider-track" 
+              style={{ transform: `translateX(-${currentSlide * 100}%)`, height: '100%' }}
+            >
+              {authImages.map((image, index) => (
+                <div key={index} className="slider-slide" style={{padding: '0 1rem'}}>
+                  <div className="mobile-slider-image-container">
+                    <img 
+                      src={image} 
+                      onError={(e) => { (e.currentTarget as HTMLImageElement).src = '/auth.png'; }} 
+                      alt={`Slide ${index + 1}`} 
+                      className="mobile-slider-image" 
+                    />
+                  </div>
+                  <div className="mobile-slider-text-container">
+                    <div className="slide-text">
+                      <h2 className="text-xl font-semibold slider-header">{slides[index % slides.length]?.title}</h2>
+                      <p className="text-white/90 mt-2 slider-body text-sm">{slides[index % slides.length]?.description}</p>
+                    </div>
+                  </div>
                 </div>
               ))}
             </div>
-            <div className="mt-4 flex items-center justify-center gap-1">
+            
+            <div className="slider-dots">
               {authImages.map((_, index) => (
-                <span 
-                  key={index} 
-                  className={`h-1.5 w-1.5 rounded-full ${index === currentSlide ? 'bg-white' : 'bg-white/60'}`}
-                  onClick={() => setCurrentSlide(index)}
-                ></span>
+                <div
+                  key={index}
+                  className={`slider-dot ${index === currentSlide ? 'active glowing-dot' : ''}`}
+                  onClick={() => goToSlide(index)}
+                ></div>
               ))}
             </div>
           </div>
         </div>
-        <div className="h-2/3 overflow-y-auto p-6">
+        
+        {/* Mobile Form */}
+        <div className="h-3/5 overflow-y-auto p-5 bg-gray-50">
           <div className="mb-4">
-            <h1 className="text-2xl font-bold text-[#3657A7]">Let's get you Started</h1>
-            <p className="text-sm text-gray-500 mt-1">Create an Account</p>
+            <h1 className="text-2xl font-bold text-gray-900">Create Account</h1>
+            <p className="text-sm text-gray-500 mt-1">Join our community today</p>
           </div>
+          
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="fullName-m">First & Last Name</Label>
-              <div className="relative">
+              <Label htmlFor="fullName-m" className="text-sm font-medium text-gray-700">Full Name</Label>
+              <Input 
+                id="fullName-m" 
+                type="text" 
+                placeholder="First and last name" 
+                value={formData.fullName} 
+                onChange={(e) => handleInputChange('fullName', e.target.value)} 
+                className={`form-input ${errors.fullName ? 'error-input' : 'border-gray-300 focus:border-blue-500'}`} 
+                required 
+              />
+              {errors.fullName && <p className="text-sm text-red-600 mt-1">{errors.fullName}</p>}
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="email-m" className="text-sm font-medium text-gray-700">Email Address</Label>
+              <Input 
+                id="email-m" 
+                type="email" 
+                placeholder="Your email address" 
+                value={formData.email} 
+                onChange={(e) => handleInputChange('email', e.target.value)} 
+                className={`form-input ${errors.email ? 'error-input' : 'border-gray-300 focus:border-blue-500'}`} 
+                required 
+              />
+              {errors.email && <p className="text-sm text-red-600 mt-1">{errors.email}</p>}
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="phone-m" className="text-sm font-medium text-gray-700">Phone Number</Label>
+              <div className="flex gap-2">
+                <Select value={formData.country || 'NG'} onValueChange={(v) => handleInputChange('country', v)}>
+                  <SelectTrigger className="country-select w-20 h-12">
+                    <SelectValue placeholder="Select country">
+                      {selectedCountry ? `${selectedCountry.flag}` : 'Select country'}
+                    </SelectValue>
+                  </SelectTrigger>
+                  <SelectContent>
+                    {countries.map((c) => (
+                      <SelectItem key={c.code} value={c.code}>{`${c.flag} ${c.name} (${c.dialCode})`}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
                 <Input 
-                  id="fullName-m" 
-                  type="text" 
-                  placeholder="Enter your name" 
-                  value={formData.fullName} 
-                  onChange={(e) => handleInputChange('fullName', e.target.value)} 
-                  className={`h-12 border-gray-300 focus:border-[#3657A7] form-input ${errors.fullName ? 'error-input' : ''}`} 
+                  id="phone-m" 
+                  type="tel" 
+                  placeholder="Phone number" 
+                  value={formData.phone} 
+                  onChange={(e) => handleInputChange('phone', e.target.value)} 
+                  className={`form-input flex-1 ${errors.phone ? 'error-input' : 'border-gray-300 focus:border-blue-500'}`} 
                   required 
                 />
-                {errors.fullName && <p className="text-sm text-red-700 mt-1">{errors.fullName}</p>}
               </div>
+              {errors.phone && <p className="text-sm text-red-600 mt-1">{errors.phone}</p>}
             </div>
+            
             <div className="space-y-2">
-              <Label htmlFor="email-m">Email Address</Label>
-              <div className="relative">
-                <Input 
-                  id="email-m" 
-                  type="email" 
-                  placeholder="Enter your email address" 
-                  value={formData.email} 
-                  onChange={(e) => handleInputChange('email', e.target.value)} 
-                  className={`h-12 border-gray-300 focus:border-[#3657A7] form-input ${errors.email ? 'error-input' : ''}`} 
-                  required 
-                />
-                {errors.email && <p className="text-sm text-red-700 mt-1">{errors.email}</p>}
-              </div>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="phone-m">Phone Number</Label>
-              <div className="relative">
-                <div className="flex gap-2">
-                  <Select value={formData.country || 'NG'} onValueChange={(v) => handleInputChange('country', v)}>
-                    <SelectTrigger className="h-12 w-40">
-                      <SelectValue placeholder="Select country">
-                        {selectedCountry ? `${selectedCountry.flag} ${selectedCountry.name} (${selectedCountry.dialCode})` : 'Select country'}
-                      </SelectValue>
-                    </SelectTrigger>
-                    <SelectContent>
-                      {countries.map((c) => (
-                        <SelectItem key={c.code} value={c.code}>{`${c.flag} ${c.name} (${c.dialCode})`}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <Input 
-                    id="phone-m" 
-                    type="tel" 
-                    placeholder={`${selectedCountry.dialCode} phone number`} 
-                    value={formData.phone} 
-                    onChange={(e) => handleInputChange('phone', e.target.value)} 
-                    className={`h-12 border-gray-300 focus:border-[#3657A7] form-input ${errors.phone ? 'error-input' : ''}`} 
-                    required 
-                  />
-                </div>
-                {errors.phone && <p className="text-sm text-red-700 mt-1">{errors.phone}</p>}
-              </div>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="password-m">Password</Label>
+              <Label htmlFor="password-m" className="text-sm font-medium text-gray-700">Password</Label>
               <div className="relative">
                 <Input 
                   id="password-m" 
                   type={showPassword ? 'text' : 'password'} 
-                  placeholder="Create a password" 
+                  placeholder="Create password" 
                   value={formData.password} 
                   onChange={(e) => handleInputChange('password', e.target.value)} 
-                  className={`h-12 pr-12 border-gray-300 focus:border-[#3657A7] form-input ${errors.password ? 'error-input' : ''}`} 
+                  className={`form-input pr-12 ${errors.password ? 'error-input' : 'border-gray-300 focus:border-blue-500'}`} 
                   required 
                 />
                 <button 
@@ -617,22 +836,22 @@ const Signup = () => {
                   onClick={() => setShowPassword(!showPassword)} 
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500"
                 >
-                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                 </button>
-                {errors.password && <p className="text-sm text-red-700 mt-1">{errors.password}</p>}
               </div>
-              <p className="text-xs text-gray-500">Your password must have at least 8 characters</p>
+              {errors.password && <p className="text-sm text-red-600 mt-1">{errors.password}</p>}
             </div>
+            
             <div className="space-y-2">
-              <Label htmlFor="confirmPassword-m">Confirm Password</Label>
+              <Label htmlFor="confirmPassword-m" className="text-sm font-medium text-gray-700">Confirm Password</Label>
               <div className="relative">
                 <Input 
                   id="confirmPassword-m" 
                   type={showConfirmPassword ? 'text' : 'password'} 
-                  placeholder="Confirm your password" 
+                  placeholder="Confirm password" 
                   value={formData.confirmPassword} 
                   onChange={(e) => handleInputChange('confirmPassword', e.target.value)} 
-                  className={`h-12 pr-12 border-gray-300 focus:border-[#3657A7] form-input ${errors.confirmPassword ? 'error-input' : ''}`} 
+                  className={`form-input pr-12 ${errors.confirmPassword ? 'error-input' : 'border-gray-300 focus:border-blue-500'}`} 
                   required 
                 />
                 <button 
@@ -640,23 +859,13 @@ const Signup = () => {
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)} 
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500"
                 >
-                  {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  {showConfirmPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                 </button>
-                {errors.confirmPassword && <p className="text-sm text-red-700 mt-1">{errors.confirmPassword}</p>}
               </div>
+              {errors.confirmPassword && <p className="text-sm text-red-600 mt-1">{errors.confirmPassword}</p>}
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="ref-m">Referral Code (Optional)</Label>
-              <Input 
-                id="ref-m" 
-                type="text" 
-                placeholder="Referral code (Optional)" 
-                value={formData.referralCode} 
-                onChange={(e) => handleInputChange('referralCode', e.target.value)} 
-                className={`h-12 border-gray-300 focus:border-[#3657A7] form-input`} 
-              />
-            </div>
-            <div className="flex items-start gap-3">
+            
+            <div className="flex items-start gap-3 pt-2">
               <Checkbox 
                 id="terms-m" 
                 checked={agreedToTerms} 
@@ -667,29 +876,36 @@ const Signup = () => {
                     setErrors(prev => ({ ...prev, terms: '' }));
                   }
                 }} 
-                className="mt-1" 
+                className="custom-checkbox mt-0.5 border-gray-300" 
               />
-              <Label htmlFor="terms-m" className="text-sm text-gray-600">
-                By creating an account you agree to the <Link to="/terms" className="text-[#3657A7] underline">Terms & Conditions</Link> and our <Link to="/privacy" className="text-[#3657A7] underline">Privacy Policy</Link>
+              <Label htmlFor="terms-m" className="text-xs text-gray-600 leading-tight">
+                I agree to the <Link to="/terms" className="text-blue-600 hover:underline">Terms</Link> and <Link to="/privacy" className="text-blue-600 hover:underline">Privacy Policy</Link>
               </Label>
             </div>
-            {errors.terms && <p className="text-sm text-red-700 mt-1">{errors.terms}</p>}
+            {errors.terms && <p className="text-sm text-red-600 mt-1">{errors.terms}</p>}
+            
             <Button 
               type="submit" 
               disabled={isLoading} 
-              className="w-full h-12 bg-[#3657A7] hover:bg-[#2f4d93]"
+              className="w-full h-12 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-medium mt-2"
             >
-              {isLoading ? 'Creating Account...' : 'Sign Up'}
+              {isLoading ? 'Creating Account...' : 'Create Account'}
             </Button>
           </form>
-          <div className="mt-6">
+          
+          <div className="mt-5">
             <div className="relative my-4">
-              <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-gray-300" /></div>
-              <div className="relative flex justify-center text-sm"><span className="px-4 bg-white text-gray-500">Or sign up with</span></div>
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-gray-300" />
+              </div>
+              <div className="relative flex justify-center text-xs">
+                <span className="px-2 bg-gray-50 text-gray-500">Or sign up with</span>
+              </div>
             </div>
-            <div className="grid grid-cols-2 gap-4">
-              <Button variant="outline" className="w-full border border-gray-300 hover:bg-gray-50 rounded-xl py-2.5">
-                <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24">
+            
+            <div className="grid grid-cols-2 gap-3">
+              <Button variant="outline" className="social-button h-11 border-gray-300 bg-white">
+                <svg className="w-4 h-4 mr-1" viewBox="0 0 24 24">
                   <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
                   <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
                   <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
@@ -697,18 +913,21 @@ const Signup = () => {
                 </svg>
                 Google
               </Button>
-              <Button variant="outline" className="w-full border border-gray-300 hover:bg-gray-50 rounded-xl py-2.5">
-                <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24">
-                  <path fill="#1877F2" d="M22 12.07C22 6.48 17.52 2 11.93 2S1.86 6.48 1.86 12.07c0 4.95 3.61 9.06 8.33 9.93v-7.02H7.9v-2.9h2.29V9.41c0-2.26 1.33-3.5 3.38-3.5.98 0 2 .17 2 .17v2.2h-1.13c-1.11 0-1.46.69-1.46 1.39v1.67h2.49l-.4 2.9h-2.09V22c4.72-.87 8.33-4.98 8.33-9.93z"/>
+              
+              <Button variant="outline" className="social-button h-11 border-gray-300 bg-white">
+                <svg className="w-4 h-4 mr-1" viewBox="0 0 24 24">
+                  <path fill="#1877F2" d="M22 12.07C22 6.48 17.52 2 11.93 2S1.86 6.48 1.86 12.07c0 4.95 3.61 9.06 8.33 9.93v-7.02H7.9v-2.9h2.29V9.41c0-2.26 1.33-3.50 3.38-3.50.98 0 2 .17 2 .17v2.20h-1.13c-1.11 0-1.46.69-1.46 1.39v1.67h2.49l-.4 2.90h-2.09V22c4.72-.87 8.33-4.98 8.33-9.93z"/>
                 </svg>
                 Facebook
               </Button>
             </div>
-            <div className="mt-4">
-              <p className="text-sm text-gray-600">
-                Already have an account? <Link to="/login" className="text-[#3657A7]">Log In</Link>
-              </p>
-            </div>
+            
+            <p className="mt-4 text-center text-xs text-gray-600">
+              Already have an account?{" "}
+              <Link to="/login" className="text-blue-600 font-medium">
+                Sign in
+              </Link>
+            </p>
           </div>
         </div>
       </div>

@@ -2,8 +2,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Link, useNavigate } from "react-router-dom";
-import { Mail, CheckCircle, AlertCircle, CreditCard, Users, Smartphone, Zap, BarChart3, Shield } from "lucide-react";
-import { useState, useEffect } from "react";
+import { Mail, CheckCircle, CreditCard, Users, Smartphone, Zap, BarChart3, Shield } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
 import { mockService } from "@/services/mockData";
 import { useToast } from "@/hooks/use-toast";
 
@@ -15,6 +15,8 @@ const ForgotPassword = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [currentSlide, setCurrentSlide] = useState(0);
+  const [isTransitioning, setIsTransitioning] = useState(false);
+  const sliderRef = useRef(null);
 
   const slides = [
     { image: '/AUTH5.png', title: 'Reset your password easily', description: 'Receive a secure link to reset your account password in minutes.' },
@@ -22,38 +24,50 @@ const ForgotPassword = () => {
     { image: '/AUTH7.png', title: 'We’ve got your back', description: 'Fast support to help you get back into your account.' },
   ];
 
+  useEffect(() => {
+    const timer = setInterval(() => {
+      if (!isTransitioning) {
+        goToNextSlide();
+      }
+    }, 5000);
+    return () => clearInterval(timer);
+  }, [currentSlide, isTransitioning]);
+
+  const goToSlide = (index) => {
+    if (index === currentSlide || isTransitioning) return;
+    setIsTransitioning(true);
+    setCurrentSlide(index);
+    setTimeout(() => {
+      setIsTransitioning(false);
+    }, 800);
+  };
+
+  const goToNextSlide = () => {
+    const nextSlide = (currentSlide + 1) % slides.length;
+    goToSlide(nextSlide);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
     setIsLoading(true);
 
     try {
-      // Simple navigation - no validation needed for UI flow
       await mockService.forgotPassword(email);
       setIsSubmitted(true);
       toast({
         title: "Email Sent",
         description: "Check your email for a link to reset your password.",
       });
-      // Navigate to verify email page for UI flow
       navigate('/verify-email', { state: { email } });
     } catch (error) {
       console.error('Password reset error:', error);
-      // Even if there's an error, still navigate for UI flow
       navigate('/verify-email', { state: { email } });
     } finally {
       setIsLoading(false);
     }
   };
 
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentSlide((prev) => (prev + 1) % slides.length);
-    }, 5000);
-    return () => clearInterval(interval);
-  }, []);
-
-  // Floating background icons component
   const FloatingIcon = ({ icon: Icon, className, delay = 0 }) => (
     <div 
       className={`absolute opacity-10 animate-pulse ${className}`}
@@ -66,7 +80,6 @@ const ForgotPassword = () => {
     </div>
   );
 
-  // Background geometric shapes component
   const GeometricShape = ({ type, className, delay = 0 }) => {
     const baseClasses = "absolute opacity-10 animate-bounce";
     const shapeClasses = type === 'circle' 
@@ -85,16 +98,53 @@ const ForgotPassword = () => {
   };
 
   return (
-    <div className="h-screen bg-white overflow-hidden">
+    <div className="h-screen overflow-hidden bg-white">
       <style>
         {`
-          @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400&family=Inter:wght@600&family=Lato:wght@400&display=swap');
-          .form-input { font-family: 'Roboto', sans-serif; }
-          .slider-header { font-family: 'Inter', sans-serif; }
-          .slider-body { font-family: 'Lato', sans-serif; }
-          .error-input { color: red !important; }
+          @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
           
-          /* Custom floating animation */
+          * {
+            font-family: 'Inter', sans-serif;
+          }
+          
+          .form-input { 
+            border-radius: 10px;
+            padding: 0.875rem 1rem;
+            font-size: 0.9375rem;
+            transition: all 0.2s ease;
+          }
+          
+          .form-input:focus {
+            box-shadow: 0 0 0 3px rgba(54, 87, 167, 0.15);
+            border-color: #3657A7;
+          }
+          
+          .slider-header { 
+            font-weight: 600;
+            font-size: 1.5rem;
+            line-height: 1.3;
+          }
+          
+          .slider-body { 
+            font-weight: 400;
+            font-size: 1rem;
+            line-height: 1.5;
+          }
+          
+          .error-input { 
+            border-color: #ef4444 !important;
+            box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.15);
+          }
+          
+          .hide-scrollbar::-webkit-scrollbar { 
+            display: none; 
+          }
+          
+          .hide-scrollbar { 
+            -ms-overflow-style: none; 
+            scrollbar-width: none; 
+          }
+          
           @keyframes float {
             0%, 100% { transform: translateY(0px) rotate(0deg); }
             50% { transform: translateY(-20px) rotate(180deg); }
@@ -104,138 +154,140 @@ const ForgotPassword = () => {
             animation: float 6s ease-in-out infinite;
           }
           
-          /* Gradient overlay for depth */
           .bg-gradient-overlay {
             background: linear-gradient(135deg, #3657A7 0%, #4a6bc7 50%, #3657A7 100%);
           }
 
-          /* Image styling for larger, centered display */
-          .slider-image {
-            max-height: 400px; /* Larger for desktop */
-            width: auto;
-            margin: 0 auto 2rem auto; /* Added bottom margin */
-            display: block;
-          }
-
-          /* Mobile image styling */
-          .mobile-slider-image {
-            max-height: 200px; /* Smaller for mobile */
-            width: auto;
-            margin: 0 auto 1.5rem auto; /* Added bottom margin */
-            display: block;
-          }
-
-          /* Fixed height for slider text container to prevent layout shifts */
-          .slider-text-container {
-            min-height: 120px; /* Adjust based on longest slide content */
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            text-align: center;
+          .slider-container {
             position: relative;
-          }
-
-          /* Mobile slider text container */
-          .mobile-slider-text-container {
-            min-height: 100px; /* Smaller for mobile */
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            text-align: center;
-            position: relative;
-          }
-
-          /* Smooth transition for slide content */
-          .slide-content {
-            position: absolute;
             width: 100%;
-            opacity: 0;
-            transition: opacity 0.5s ease-in-out;
+            height: 100%;
+            overflow: hidden;
           }
 
-          .slide-content.active {
-            opacity: 1;
+          .slider-track {
+            display: flex;
+            transition: transform 0.8s cubic-bezier(0.23, 1, 0.32, 1);
+            height: 100%;
+          }
+
+          .slider-slide {
+            flex: 0 0 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+          }
+
+          .slider-image-container {
+            width: 100%;
+            height: 400px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+          }
+
+          .slider-image {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            transition: opacity 0.8s ease-in-out;
+          }
+
+          .slider-text-container {
+            min-height: 120px;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            position: relative;
+            padding: 0 2rem;
+          }
+
+          .mobile-slider-image-container {
+            width: 100%;
+            height: 200px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+          }
+
+          .mobile-slider-image {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+          }
+
+          .mobile-slider-text-container {
+            min-height: 100px;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            position: relative;
+            padding: 0 1rem;
+          }
+
+          .slider-dots {
+            position: absolute;
+            bottom: 30px;
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            z-index: 10;
+          }
+
+          .slider-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background-color: rgba(255, 255, 255, 0.5);
+            cursor: pointer;
+            transition: all 0.3s ease;
+          }
+
+          .slider-dot.active {
+            background-color: white;
+            transform: scale(1.2);
+          }
+
+          .slider-dot:hover {
+            background-color: rgba(255, 255, 255, 0.8);
+          }
+
+          @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+          }
+
+          .slide-text {
+            animation: fadeIn 0.8s ease-out forwards;
+          }
+
+          @keyframes glow {
+            0%, 100% { box-shadow: 0 0 5px rgba(255, 255, 255, 0.5); }
+            50% { box-shadow: 0 0 20px rgba(255, 255, 255, 0.8); }
+          }
+
+          .glowing-dot {
+            animation: glow 2s infinite;
           }
         `}
       </style>
-      <div className="hidden lg:flex h-screen flex-row-reverse">
-        <div className="w-1/2 bg-white overflow-y-auto">
-          <div className="min-h-screen flex items-center justify-center p-12">
-            <div className="w-full max-w-md space-y-6">
-              <div className="text-left">
-                <h1 className="text-3xl font-bold text-[#1F1F1F] font-['Inter']">Reset your password</h1>
-                <p className="text-gray-600 mt-2 text-sm">Enter the email address associated with your account and we will send you a link to reset your password.</p>
-              </div>
-              {!isSubmitted ? (
-                <form onSubmit={handleSubmit} className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="email">Email</Label>
-                    <div className="relative">
-                      <Input
-                        id="email"
-                        type="email"
-                        placeholder="Enter your email address"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        className={`h-12 border-2 border-gray-200 focus:border-[#3657A7] transition-colors duration-300 form-input ${error ? 'error-input' : ''}`}
-                        required
-                        disabled={isLoading}
-                      />
-                      {error && <p className="text-sm text-red-700 mt-1">{error}</p>}
-                    </div>
-                  </div>
-                  <Button 
-                    type="submit" 
-                    className="w-full h-12 bg-[#3657A7] hover:bg-[#2f4d93] text-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-300"
-                    disabled={isLoading}
-                  >
-                    {isLoading ? (
-                      <div className="flex items-center justify-center">
-                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
-                        <span>Sending...</span>
-                      </div>
-                    ) : (
-                      <span>Continue</span>
-                    )}
-                  </Button>
-                </form>
-              ) : (
-                <div className="space-y-4">
-                  <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-                    <div className="flex items-start space-x-3">
-                      <CheckCircle className="h-5 w-5 text-green-600 mt-0.5" />
-                      <div className="space-y-2">
-                        <h4 className="text-lg font-medium text-green-900">Check Your Email</h4>
-                        <p className="text-sm text-green-700">
-                          We've sent a password reset link to <strong>{email}</strong>. 
-                          Please check your inbox and follow the instructions to reset your password.
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="text-sm text-gray-600">
-                    Didn't receive the email?{' '}
-                    <button onClick={() => { setIsSubmitted(false); setError(''); }} className="text-[#3657A7] font-medium">Try again</button>
-                  </div>
-                </div>
-              )}
-              <div className="text-center">
-                <p className="text-gray-600">
-                  <Link to="/login" className="text-[#0B63BC] hover:text-[#0B63BC]/80 font-semibold transition-colors">
-                    Back to Sign In
-                  </Link>
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div className="w-1/2 relative bg-gradient-overlay text-white flex items-center justify-center p-12 overflow-hidden">
+      <div className="hidden lg:flex h-full">
+        <div className="w-1/2 relative bg-gradient-overlay text-white overflow-hidden">
           <img 
             src="/logo.png" 
             alt="Bill Station Logo" 
-            className="absolute top-4 left-4 w-12 h-12 object-contain z-20"
+            className="absolute top-6 left-6 w-14 h-14 object-contain z-20"
           />
           <div className="absolute inset-0 z-0">
             <FloatingIcon icon={CreditCard} className="top-16 left-12 floating-element" delay={0} />
@@ -256,37 +308,118 @@ const ForgotPassword = () => {
             <div className="absolute bottom-28 left-20 w-6 h-6 border-2 border-white/20 animate-spin" style={{animationDuration: '6s'}} />
             <div className="absolute top-56 left-32 w-4 h-4 bg-white/10 transform rotate-45 animate-pulse" />
           </div>
-          <div className="relative max-w-md text-center z-10">
-            <img src={slides[currentSlide].image} onError={(e) => { (e.currentTarget as HTMLImageElement).src = '/amico.png'; }} alt="Forgot Password" className="slider-image" />
-            <div className="slider-text-container">
+          <div className="slider-container">
+            <div 
+              className="slider-track" 
+              ref={sliderRef}
+              style={{ transform: `translateX(-${currentSlide * 100}%)` }}
+            >
               {slides.map((slide, index) => (
-                <div
-                  key={index}
-                  className={`slide-content ${index === currentSlide ? 'active' : ''}`}
-                >
-                  <h2 className="text-2xl font-semibold slider-header">{slide.title}</h2>
-                  <p className="text-white/90 mt-2 slider-body">{slide.description}</p>
+                <div key={index} className="slider-slide">
+                  <div className="slider-image-container">
+                    <img 
+                      src={slide.image} 
+                      onError={(e) => { e.currentTarget.src = '/fpass.png'; }} 
+                      alt={`Slide ${index + 1}`} 
+                      className="slider-image" 
+                    />
+                  </div>
+                  <div className="slider-text-container">
+                    <div className="slide-text">
+                      <h2 className="text-2xl font-semibold slider-header">{slide.title}</h2>
+                      <p className="text-white/90 mt-2 slider-body">{slide.description}</p>
+                    </div>
+                  </div>
                 </div>
               ))}
             </div>
-            <div className="mt-6 flex items-center justify-center gap-1">
+            <div className="slider-dots">
               {slides.map((_, index) => (
-                <span 
-                  key={index} 
-                  className={`h-1.5 w-1.5 rounded-full cursor-pointer transition-all ${index === currentSlide ? 'bg-white' : 'bg-white/60'}`}
-                  onClick={() => setCurrentSlide(index)}
-                ></span>
+                <div
+                  key={index}
+                  className={`slider-dot ${index === currentSlide ? 'active glowing-dot' : ''}`}
+                  onClick={() => goToSlide(index)}
+                ></div>
               ))}
             </div>
           </div>
         </div>
+        <div className="w-1/2 overflow-y-auto hide-scrollbar bg-gray-50">
+          <div className="min-h-full flex items-center justify-center p-8">
+            <div className="w-full max-w-md space-y-6">
+              <div className="text-left">
+                <h1 className="text-3xl font-bold text-gray-900">Reset your password</h1>
+                <p className="text-gray-500 mt-2 text-sm">Enter the email address associated with your account and we will send you a link to reset your password.</p>
+              </div>
+              {!isSubmitted ? (
+                <form onSubmit={handleSubmit} className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="email">Email</Label>
+                    <div className="relative">
+                      <Input
+                        id="email"
+                        type="email"
+                        placeholder="Enter your email address"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        className={`form-input h-12 ${error ? 'error-input' : 'border-gray-300 focus:border-[#3657A7]'}`}
+                        required
+                        disabled={isLoading}
+                      />
+                      {error && <p className="text-sm text-red-600 mt-1">{error}</p>}
+                    </div>
+                  </div>
+                  <Button 
+                    type="submit" 
+                    className="w-full h-12 bg-[#3657A7] hover:bg-[#2e4a8c] text-white rounded-xl font-medium text-base transition-all duration-200 shadow-md hover:shadow-lg"
+                    disabled={isLoading}
+                  >
+                    {isLoading ? (
+                      <span className="flex items-center justify-center">
+                        <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
+                        Sending...
+                      </span>
+                    ) : (
+                      <span>Continue</span>
+                    )}
+                  </Button>
+                </form>
+              ) : (
+                <div className="space-y-4">
+                  <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                    <div className="flex items-start space-x-3">
+                      <CheckCircle className="h-5 w-5 text-green-600 mt-0.5" />
+                      <div className="space-y-2">
+                        <h4 className="text-lg font-medium text-green-900">Check Your Email</h4>
+                        <p className="text-sm text-green-700">
+                          We've sent a password reset link to <strong>{email}</strong>. 
+                          Please check your inbox and follow the instructions to reset your password.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="text-sm text-gray-600">
+                    <button onClick={() => { setIsSubmitted(false); setError(''); }} className="text-[#3657A7] font-medium hover:text-[#2e4a8c]">Try again</button>
+                  </div>
+                </div>
+              )}
+              <div className="text-center">
+                <p className="text-gray-600">
+                  <Link to="/login" className="text-[#3657A7] font-medium hover:text-[#2e4a8c]">
+                    Back to Sign In
+                  </Link>
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
-      <div className="lg:hidden h-screen">
-        <div className="h-1/3 bg-gradient-overlay flex items-center justify-center px-6 relative overflow-hidden">
+      <div className="lg:hidden h-screen overflow-hidden flex flex-col">
+        <div className="h-2/5 bg-gradient-overlay flex items-center justify-center px-6 relative overflow-hidden">
           <img 
             src="/logo.png" 
             alt="Bill Station Logo" 
-            className="absolute top-4 left-4 w-12 h-12 object-contain z-20"
+            className="absolute top-4 left-4 w-10 h-10 object-contain z-20"
           />
           <div className="absolute inset-0 z-0">
             <FloatingIcon icon={CreditCard} className="top-8 left-8 floating-element" delay={0} />
@@ -297,75 +430,80 @@ const ForgotPassword = () => {
             <GeometricShape type="square" className="bottom-12 left-16" delay={1} />
             <div className="absolute top-20 right-20 w-6 h-6 border-2 border-white/20 rounded-full animate-spin" style={{animationDuration: '6s'}} />
           </div>
-          <div className="max-w-sm text-white text-center relative z-10">
-            <img src={slides[currentSlide].image} onError={(e) => { (e.currentTarget as HTMLImageElement).src = '/fpass.png'; }} alt="Forgot Password" className="mobile-slider-image" />
-            <div className="mobile-slider-text-container">
+          <div className="slider-container" style={{height: '100%'}}>
+            <div 
+              className="slider-track" 
+              style={{ transform: `translateX(-${currentSlide * 100}%)`, height: '100%' }}
+            >
               {slides.map((slide, index) => (
-                <div
-                  key={index}
-                  className={`slide-content ${index === currentSlide ? 'active' : ''}`}
-                >
-                  <h2 className="text-xl font-semibold slider-header">{slide.title}</h2>
-                  <p className="text-white/90 mt-2 slider-body">{slide.description}</p>
+                <div key={index} className="slider-slide" style={{padding: '0 1rem'}}>
+                  <div className="mobile-slider-image-container">
+                    <img 
+                      src={slide.image} 
+                      onError={(e) => { e.currentTarget.src = '/fpass.png'; }} 
+                      alt={`Slide ${index + 1}`} 
+                      className="mobile-slider-image" 
+                    />
+                  </div>
+                  <div className="mobile-slider-text-container">
+                    <div className="slide-text">
+                      <h2 className="text-xl font-semibold slider-header">{slide.title}</h2>
+                      <p className="text-white/90 mt-2 slider-body text-sm">{slide.description}</p>
+                    </div>
+                  </div>
                 </div>
               ))}
             </div>
-            <div className="mt-4 flex items-center justify-center gap-1">
+            <div className="slider-dots">
               {slides.map((_, index) => (
-                <span 
-                  key={index} 
-                  className={`h-1.5 w-1.5 rounded-full ${index === currentSlide ? 'bg-white' : 'bg-white/60'}`}
-                  onClick={() => setCurrentSlide(index)}
-                ></span>
+                <div
+                  key={index}
+                  className={`slider-dot ${index === currentSlide ? 'active glowing-dot' : ''}`}
+                  onClick={() => goToSlide(index)}
+                ></div>
               ))}
             </div>
           </div>
         </div>
-        <div className="h-2/3 overflow-y-auto p-6">
+        <div className="h-3/5 overflow-y-auto p-5 bg-gray-50">
           <div className="mb-4">
-            <h1 className="text-2xl font-bold text-[#3657A7]">Reset your password</h1>
-            <p className="text-sm text-gray-500">Enter the email associated with your account and we'll send a reset link.</p>
+            <h1 className="text-2xl font-bold text-gray-900">Reset your password</h1>
+            <p className="text-sm text-gray-500 mt-1">Enter the email associated with your account and we'll send a reset link.</p>
           </div>
-          {!isSubmitted ? (
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="email-m">Email</Label>
-                <div className="relative">
-                  <Input 
-                    id="email-m" 
-                    type="email" 
-                    placeholder="Enter your email address" 
-                    value={email} 
-                    onChange={(e) => setEmail(e.target.value)} 
-                    className={`h-12 border-gray-300 focus:border-[#3657A7] form-input ${error ? 'error-input' : ''}`} 
-                    required 
-                    disabled={isLoading} 
-                  />
-                  {error && <p className="text-sm text-red-700 mt-1">{error}</p>}
-                </div>
-              </div>
-              <Button 
-                type="submit" 
-                className="w-full h-12 bg-[#3657A7] hover:bg-[#2f4d93]" 
-                disabled={isLoading}
-              >
-                {isLoading ? 'Sending...' : 'Continue'}
-              </Button>
-            </form>
-          ) : (
-            <div className="space-y-4">
-              <div className="bg-green-50 border border-green-200 rounded-lg p-3">
-                <p className="text-sm text-green-700">
-                  We've sent a reset link to <strong>{email}</strong>.
-                </p>
-              </div>
-              <div className="text-sm text-gray-600">
-                Didn't receive the email? <button onClick={() => { setIsSubmitted(false); setError(''); }} className="text-[#3657A7] font-medium">Try again</button>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="email-m">Email</Label>
+              <div className="relative">
+                <Input 
+                  id="email-m" 
+                  type="email" 
+                  placeholder="Enter your email address" 
+                  value={email} 
+                  onChange={(e) => setEmail(e.target.value)} 
+                  className={`form-input h-12 ${error ? 'error-input' : 'border-gray-300 focus:border-[#3657A7]'}`} 
+                  required 
+                  disabled={isLoading} 
+                />
+                {error && <p className="text-sm text-red-600 mt-1">{error}</p>}
               </div>
             </div>
-          )}
+            <Button 
+              type="submit" 
+              className="w-full h-12 bg-[#3657A7] hover:bg-[#2e4a8c] text-white rounded-xl font-medium mt-2"
+              disabled={isLoading}
+            >
+              {isLoading ? (
+                <span className="flex items-center justify-center">
+                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
+                  Sending...
+                </span>
+              ) : (
+                <span>Continue</span>
+              )}
+            </Button>
+          </form>
           <div className="mt-4">
-            <Link to="/login" className="text-sm text-[#3657A7]">Back to Sign In</Link>
+            <Link to="/login" className="text-sm text-[#3657A7] hover:text-[#2e4a8c]">Back to Sign In</Link>
           </div>
         </div>
       </div>
