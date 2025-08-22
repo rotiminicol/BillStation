@@ -73,22 +73,6 @@ const Signup = () => {
     return () => clearInterval(timer);
   }, [currentSlide, isTransitioning]);
 
-  const validatePassword = (password) => {
-    const requirements = [
-      { regex: /[A-Z]/, message: 'At least one uppercase letter' },
-      { regex: /[a-z]/, message: 'At least one lowercase letter' },
-      { regex: /[0-9]/, message: 'At least one number' },
-      { regex: /[^A-Za-z0-9]/, message: 'At least one symbol' },
-      { regex: /^.{8,}$/, message: 'At least 8 characters long' }
-    ];
-
-    const failedRequirements = requirements.filter(req => !req.regex.test(password));
-    return {
-      isValid: failedRequirements.length === 0,
-      messages: failedRequirements.map(req => req.message)
-    };
-  };
-
   const validateField = (field, value) => {
     switch (field) {
       case 'fullName': {
@@ -97,9 +81,8 @@ const Signup = () => {
         return '';
       }
       case 'email': {
-        if (!value.trim()) return 'Email address is required';
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!emailRegex.test(value)) return 'Please enter a valid email address';
+        if (!value.trim()) return 'Email is required';
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) return 'Please enter a valid email address';
         return '';
       }
       case 'phone': {
@@ -110,8 +93,15 @@ const Signup = () => {
       }
       case 'password': {
         if (!value) return 'Password is required';
-        const { isValid, messages } = validatePassword(value);
-        return !isValid ? messages[0] : '';
+        const requirements = [
+          { regex: /[A-Z]/, message: 'At least one uppercase letter' },
+          { regex: /[a-z]/, message: 'At least one lowercase letter' },
+          { regex: /[0-9]/, message: 'At least one number' },
+          { regex: /[^A-Za-z0-9]/, message: 'At least one symbol' },
+          { regex: /^.{8,}$/, message: 'At least 8 characters long' }
+        ];
+        const failedRequirements = requirements.filter(req => !req.regex.test(value));
+        return failedRequirements.length > 0 ? failedRequirements[0].message : '';
       }
       case 'confirmPassword': {
         if (!value) return 'Please confirm your password';
@@ -126,6 +116,11 @@ const Signup = () => {
   const handleInputChange = (field, value) => {
     updateFormData({ [field]: value });
     setErrors(prev => ({ ...prev, [field]: '' }));
+  };
+
+  const handleEmailBlur = () => {
+    const emailError = validateField('email', formData.email);
+    setErrors(prev => ({ ...prev, email: emailError }));
   };
 
   const isFormValid = () => {
@@ -236,7 +231,7 @@ const Signup = () => {
   };
 
   return (
-    <div className="min-h-screen h-screen overflow-hidden bg-white flex flex-col">
+    <div className="min-h-screen h-screen overflow-hidden bg-white flex">
       <style>
         {`
           @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
@@ -273,15 +268,13 @@ const Signup = () => {
             box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.15);
           }
           
-          /* Hide scrollbar for Chrome, Safari and Opera */
           .hide-scrollbar::-webkit-scrollbar {
             display: none;
           }
           
-          /* Hide scrollbar for IE, Edge and Firefox */
           .hide-scrollbar {
-            -ms-overflow-style: none;  /* IE and Edge */
-            scrollbar-width: none;  /* Firefox */
+            -ms-overflow-style: none;
+            scrollbar-width: none;
           }
           
           @keyframes float {
@@ -347,32 +340,6 @@ const Signup = () => {
             text-align: center;
             position: relative;
             padding: 0 2rem;
-          }
-
-          .mobile-slider-image-container {
-            width: 100%;
-            height: 200px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-          }
-
-          .mobile-slider-image {
-            width: 100%;
-            height: 100%;
-            object-fit: contain;
-          }
-
-          .mobile-slider-text-container {
-            min-height: 100px;
-            width: 100%;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            text-align: center;
-            position: relative;
-            padding: 0 1rem;
           }
 
           .slider-dots {
@@ -441,20 +408,10 @@ const Signup = () => {
             transform: translateY(-2px);
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
           }
-
-          /* Left side scrollable area */
-          /* Hide scrollbar for all browsers */
-          .scrollbar-hide {
-            -ms-overflow-style: none;  /* IE and Edge */
-            scrollbar-width: none;  /* Firefox */
-          }
-          .scrollbar-hide::-webkit-scrollbar {
-            display: none;  /* Chrome, Safari and Opera */
-          }
         `}
       </style>
 
-      <div className="hidden lg:flex h-screen overflow-hidden fixed w-full">
+      <div className="flex h-screen overflow-hidden fixed w-full">
         <div className="w-1/2 bg-gradient-overlay text-white relative flex items-center justify-center" style={{ height: '100vh', overflow: 'hidden' }}>
           <img 
             src="/logo.png" 
@@ -520,7 +477,7 @@ const Signup = () => {
         </div>
         
         <div className="w-1/2 bg-gray-50 flex items-start justify-center p-0 overflow-hidden h-screen">
-          <div className="w-full max-w-md py-8 px-6 overflow-y-auto scrollbar-hide" style={{ height: '100vh' }}>
+          <div className="w-full max-w-md py-8 px-6 overflow-y-auto hide-scrollbar" style={{ height: '100vh' }}>
             <div className="mb-6 text-center pt-6">
               <h1 className="text-3xl font-bold text-[#3657A7]">Let’s get you Started</h1>
               <p className="text-gray-500 mt-2">Create an Account</p>
@@ -549,6 +506,7 @@ const Signup = () => {
                   placeholder="Enter your email address" 
                   value={formData.email} 
                   onChange={(e) => handleInputChange('email', e.target.value)} 
+                  onBlur={handleEmailBlur}
                   className={`form-input ${errors.email ? 'error-input' : 'border-gray-300 focus:border-blue-500'}`} 
                   required 
                 />
@@ -604,7 +562,7 @@ const Signup = () => {
                       'At least one number',
                       'At least one symbol'
                     ].map((requirement, index) => {
-                      const isMet = !validatePassword(formData.password).messages.includes(requirement);
+                      const isMet = !validateField('password', formData.password).includes(requirement);
                       return (
                         <div 
                           key={index} 
@@ -679,9 +637,9 @@ const Signup = () => {
               
               <Button 
                 type="submit" 
-                disabled={!isFormValid() || isLoading}
+                disabled={!isFormValid() || isLoading || errors.email}
                 className={`w-full h-12 rounded-xl font-medium text-base transition-all duration-200 shadow-md hover:shadow-lg ${
-                  isFormValid() 
+                  isFormValid() && !errors.email 
                     ? 'bg-[#3657A7] hover:bg-[#2a4585] text-white' 
                     : 'bg-gray-200 text-gray-500 cursor-not-allowed'
                 }`}
@@ -730,228 +688,6 @@ const Signup = () => {
                 Already have an account?{" "}
                 <Link to="/login" className="text-[#3657A7] font-medium hover:underline">
                   Sign in here
-                </Link>
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div className="lg:hidden h-screen overflow-hidden flex flex-col">
-        <div className="h-2/5 bg-gradient-overlay flex items-center justify-center px-6 relative overflow-hidden">
-          <img 
-            src="/logo.png" 
-            alt="Bill Station Logo" 
-            className="absolute top-4 left-4 w-10 h-10 object-contain z-20"
-          />
-          <div className="relative z-0 min-h-full p-8">
-            <FloatingIcon icon={CreditCard} className="top-8 left-8 floating-element" delay={0} />
-            <FloatingIcon icon={Smartphone} className="top-16 right-8 floating-element" delay={1} />
-            <FloatingIcon icon={Users} className="bottom-16 left-12 floating-element" delay={2} />
-            <FloatingIcon icon={Zap} className="bottom-8 right-12 floating-element" delay={0.5} />
-            <GeometricShape type="circle" className="top-12 right-16" delay={0} />
-            <GeometricShape type="square" className="bottom-12 left-16" delay={1} />
-            <div className="absolute top-20 right-20 w-6 h-6 border-2 border-white/20 rounded-full animate-spin" style={{animationDuration: '6s'}} />
-          </div>
-          
-          <div className="slider-container" style={{ height: '100%', overflow: 'hidden' }}>
-            <div 
-              className="slider-track" 
-              style={{ transform: `translateX(-${currentSlide * 100}%)`, height: '100%' }}
-            >
-              {authImages.map((image, index) => (
-                <div key={index} className="slider-slide" style={{padding: '0 1rem', height: '100%'}}>
-                  <div className="mobile-slider-image-container">
-                    <img 
-                      src={image} 
-                      onError={(e) => { (e.currentTarget as HTMLImageElement).src = '/auth.png'; }} 
-                      alt={`Slide ${index + 1}`} 
-                      className="mobile-slider-image" 
-                    />
-                  </div>
-                  <div className="mobile-slider-text-container">
-                    <div className="slide-text">
-                      <h2 className="text-xl font-semibold slider-header">{slides[index % slides.length]?.title}</h2>
-                      <p className="text-white/90 mt-2 slider-body text-sm">{slides[index % slides.length]?.description}</p>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-            
-            <div className="sticky bottom-0 left-0 right-0 z-10 pb-6 pt-4 flex justify-center gap-2 bg-gradient-to-t from-[#3657A7] to-transparent">
-              {authImages.map((_, index) => (
-                <div
-                  key={index}
-                  className={`slider-dot ${index === currentSlide ? 'active glowing-dot' : ''}`}
-                  onClick={() => goToSlide(index)}
-                ></div>
-              ))}
-            </div>
-          </div>
-        </div>
-        
-        <div className="h-3/5 bg-gray-50 flex flex-col">
-          <div className="form-container hide-scrollbar p-5">
-            <div className="mb-4">
-              <h1 className="text-2xl font-bold text-gray-900">Create Account</h1>
-              <p className="text-sm text-gray-500 mt-1">Join our community today</p>
-            </div>
-            
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="fullName-m" className="text-sm font-medium text-gray-700">Full Name</Label>
-                <Input 
-                  id="fullName-m" 
-                  type="text" 
-                  placeholder="First and last name" 
-                  value={formData.fullName} 
-                  onChange={(e) => handleInputChange('fullName', e.target.value)} 
-                  className={`form-input ${errors.fullName ? 'error-input' : 'border-gray-300 focus:border-blue-500'}`} 
-                  required 
-                />
-                {errors.fullName && <p className="text-sm text-red-600 mt-1">{errors.fullName}</p>}
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="email-m" className="text-sm font-medium text-gray-700">Email Address</Label>
-                <Input 
-                  id="email-m" 
-                  type="email" 
-                  placeholder="Your email address" 
-                  value={formData.email} 
-                  onChange={(e) => handleInputChange('email', e.target.value)} 
-                  className={`form-input ${errors.email ? 'error-input' : 'border-gray-300 focus:border-blue-500'}`} 
-                  required 
-                />
-                {errors.email && <p className="text-sm text-red-600 mt-1">{errors.email}</p>}
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="phone-m" className="text-sm font-medium text-gray-700">Phone Number</Label>
-                <div className="flex items-center">
-                  <div className="flex items-center h-12 pl-3 pr-2 border-r border-gray-200">
-                    <img src={selectedCountry.flag} alt="Nigeria flag" className="w-6 h-4 mr-2" />
-                    <span className="text-gray-500 text-sm font-medium">{selectedCountry.dialCode}</span>
-                  </div>
-                  <Input 
-                    id="phone-m" 
-                    type="tel" 
-                    placeholder="Phone number" 
-                    value={formData.phone} 
-                    onChange={(e) => handleInputChange('phone', e.target.value)} 
-                    className={`form-input flex-1 pl-4 ${errors.phone ? 'error-input' : 'border-gray-300 focus:border-blue-500'}`} 
-                    required 
-                  />
-                </div>
-                {errors.phone && <p className="text-sm text-red-600 mt-1">{errors.phone}</p>}
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="password-m" className="text-sm font-medium text-gray-700">Password</Label>
-                <div className="relative">
-                  <Input 
-                    id="password-m" 
-                    type={showPassword ? 'text' : 'password'} 
-                    placeholder="Create password" 
-                    value={formData.password} 
-                    onChange={(e) => handleInputChange('password', e.target.value)} 
-                    className={`form-input pr-12 ${errors.password ? 'error-input' : 'border-gray-300 focus:border-blue-500'}`} 
-                    required 
-                  />
-                  <button 
-                    type="button" 
-                    onClick={() => setShowPassword(!showPassword)} 
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500"
-                  >
-                    {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
-                  </button>
-                </div>
-                {errors.password && <p className="text-sm text-red-600 mt-1">{errors.password}</p>}
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="confirmPassword-m" className="text-sm font-medium text-gray-700">Confirm Password</Label>
-                <div className="relative">
-                  <Input 
-                    id="confirmPassword-m" 
-                    type={showConfirmPassword ? 'text' : 'password'} 
-                    placeholder="Confirm password" 
-                    value={formData.confirmPassword} 
-                    onChange={(e) => handleInputChange('confirmPassword', e.target.value)} 
-                    className={`form-input pr-12 ${errors.confirmPassword ? 'error-input' : 'border-gray-300 focus:border-blue-500'}`} 
-                    required 
-                  />
-                  <button 
-                    type="button" 
-                    onClick={() => setShowConfirmPassword(!showConfirmPassword)} 
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500"
-                  >
-                    {showConfirmPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
-                  </button>
-                </div>
-                {errors.confirmPassword && <p className="text-sm text-red-600 mt-1">{errors.confirmPassword}</p>}
-              </div>
-              
-              <div className="flex items-start gap-3 pt-2">
-                <Checkbox 
-                  id="terms-m" 
-                  checked={agreedToTerms} 
-                  onCheckedChange={(checked) => {
-                    const isChecked = checked === true;
-                    setAgreedToTerms(isChecked);
-                    if (isChecked) {
-                      setErrors(prev => ({ ...prev, terms: '' }));
-                    }
-                  }} 
-                  className="custom-checkbox mt-0.5 border-gray-300" 
-                />
-                <Label htmlFor="terms-m" className="text-xs text-gray-600 leading-tight">
-                  I agree to the <Link to="/terms" className="text-[#3657A7] hover:underline">Terms of Service</Link> and <Link to="/privacy" className="text-[#3657A7] hover:underline">Privacy Policy</Link>
-                </Label>
-              </div>
-              {errors.terms && <p className="text-sm text-red-600 mt-1">{errors.terms}</p>}
-              
-              <Button 
-                type="submit" 
-                disabled={isLoading} 
-                className="w-full h-12 bg-[#3657A7] hover:bg-[#2a4585] text-white rounded-xl font-medium mt-2"
-              >
-                {isLoading ? 'Creating Account...' : 'Create Account'}
-              </Button>
-            </form>
-            
-            <div className="p-5">
-              <div className="relative my-4">
-                <div className="absolute inset-0 flex items-center">
-                  <div className="w-full border-t border-gray-300" />
-                </div>
-                <div className="relative flex justify-center text-xs">
-                  <span className="px-2 bg-gray-50 text-gray-500">Or sign up with</span>
-                </div>
-              </div>
-              
-              <div className="grid grid-cols-2 gap-3">
-                <Button variant="outline" className="social-button h-11 border-gray-300 bg-white">
-                  <svg className="w-4 h-4 mr-1" viewBox="0 0 24 24">
-                    <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-                    <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-                    <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
-                    <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
-                  </svg>
-                  Google
-                </Button>
-                
-                <Button variant="outline" className="social-button h-11 border-gray-300 bg-white">
-                  <img src="/microsoft.png" alt="Microsoft" className="w-4 h-4 mr-1" />
-                  Microsoft
-                </Button>
-              </div>
-              
-              <p className="mt-4 text-center text-xs text-gray-600">
-                Already have an account?{" "}
-                <Link to="/login" className="text-[#3657A7] font-medium">
-                  Sign in
                 </Link>
               </p>
             </div>
