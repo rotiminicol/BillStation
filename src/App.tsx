@@ -9,7 +9,6 @@ import { AuthProvider } from "@/hooks/use-auth";
 import ErrorBoundary from "@/components/ErrorBoundary";
 
 // Desktop Imports
-import Splash from "./pages/Splash";
 import Landing from "./pages/Landing";
 import About from "./pages/About";
 import Crypto from "./pages/Crypto";
@@ -20,10 +19,11 @@ import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import ForgotPassword from "./pages/ForgotPassword";
 import VerifyEmail from "./pages/VerifyEmail";
+import VerifySignup from "./pages/VerifySignup";
+import VerifySuccess from "./pages/VerifySuccess";
 import ResetPassword from "./pages/ResetPassword";
 import Terms from "./pages/Terms";
 import Privacy from "./pages/Privacy";
-import Onboarding from "./pages/Onboarding";
 import Dashboard from "./pages/Dashboard";
 import Payment from "./pages/Payment";
 import CardPage from "./pages/Card";
@@ -96,6 +96,7 @@ import MobileBuyTickets from "./pages/mobile/BuyTickets";
 import MobileConvertAsset from "./pages/mobile/ConvertAsset";
 import MobileBookRide from "./pages/mobile/BookRide";
 import MobileTransactionHistory from "./pages/mobile/TransactionHistory";
+import ResetSuccessful from "./pages/ResetSuccessful";
 
 const queryClient = new QueryClient();
 
@@ -124,8 +125,7 @@ const AppRouter = () => {
   if (isMobile) {
     return (
       <Routes>
-        <Route path="/" element={<Splash />} />
-        <Route path="/landing" element={<Landing />} />
+        <Route path="/" element={<Landing />} />
         <Route path="/about" element={<About />} />
         <Route path="/crypto" element={<Crypto />} />
         <Route path="/services" element={<Services />} />
@@ -135,7 +135,10 @@ const AppRouter = () => {
         <Route path="/signup" element={<MobileSignup />} />
         <Route path="/forgot-password" element={<MobileForgotPassword />} />
         <Route path="/reset-password" element={<MobileResetPassword />} />
+        <Route path="/reset-successful" element={<ResetSuccessful />} />
         <Route path="/verify-email" element={<VerifyEmail />} />
+        <Route path="/verify-signup" element={<VerifySignup />} />
+        <Route path="/verify-success" element={<VerifySuccess />} />
         <Route path="/terms" element={<Terms />} />
         <Route path="/privacy" element={<Privacy />} />
         <Route path="/onboarding" element={<MobileOnboarding />} />
@@ -182,8 +185,7 @@ const AppRouter = () => {
   // Desktop routes
   return (
     <Routes>
-      <Route path="/" element={<Splash />} />
-              <Route path="/landing" element={<Landing />} />
+      <Route path="/" element={<Landing />} />
         <Route path="/welcome" element={<Welcome />} />
         <Route path="/login" element={<Login />} />
         <Route path="/about" element={<About />} />
@@ -192,11 +194,13 @@ const AppRouter = () => {
         <Route path="/agent" element={<Agent />} />
       <Route path="/signup" element={<Signup />} />
       <Route path="/forgot-password" element={<ForgotPassword />} />
-      <Route path="/reset-password" element={<ResetPassword />} />
-      <Route path="/verify-email" element={<VerifyEmail />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
+        <Route path="/reset-successful" element={<ResetSuccessful />} />
+        <Route path="/verify-email" element={<VerifyEmail />} />
+        <Route path="/verify-signup" element={<VerifySignup />} />
+        <Route path="/verify-success" element={<VerifySuccess />} />
       <Route path="/terms" element={<Terms />} />
       <Route path="/privacy" element={<Privacy />} />
-      <Route path="/onboarding" element={<Onboarding />} />
       <Route path="/dashboard" element={<Dashboard />} />
       <Route path="/payment" element={<Payment />} />
               <Route path="/card" element={<CardPage />} />

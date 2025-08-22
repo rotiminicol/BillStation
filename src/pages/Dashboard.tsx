@@ -16,6 +16,7 @@ import ViewAllButton from "@/components/ui/view-all-button";
 import { currencyRates, currencySymbols, languages } from "@/lib/utils";
 import { useAuth } from "@/hooks/use-auth";
 import UpgradeCarousel from "@/components/UpgradeCarousel";
+import { useNavigate, useLocation } from "react-router-dom";
 
 const Dashboard = () => {
   const [showBalance, setShowBalance] = useState(true);
@@ -28,6 +29,37 @@ const Dashboard = () => {
   const [currentCard, setCurrentCard] = useState(0);
   const { toast } = useToast();
   const { user } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  // Prevent back navigation from dashboard
+  useEffect(() => {
+    // Add a history entry when component mounts
+    window.history.pushState(null, '', window.location.href);
+    
+    // This will be called when back/forward button is pressed
+    const handlePopState = () => {
+      // Replace current history entry with dashboard
+      window.history.pushState(null, '', window.location.href);
+      // Force reload to ensure we're on the dashboard
+      window.location.reload();
+    };
+    
+    // Add event listener for popstate
+    window.addEventListener('popstate', handlePopState);
+    
+    // Clean up
+    return () => {
+      window.removeEventListener('popstate', handlePopState);
+    };
+  }, []);
+  
+  // Redirect to dashboard if not already there
+  useEffect(() => {
+    if (location.pathname !== '/dashboard') {
+      navigate('/dashboard', { replace: true });
+    }
+  }, [location.pathname, navigate]);
 
   useEffect(() => {
     const fetchDashboardData = async () => {

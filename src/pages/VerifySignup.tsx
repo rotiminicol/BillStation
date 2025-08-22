@@ -7,7 +7,7 @@ import { useState, useEffect, useRef } from "react";
 import { mockService } from "@/services/mockData";
 import { useToast } from "@/hooks/use-toast";
 
-const VerifyEmail = () => {
+const VerifySignup = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
   const location = useLocation();
@@ -133,7 +133,7 @@ const VerifyEmail = () => {
         title: "Success",
         description: "Your email has been verified successfully!",
       });
-      navigate('/reset-password', { state: { email: location.state?.email } });
+      navigate('/verify-success', { state: { email: location.state?.email } });
     } catch (error) {
       console.error('Verification error:', error);
       setError('Invalid verification code. Please try again.');
@@ -599,4 +599,4 @@ const VerifyEmail = () => {
   );
 };
 
-export default VerifyEmail;
+export default VerifySignup;

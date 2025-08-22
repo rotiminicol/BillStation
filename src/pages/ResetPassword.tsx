@@ -49,16 +49,38 @@ const ResetPassword = () => {
     goToSlide(nextSlide);
   };
 
+  const validatePassword = (password) => {
+    const requirements = [
+      { regex: /[A-Z]/, message: 'At least one uppercase letter' },
+      { regex: /[a-z]/, message: 'At least one lowercase letter' },
+      { regex: /[0-9]/, message: 'At least one number' },
+      { regex: /[^A-Za-z0-9]/, message: 'At least one symbol' },
+      { regex: /^.{8,}$/, message: 'At least 8 characters long' }
+    ];
+
+    const failedRequirements = requirements.filter(req => !req.regex.test(password));
+    return {
+      isValid: failedRequirements.length === 0,
+      messages: failedRequirements.map(req => req.message)
+    };
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
-    setIsLoading(true);
-
-    if (password.length < 8) {
-      setError('Password must be at least 8 characters long');
-      setIsLoading(false);
+    
+    const passwordValidation = validatePassword(password);
+    if (!passwordValidation.isValid) {
+      setError(passwordValidation.messages[0]);
       return;
     }
+    
+    if (password !== confirmPassword) {
+      setError('Passwords do not match');
+      return;
+    }
+    
+    setIsLoading(true);
 
     if (password !== confirmPassword) {
       setError('Passwords do not match');
@@ -73,11 +95,10 @@ const ResetPassword = () => {
         title: "Password Reset",
         description: "Your password has been successfully reset.",
       });
-      navigate('/dashboard');
+      navigate('/reset-successful');
     } catch (error) {
       console.error('Password reset error:', error);
-      navigate('/dashboard');
-    } finally {
+      setError('An error occurred. Please try again.');
       setIsLoading(false);
     }
   };
@@ -110,6 +131,9 @@ const ResetPassword = () => {
       />
     );
   };
+
+  const passwordValidation = validatePassword(password);
+  const passwordsMatch = password === confirmPassword && password !== '';
 
   return (
     <div className="h-screen overflow-hidden bg-white">
@@ -380,6 +404,31 @@ const ResetPassword = () => {
                         required
                         disabled={isLoading}
                       />
+                      {password && (
+                        <div className="mt-2 space-y-1">
+                          {[
+                            'At least 8 characters long',
+                            'At least one uppercase letter',
+                            'At least one lowercase letter',
+                            'At least one number',
+                            'At least one symbol'
+                          ].map((requirement, index) => {
+                            const isMet = !passwordValidation.messages.includes(requirement);
+                            return (
+                              <div 
+                                key={index} 
+                                className={`flex items-center text-sm ${isMet ? 'text-green-600' : 'text-gray-500'}`}
+                              >
+                                <CheckCircle 
+                                  className={`h-4 w-4 mr-2 ${isMet ? 'text-green-600' : 'text-gray-400'}`} 
+                                  fill={isMet ? 'currentColor' : 'none'} 
+                                />
+                                {requirement}
+                              </div>
+                            );
+                          })}
+                        </div>
+                      )}
                       <button
                         type="button"
                         onClick={() => setShowPassword(!showPassword)}
@@ -388,7 +437,6 @@ const ResetPassword = () => {
                         {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                       </button>
                     </div>
-                    <p className="text-sm text-gray-500 mt-1">Your password must have at least 8 characters</p>
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="confirm-password">Confirm Password</Label>
@@ -399,10 +447,13 @@ const ResetPassword = () => {
                         placeholder="Confirm your new password"
                         value={confirmPassword}
                         onChange={(e) => setConfirmPassword(e.target.value)}
-                        className={`form-input h-12 ${error ? 'error-input' : 'border-gray-300 focus:border-[#3657A7]'}`}
+                        className={`form-input h-12 ${error ? 'error-input' : passwordsMatch && confirmPassword ? 'border-green-500' : 'border-gray-300 focus:border-[#3657A7]'}`}
                         required
                         disabled={isLoading}
                       />
+                      {passwordsMatch && confirmPassword && (
+                        <CheckCircle className="absolute right-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-green-500" />
+                      )}
                       <button
                         type="button"
                         onClick={() => setShowPassword(!showPassword)}
@@ -415,8 +466,8 @@ const ResetPassword = () => {
                   {error && <p className="text-sm text-red-600 mt-1">{error}</p>}
                   <Button 
                     type="submit" 
-                    className="w-full h-12 bg-[#3657A7] hover:bg-[#2e4a8c] text-white rounded-xl font-medium text-base transition-all duration-200 shadow-md hover:shadow-lg"
-                    disabled={isLoading}
+                    className="w-full h-12 bg-[#3657A7] hover:bg-[#2a4580] text-white font-medium rounded-lg transition-colors duration-200"
+                    disabled={!passwordValidation.isValid || !passwordsMatch || isLoading}
                   >
                     {isLoading ? (
                       <span className="flex items-center justify-center">
@@ -448,7 +499,7 @@ const ResetPassword = () => {
               )}
               <div className="text-center">
                 <p className="text-gray-600">
-                  <Link to="/login" className="text-[#3657A7] font-medium hover:text-[#2e4a8c]">
+                  <Link to="/login" className="text-[#3657A7] font-medium Hover:text-[#2e4a8c]">
                     Back to Sign In
                   </Link>
                 </p>
@@ -535,7 +586,16 @@ const ResetPassword = () => {
                   {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                 </button>
               </div>
-              <p className="text-sm text-gray-500 mt-1">Your password must have at least 8 characters</p>
+              <div className="text-sm text-gray-500 mt-1">
+                <p>Password must contain:</p>
+                <ul className="list-disc list-inside">
+                  <li>At least one uppercase letter</li>
+                  <li>At least one lowercase letter</li>
+                  <li>At least one number</li>
+                  <li>At least one symbol</li>
+                  <li>At least 8 characters long</li>
+                </ul>
+              </div>
             </div>
             <div className="space-y-2">
               <Label htmlFor="confirm-password-m">Confirm Password</Label>
@@ -563,7 +623,7 @@ const ResetPassword = () => {
             <Button 
               type="submit" 
               className="w-full h-12 bg-[#3657A7] hover:bg-[#2e4a8c] text-white rounded-xl font-medium mt-2"
-              disabled={isLoading}
+              disabled={isLoading || !passwordValidation.isValid}
             >
               {isLoading ? (
                 <span className="flex items-center justify-center">

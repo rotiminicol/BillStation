@@ -97,6 +97,8 @@ const ForgotPassword = () => {
     );
   };
 
+  const isEmailValid = email.trim() !== '';
+
   return (
     <div className="h-screen overflow-hidden bg-white">
       <style>
@@ -372,7 +374,7 @@ const ForgotPassword = () => {
                   <Button 
                     type="submit" 
                     className="w-full h-12 bg-[#3657A7] hover:bg-[#2e4a8c] text-white rounded-xl font-medium text-base transition-all duration-200 shadow-md hover:shadow-lg"
-                    disabled={isLoading}
+                    disabled={isLoading || !isEmailValid}
                   >
                     {isLoading ? (
                       <span className="flex items-center justify-center">
@@ -490,7 +492,7 @@ const ForgotPassword = () => {
             <Button 
               type="submit" 
               className="w-full h-12 bg-[#3657A7] hover:bg-[#2e4a8c] text-white rounded-xl font-medium mt-2"
-              disabled={isLoading}
+              disabled={isLoading || !isEmailValid}
             >
               {isLoading ? (
                 <span className="flex items-center justify-center">

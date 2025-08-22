@@ -12,7 +12,10 @@ const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [errors, setErrors] = useState({
+    email: '',
+    password: ''
+  });
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isTransitioning, setIsTransitioning] = useState(false);
   const sliderRef = useRef(null);
@@ -57,23 +60,68 @@ const Login = () => {
 
   const handleInputChange = (field, value) => {
     updateFormData({ [field]: value });
-    setError('');
+    // Clear the specific field error when user types
+    if (errors[field]) {
+      setErrors(prev => ({
+        ...prev,
+        [field]: ''
+      }));
+    }
   };
 
-  const handleSubmit = async (e) => {
+  const validateForm = () => {
+    const newErrors = {
+      email: '',
+      password: ''
+    };
+    
+    // Email validation
+    if (!formData.email.trim()) {
+      newErrors.email = 'Email is required';
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+      newErrors.email = 'Please enter a valid email address';
+    }
+    
+    // Password validation
+    if (!formData.password) {
+      newErrors.password = 'Password is required';
+    } else if (formData.password.length < 8) {
+      newErrors.password = 'Password must be at least 8 characters';
+    }
+    
+    setErrors(newErrors);
+    return !Object.values(newErrors).some(error => error);
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
+    
+    if (!validateForm()) {
+      return;
+    }
+    
     setIsLoading(true);
 
     try {
-      // Simple navigation - no validation needed for UI flow
-      await mockService.login(formData.email, formData.password);
-      console.log('Login successful');
-      navigate('/dashboard');
-    } catch (err) {
-      console.error('Login error:', err);
-      // Even if there's an error, still navigate for UI flow
-      navigate('/dashboard');
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      
+      // Mock successful login
+      const user = mockService.login(formData.email, formData.password);
+      if (user) {
+        navigate('/dashboard');
+      } else {
+        setErrors(prev => ({
+          ...prev,
+          email: 'Invalid email or password',
+          password: 'Invalid email or password'
+        }));
+      }
+    } catch (error) {
+      setErrors(prev => ({
+        ...prev,
+        email: 'An error occurred. Please try again.'
+      }));
     } finally {
       setIsLoading(false);
     }
@@ -417,11 +465,14 @@ const Login = () => {
                     type="email" 
                     placeholder="Enter your email address" 
                     value={formData.email} 
-                    onChange={(e) => handleInputChange('email', e.target.value)} 
-                    className={`form-input ${error ? 'error-input' : 'border-gray-300 focus:border-blue-500'}`} 
+                    onChange={(e) => {
+                      handleInputChange('email', e.target.value);
+                      setErrors(prev => ({ ...prev, email: '' }));
+                    }}
+                    className={`form-input ${errors.email ? 'border-red-500 focus:border-red-500' : 'border-gray-300 focus:border-blue-500'}`} 
                     required 
                   />
-                  {error && <p className="text-sm text-red-600 mt-1">{error}</p>}
+                  {errors.email && <p className="text-sm text-red-600 mt-1">{errors.email}</p>}
                 </div>
                 
                 <div className="space-y-2">
@@ -432,8 +483,11 @@ const Login = () => {
                       type={showPassword ? 'text' : 'password'} 
                       placeholder="Enter your password" 
                       value={formData.password} 
-                      onChange={(e) => handleInputChange('password', e.target.value)} 
-                      className={`form-input pr-12 ${error ? 'error-input' : 'border-gray-300 focus:border-blue-500'}`} 
+                      onChange={(e) => {
+                        handleInputChange('password', e.target.value);
+                        setErrors(prev => ({ ...prev, password: '' }));
+                      }}
+                      className={`form-input pr-12 ${errors.password ? 'border-red-500 focus:border-red-500' : 'border-gray-300 focus:border-blue-500'}`} 
                       required 
                     />
                     <button 
@@ -444,7 +498,7 @@ const Login = () => {
                       {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                     </button>
                   </div>
-                  {error && <p className="text-sm text-red-600 mt-1">{error}</p>}
+                  {errors.password && <p className="text-sm text-red-600 mt-1">{errors.password}</p>}
                 </div>
                 
                 <div className="flex items-center justify-between">
@@ -458,13 +512,17 @@ const Login = () => {
                     />
                     <Label htmlFor="remember" className="text-sm text-gray-600">Remember me</Label>
                   </div>
-                  <Link to="/forgot-password" className="text-sm text-blue-600 hover:underline font-medium">Forgot password?</Link>
+                  <Link to="/forgot-password" className="text-sm text-[#3657A7] hover:underline font-medium">Forgot password?</Link>
                 </div>
                 
                 <Button 
                   type="submit" 
-                  disabled={isLoading} 
-                  className="w-full h-12 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-medium text-base transition-all duration-200 shadow-md hover:shadow-lg"
+                  disabled={isLoading || !formData.email || !formData.password} 
+                  className={`w-full h-12 ${
+                    !formData.email || !formData.password 
+                      ? 'bg-[#3657A7] cursor-not-allowed opacity-70' 
+                      : 'bg-[#3657A7] hover:bg-[#2a4580]'
+                  } text-white rounded-xl font-medium text-base transition-all duration-200 shadow-md hover:shadow-lg`}
                 >
                   {isLoading ? (
                     <span className="flex items-center justify-center">
@@ -473,7 +531,7 @@ const Login = () => {
                     </span>
                   ) : (
                     <span className="flex items-center justify-center">
-                      Login <ArrowRight className="ml-2 h-5 w-5" />
+                      Login
                     </span>
                   )}
                 </Button>
@@ -500,17 +558,32 @@ const Login = () => {
                     Google
                   </Button>
                   
-                  <Button variant="outline" className="social-button h-11 border-gray-300 bg-white text-gray-700 hover:bg-gray-50">
-                    <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24">
-                      <path fill="#4267B2" d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
-                    </svg>
-                    Facebook
+                  <Button 
+                    variant="outline" 
+                    className="social-button h-11 border-gray-300 bg-white text-gray-700 hover:bg-gray-50"
+                    type="button"
+                    onClick={() => {
+                      // Handle Microsoft login
+                      window.location.href = '/api/auth/microsoft';
+                    }}
+                  >
+                    <img 
+                      src="/microsoft.png" 
+                      alt="Microsoft" 
+                      className="w-5 h-5 mr-2 object-contain" 
+                      onError={(e) => { 
+                        // Fallback to text if image fails to load
+                        e.currentTarget.style.display = 'none';
+                        e.currentTarget.nextElementSibling.textContent = 'Microsoft';
+                      }}
+                    />
+                    Microsoft
                   </Button>
                 </div>
                 
                 <p className="mt-6 text-center text-sm text-gray-600">
                   Don't have an account?{" "}
-                  <Link to="/signup" className="text-blue-600 font-medium hover:underline">
+                  <Link to="/signup" className="text-[#3657A7] hover:underline font-medium">
                     Sign up here
                   </Link>
                 </p>
@@ -595,10 +668,10 @@ const Login = () => {
                 placeholder="Enter your email" 
                 value={formData.email} 
                 onChange={(e) => handleInputChange('email', e.target.value)} 
-                className={`form-input ${error ? 'error-input' : 'border-gray-300 focus:border-blue-500'}`} 
+                className={`form-input ${errors.email ? 'border-red-500' : 'border-gray-300 focus:border-blue-500'}`} 
                 required 
               />
-              {error && <p className="text-sm text-red-600 mt-1">{error}</p>}
+              {errors.email && <p className="text-sm text-red-600 mt-1">{errors.email}</p>}
             </div>
             
             <div className="space-y-2">
@@ -610,7 +683,7 @@ const Login = () => {
                   placeholder="Enter your password" 
                   value={formData.password} 
                   onChange={(e) => handleInputChange('password', e.target.value)} 
-                  className={`form-input pr-12 ${error ? 'error-input' : 'border-gray-300 focus:border-blue-500'}`} 
+                  className={`form-input pr-12 ${errors.password ? 'border-red-500' : 'border-gray-300 focus:border-blue-500'}`} 
                   required 
                 />
                 <button 
@@ -621,7 +694,7 @@ const Login = () => {
                   {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                 </button>
               </div>
-              {error && <p className="text-sm text-red-600 mt-1">{error}</p>}
+              {errors.password && <p className="text-sm text-red-600 mt-1">{errors.password}</p>}
             </div>
             
             <div className="flex items-center justify-between">
@@ -669,10 +742,16 @@ const Login = () => {
               </Button>
               
               <Button variant="outline" className="social-button h-11 border-gray-300 bg-white">
-                <svg className="w-4 h-4 mr-1" viewBox="0 0 24 24">
-                  <path fill="#4267B2" d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 极 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
-                </svg>
-                Facebook
+                <img 
+                  src="/microsoft.png" 
+                  alt="Microsoft" 
+                  className="w-4 h-4 mr-1 object-contain" 
+                  onError={(e) => { 
+                    // Fallback to text if image fails to load
+                    e.currentTarget.style.display = 'none';
+                  }}
+                />
+                Microsoft
               </Button>
             </div>
             

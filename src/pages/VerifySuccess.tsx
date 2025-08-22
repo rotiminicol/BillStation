@@ -7,7 +7,7 @@ import { useState, useEffect, useRef } from "react";
 import { mockService } from "@/services/mockData";
 import { useToast } from "@/hooks/use-toast";
 
-const VerifyEmail = () => {
+const VerifySuccess = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
   const location = useLocation();
@@ -356,6 +356,44 @@ const VerifyEmail = () => {
           .glowing-dot {
             animation: glow 2s infinite;
           }
+
+          .confetti-background {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            object-position: center;
+            z-index: 1;
+          }
+
+          .success-content {
+            position: relative;
+            z-index: 2;
+            padding: 2rem;
+            margin: 1rem;
+          }
+
+          .mobile-confetti-background {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            width: 100%;
+            height: 150px;
+            object-fit: cover;
+            object-position: center;
+            z-index: 1;
+          }
+
+          .mobile-success-content {
+            position: relative;
+            z-index: 2;
+            padding: 1.5rem;
+            margin-top: -20px;
+          }
         `}
       </style>
       <div className="hidden lg:flex h-full">
@@ -420,59 +458,34 @@ const VerifyEmail = () => {
             </div>
           </div>
         </div>
-        <div className="w-1/2 overflow-y-auto hide-scrollbar bg-gray-50">
+        <div className="w-1/2 overflow-y-auto hide-scrollbar bg-gray-50 relative pt-10">
+          <img 
+            src="/Confetti.png" 
+            alt="Confetti" 
+            className="confetti-background"
+          />
           <div className="min-h-full flex items-center justify-center p-8">
-            <div className="w-full max-w-md space-y-6">
-              <div className="text-left">
-                <h1 className="text-3xl font-bold text-gray-900">Verify your Email</h1>
-                <p className="text-gray-500 mt-2 text-sm">A verification code has been sent to your email. Enter the code from the email in the field below.</p>
-              </div>
+            <div className="w-full max-w-md">
               {!isSubmitted ? (
-                <form onSubmit={handleSubmit} className="space-y-4">
-                  <div className="space-y-2">
-                    <Label>Verification Code</Label>
-                    <div className="flex justify-between space-x-2">
-                      {[0, 1, 2, 3, 4, 5].map((index) => (
-                        <Input
-                          key={index}
-                          id={`pin-${index}`}
-                          type="text"
-                          maxLength={1}
-                          value={code[index]}
-                          onChange={(e) => handlePinChange(index, e.target.value)}
-                          onKeyDown={(e) => handleKeyDown(e, index)}
-                          className={`form-input h-14 w-14 text-center text-2xl ${error ? 'error-input' : 'border-gray-300 focus:border-[#3657A7]'}`}
-                          required
-                          disabled={isLoading}
-                        />
-                      ))}
-                    </div>
-                    {error && <p className="text-sm text-red-600 mt-1">{error}</p>}
+                <div className="success-content text-center space-y-6">
+                  <div className="flex justify-center">
+                    <img 
+                      src="/check_circle_filled.png" 
+                      alt="Success Check" 
+                      className="w-20 h-20 object-contain"
+                    />
                   </div>
-                  <Button 
-                    type="submit" 
-                    className="w-full h-12 bg-[#3657A7] hover:bg-[#2e4a8c] text-white rounded-xl font-medium text-base transition-all duration-200 shadow-md hover:shadow-lg"
-                    disabled={isLoading || !isCodeComplete}
-                  >
-                    {isLoading ? (
-                      <span className="flex items-center justify-center">
-                        <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
-                        Verifying...
-                      </span>
-                    ) : (
-                      <span>Verify Account</span>
-                    )}
-                  </Button>
-                  <div className="text-center">
-                    <button 
-                      onClick={handleResendCode}
-                      className={`text-sm ${canResend ? 'text-[#3657A7] font-medium hover:text-[#2e4a8c]' : 'text-gray-400'}`}
-                      disabled={!canResend}
+                  <div className="space-y-3 w-full flex flex-col items-center">
+                    <h1 className="text-3xl font-bold text-gray-900 whitespace-nowrap">Email Verified Successfully</h1>
+                    <p className="text-gray-500 text-base leading-relaxed text-center max-w-md">Lorem ipsum dolor sit amet a aconsectetur.</p>
+                    <Button 
+                      onClick={() => navigate('/dashboard')}
+                      className="w-[500px] h-14 bg-[#3657A7] hover:bg-[#2e4a8c] text-white rounded-xl font-medium text-base transition-all duration-200 shadow-md hover:shadow-lg mt-4"
                     >
-                      {canResend ? "Didn't get the code? Resend" : `Resend in ${resendTimer}s`}
-                    </button>
+                      Continue to Dashboard
+                    </Button>
                   </div>
-                </form>
+                </div>
               ) : (
                 <div className="space-y-4">
                   <div className="bg-green-50 border border-green-200 rounded-lg p-4">
@@ -543,60 +556,37 @@ const VerifyEmail = () => {
             </div>
           </div>
         </div>
-        <div className="h-3/5 overflow-y-auto p-5 bg-gray-50">
-          <div className="mb-4">
-            <h1 className="text-2xl font-bold text-gray-900">Verify your Email</h1>
-            <p className="text-sm text-gray-500 mt-1">Enter the 6-digit verification code sent to your email.</p>
-          </div>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="space-y-2">
-              <Label>Verification Code</Label>
-              <div className="grid grid-cols-6 gap-2 mb-2">
-                {[0, 1, 2, 3, 4, 5].map((index) => (
-                  <Input
-                    key={index}
-                    id={`pin-m-${index}`}
-                    type="text"
-                    maxLength={1}
-                    value={code[index]}
-                    onChange={(e) => handlePinChange(index, e.target.value)}
-                    onKeyDown={(e) => handleKeyDown(e, index)}
-                    className={`form-input h-14 w-full text-center text-2xl ${error ? 'error-input' : 'border-gray-300 focus:border-[#3657A7]'}`}
-                    required
-                    disabled={isLoading}
-                  />
-                ))}
+        <div className="h-3/5 bg-gray-50 relative pt-10">
+          <img 
+            src="/Confetti.png" 
+            alt="Confetti" 
+            className="mobile-confetti-background"
+          />
+          <div className="mobile-success-content text-center space-y-6">
+            <div className="flex justify-center">
+              <img 
+                src="/check_circle_filled.png" 
+                alt="Success Check" 
+                className="w-16 h-16 object-contain"
+              />
+            </div>
+            <div className="space-y-4 w-full flex flex-col items-center px-4">
+              <div className="space-y-2 text-center">
+                <h1 className="text-2xl font-bold text-gray-900">Password Successful</h1>
+                <p className="text-sm text-gray-500 leading-relaxed max-w-md">Lorem ipsum dolor sit amet a aconsectetur.</p>
               </div>
-              {error && <p className="text-sm text-red-600 -mt-2 mb-2">{error}</p>}
-            </div>
-            <Button 
-              type="submit" 
-              className="w-full h-12 bg-[#3657A7] hover:bg-[#2e4a8c] text-white rounded-xl font-medium mt-2"
-              disabled={isLoading || !isCodeComplete}
-            >
-              {isLoading ? (
-                <span className="flex items-center justify-center">
-                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
-                  Verifying...
-                </span>
-              ) : (
-                <span>Verify Account</span>
-              )}
-            </Button>
-            <div className="text-center">
-              <button 
-                onClick={handleResendCode}
-                className={`text-sm ${canResend ? 'text-[#3657A7] font-medium hover:text-[#2e4a8c]' : 'text-gray-400'}`}
-                disabled={!canResend}
+              <Button 
+                onClick={() => navigate('/login')}
+                className="w-full max-w-[500px] h-14 bg-[#3657A7] hover:bg-[#2e4a8c] text-white rounded-xl font-medium text-lg mt-4"
               >
-                {canResend ? "Didn't get the code? Resend" : `Resend in ${resendTimer}s`}
-              </button>
+                Continue
+              </Button>
             </div>
-          </form>
+          </div>
         </div>
       </div>
     </div>
   );
 };
 
-export default VerifyEmail;
+export default VerifySuccess;
